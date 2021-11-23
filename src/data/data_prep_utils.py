@@ -35,7 +35,9 @@ class MillingDataPrep:
             print("Warning: no csv defined for creating labels")
         else:
             self.df_labels = pd.read_csv(path_df_labels) # path to the labels file with tool class
-            self.df_labels.drop(cut_drop_list, inplace=True) # drop the cuts that are bad
+            if cut_drop_list is not None:
+                self.df_labels.drop(cut_drop_list, inplace=True) # drop the cuts that are bad
+                
             self.df_labels.reset_index(drop=True, inplace=True) # reset the index
 
         # load the data from the matlab file
