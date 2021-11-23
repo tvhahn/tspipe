@@ -18,7 +18,7 @@ def main(project_dir):
     folder_processed_data_milling = project_dir / 'data/processed/milling'
     df_label_path=folder_processed_data_milling / "labels_with_tool_class.csv"
 
-    milldata = MillingDataPrep(folder_raw_data_milling, path_df_labels=df_label_path, window_size=64, stride=64)
+    milldata = MillingDataPrep(folder_raw_data_milling / 'mill.mat', path_df_labels=df_label_path, window_size=64, stride=64)
     df = milldata.create_xy_dataframe()
     print("Shape of final df:", df.shape)
 
