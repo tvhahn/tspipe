@@ -26,8 +26,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	bash local_install_conda.sh
 else # assume on HPC
 	@echo ">>> No Conda detected. Assume on HPC."
-	bash make_hpc_venv.sh
-	@echo ">>> venv created. Activate with source ~/weibull/bin/activate"
+	bash hpc_install_env.sh
+	@echo ">>> venv created. Activate with source ~/featstore/bin/activate"
 endif
 
 ## $(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
