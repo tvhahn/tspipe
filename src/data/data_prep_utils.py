@@ -222,13 +222,14 @@ class MillingDataPrep:
 
         # define the column names and the data types
         col_names = [s.lower() for s in list(self.signal_names)] + ["tool_class", "cut_id", "time"] 
-        col_dtype = [np.float32, np.float32, np.float32, np.float32, np.float32, np.float32, int, str, np.float32]
-        col_dtype_dict = dict(zip(col_names, col_dtype))
+        
         col_names_ordered = ['cut_id', 'case', 'time', 'ae_spindle', 'ae_table', 'vib_spindle', 'vib_table', 'smcdc', 'smcac','tool_class']
+        col_dtype = [str, int, np.float32, np.float32, np.float32, np.float32, np.float32, np.float32, np.float32, int]
+        col_dtype_dict = dict(zip(col_names_ordered, col_dtype))
 
         # create a dataframe from the x and y arrays
-        df = pd.DataFrame(x_labels, columns=col_names, dtype=str).astype(col_dtype_dict)
+        df = pd.DataFrame(x_labels, columns=col_names, dtype=str)
         df["case"] = df["cut_id"].str.split("_").str[0] # split the cut_id by "_" and take the first element (case)
-        df = df[col_names_ordered] # reorder the columns
+        df = df[col_names_ordered].astype(col_dtype_dict) # reorder the columns
                 
         return df
