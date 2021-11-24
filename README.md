@@ -3,6 +3,10 @@ feat_store
 
 Exploring feature engineering.
 
+https://github.com/tvhahn/feat-store
+
+![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
+
 Project Organization
 ------------
 
