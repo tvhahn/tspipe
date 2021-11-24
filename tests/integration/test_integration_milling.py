@@ -23,6 +23,9 @@ class TestMilling(unittest.TestCase):
         )
 
     def test_milling_data_prep(self):
+        """Test that the milling data prep works as expected."""
+        
+        # load the data and instantiate the data prep class
         milldata = MillingDataPrep(
             self.mill_data_path,
             path_df_labels=self.labels_path,
@@ -63,6 +66,7 @@ class TestMilling(unittest.TestCase):
 
         col_dtype_dict = dict(zip(col_names_ordered, col_dtype))
 
+        # load the ground truth results dataframe
         df_gt = pd.read_csv(
             self.results_path,
             compression="gzip",
