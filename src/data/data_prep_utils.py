@@ -111,7 +111,7 @@ class MillingDataPrep:
         Returns
         ===========
         sub_cut_array : np.array
-            Array of the cut samples. Shape of [n0. samples, sample len, features/sample]
+            Array of the cut samples. Shape of [no. samples, sample len, features/sample]
 
         sub_cut_labels : np.array
             Array of the labels for the cut samples. Shape of [# samples, # features/sample]
