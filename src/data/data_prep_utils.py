@@ -5,7 +5,14 @@ import pandas as pd
 
 
 class MillingDataPrep:
-    def __init__(self, path_raw_data, path_df_labels=None, window_size=64, stride=64, cut_drop_list=[17, 94]):
+    def __init__(
+        self,
+        path_raw_data,
+        path_df_labels=None,
+        window_size=64,
+        stride=64,
+        cut_drop_list=[17, 94],
+    ):
         """Prepare the UC Berkeley Milling dataset for training.
 
         Parameters
@@ -24,12 +31,12 @@ class MillingDataPrep:
 
         cut_drop_list : list
             List of cut numbers to be dropped from the dataset. cut_no 17 and 94 are erroneous.
-        
+
         """
 
-        self.data_file = path_raw_data # path to the raw data file
-        self.window_size = window_size # size of the window
-        self.stride = stride # stride between windows
+        self.data_file = path_raw_data  # path to the raw data file
+        self.window_size = window_size  # size of the window
+        self.stride = stride  # stride between windows
 
         if path_df_labels is None:
             print("Warning: no csv defined for creating labels")
@@ -37,7 +44,7 @@ class MillingDataPrep:
             self.df_labels = pd.read_csv(path_df_labels) # path to the labels file with tool class
             if cut_drop_list is not None:
                 self.df_labels.drop(cut_drop_list, inplace=True) # drop the cuts that are bad
-                
+
             self.df_labels.reset_index(drop=True, inplace=True) # reset the index
 
         # load the data from the matlab file
@@ -51,7 +58,7 @@ class MillingDataPrep:
 
     def create_labels(self):
         """Function that will create the label dataframe from the mill data set
-        
+
         Only needed if the dataframe with the labels is not provided.
         """
 
@@ -76,12 +83,12 @@ class MillingDataPrep:
         df_labels["cut_no"] = [i for i in range(167)]
 
         def tool_state(cols):
-            """Add the label to the cut. 
-            
+            """Add the label to the cut.
+
             Categories are:
             Healthy Sate (label=0): 0~0.2mm flank wear
             Degredation State (label=1): 0.2~0.7mm flank wear
-            Failure State (label=2): >0.7mm flank wear 
+            Failure State (label=2): >0.7mm flank wear
             """
             # pass in the tool wear, VB, column
             vb = cols
@@ -117,22 +124,26 @@ class MillingDataPrep:
             Array of the labels for the cut samples. Shape of [# samples, # features/sample]
 
         """
-        
-        assert cut_no in self.df_labels["cut_no"].values, "Cut number must be in the dataframe"
 
-        # create a numpy array of the cut 
+        assert (cut_no in self.df_labels["cut_no"].values), "Cut number must be in the dataframe"
+
+        # create a numpy array of the cut
         # with a final array shape like [no. cuts, len cuts, no. signals]
         cut = self.data[0, cut_no]
         for i, signal_name in enumerate(self.signal_names):
             if i == 0:
                 cut_array = cut[signal_name].reshape((9000, 1))
             else:
-                cut_array = np.concatenate((cut_array, cut[signal_name].reshape((9000, 1))), axis=1)
+                cut_array = np.concatenate(
+                    (cut_array, cut[signal_name].reshape((9000, 1))), axis=1
+                )
 
         # select the start and end of the cut
-        start = self.df_labels[self.df_labels["cut_no"] == cut_no]["window_start"].values[0]
+        start = self.df_labels[self.df_labels["cut_no"] == cut_no][
+            "window_start"
+        ].values[0]
         end = self.df_labels[self.df_labels["cut_no"] == cut_no]["window_end"].values[0]
-        cut_array = cut_array[start:end,:]
+        cut_array = cut_array[start:end, :]
 
         # instantiate the "temporary" list to store the sub-cuts and metadata
         sub_cut_list = []
@@ -145,7 +156,9 @@ class MillingDataPrep:
         # fit the strided windows into the dummy_array until the length
         # of the window does not equal the proper length (better way to do this???)
         for i in range(cut_array.shape[0]):
-            windowed_signal = cut_array[i * self.stride : i * self.stride + self.window_size]
+            windowed_signal = cut_array[
+                i * self.stride : i * self.stride + self.window_size
+            ]
 
             # if the windowed signal is the proper length, add it to the list
             if windowed_signal.shape == (self.window_size, 6):
@@ -170,12 +183,26 @@ class MillingDataPrep:
 
         # take the length of the signals in the sub_cut_array
         # and divide it by the frequency (250 Hz) to get the time (seconds) of each sub-cut
-        sub_cut_times = np.expand_dims(np.arange(0, sub_cut_array.shape[1])/250.0, axis=0)
-        sub_cut_times = np.repeat(sub_cut_times, sub_cut_array.shape[0], axis = 0,)
-        
-        sub_cut_labels_ids_times = np.stack((sub_cut_labels, sub_cut_ids, sub_cut_times), axis=2)
+        sub_cut_times = np.expand_dims(
+            np.arange(0, sub_cut_array.shape[1]) / 250.0, axis=0
+        )
+        sub_cut_times = np.repeat(
+            sub_cut_times,
+            sub_cut_array.shape[0],
+            axis=0,
+        )
 
-        return sub_cut_array, sub_cut_labels, sub_cut_ids, sub_cut_times, sub_cut_labels_ids_times
+        sub_cut_labels_ids_times = np.stack(
+            (sub_cut_labels, sub_cut_ids, sub_cut_times), axis=2
+        )
+
+        return (
+            sub_cut_array,
+            sub_cut_labels,
+            sub_cut_ids,
+            sub_cut_times,
+            sub_cut_labels_ids_times,
+        )
 
     def create_xy_arrays(self):
         """Create the x and y arrays used in deep learning.
@@ -187,19 +214,23 @@ class MillingDataPrep:
 
         y_array : np.array
             Array of the labels for the cut samples. Shape of [no. samples, sample len, label/ids/times]
-        
+
         """
 
         # create a list to store the x and y arrays
         x = []  # instantiate X's
         y_labels_ids_times = []  # instantiate y's
-        
 
         # iterate throught the df_labels
         for i in self.df_labels.itertuples():
-            (sub_cut_array, sub_cut_labels, sub_cut_ids, 
-            sub_cut_times, sub_cut_labels_ids_times) = self.create_data_array(i.cut_no)
-        
+            (
+                sub_cut_array,
+                sub_cut_labels,
+                sub_cut_ids,
+                sub_cut_times,
+                sub_cut_labels_ids_times,
+            ) = self.create_data_array(i.cut_no)
+
             x.append(sub_cut_array)
             y_labels_ids_times.append(sub_cut_labels_ids_times)
 
@@ -212,24 +243,55 @@ class MillingDataPrep:
         ===========
         df : pd.DataFrame
             Single flat dataframe containing each sample and its labels.
-        
+
         """
 
-        x, y_labels_ids_times = self.create_xy_arrays() # create the x and y arrays
+        x, y_labels_ids_times = self.create_xy_arrays()  # create the x and y arrays
 
         # concatenate the x and y arrays and reshape them to be a flat array (2D)
-        x_labels = np.reshape(np.concatenate((x, y_labels_ids_times), axis=2),(-1, 9))
+        x_labels = np.reshape(np.concatenate((x, y_labels_ids_times), axis=2), (-1, 9))
 
         # define the column names and the data types
-        col_names = [s.lower() for s in list(self.signal_names)] + ["tool_class", "cut_id", "time"] 
-        
-        col_names_ordered = ['cut_id', 'case', 'time', 'ae_spindle', 'ae_table', 'vib_spindle', 'vib_table', 'smcdc', 'smcac','tool_class']
-        col_dtype = [str, int, np.float32, np.float32, np.float32, np.float32, np.float32, np.float32, np.float32, int]
+        col_names = [s.lower() for s in list(self.signal_names)] + [
+            "tool_class",
+            "cut_id",
+            "time",
+        ]
+
+        col_names_ordered = [
+            "cut_id",
+            "case",
+            "time",
+            "ae_spindle",
+            "ae_table",
+            "vib_spindle",
+            "vib_table",
+            "smcdc",
+            "smcac",
+            "tool_class",
+        ]
+
+        col_dtype = [
+            str,
+            int,
+            np.float32,
+            np.float32,
+            np.float32,
+            np.float32,
+            np.float32,
+            np.float32,
+            np.float32,
+            int,
+        ]
+
         col_dtype_dict = dict(zip(col_names_ordered, col_dtype))
 
         # create a dataframe from the x and y arrays
         df = pd.DataFrame(x_labels, columns=col_names, dtype=str)
-        df["case"] = df["cut_id"].str.split("_").str[0] # split the cut_id by "_" and take the first element (case)
+
+        # split the cut_id by "_" and take the first element (case)
+        df["case"] = df["cut_id"].str.split("_").str[0]  
+
         df = df[col_names_ordered].astype(col_dtype_dict) # reorder the columns
-                
+
         return df
