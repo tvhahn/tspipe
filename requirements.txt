@@ -2,7 +2,7 @@
 -e .
 
 # external requirements
-statsmodels=0.12.1
+statsmodels==0.12.1
 matplotlib
 seaborn
 pandas
