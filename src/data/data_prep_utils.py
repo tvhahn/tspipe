@@ -37,13 +37,19 @@ class MillingDataPrep:
         self.data_file = path_raw_data  # path to the raw data file
         self.window_size = window_size  # size of the window
         self.stride = stride  # stride between windows
+        self.cut_drop_list = cut_drop_list  # list of cut numbers to be dropped
+
+        assert (self.data_file.exists()), "mill.mat does not exist or is not extracted from zip"
+        assert (self.window_size > 0 ), "window_size must be greater than 0"
+        assert (self.stride > 0), "stride must be greater than 0"
+
 
         if path_df_labels is None:
-            print("Warning: no csv defined for creating labels")
+            print("Warning: no csv defined for creating labels. Create one.")
         else:
             self.df_labels = pd.read_csv(path_df_labels) # path to the labels file with tool class
-            if cut_drop_list is not None:
-                self.df_labels.drop(cut_drop_list, inplace=True) # drop the cuts that are bad
+            if self.cut_drop_list is not None:
+                self.df_labels.drop(self.cut_drop_list, inplace=True) # drop the cuts that are bad
 
             self.df_labels.reset_index(drop=True, inplace=True) # reset the index
 
@@ -139,13 +145,11 @@ class MillingDataPrep:
                 )
 
         # select the start and end of the cut
-        start = self.df_labels[self.df_labels["cut_no"] == cut_no][
-            "window_start"
-        ].values[0]
+        start = self.df_labels[self.df_labels["cut_no"] == cut_no]["window_start"].values[0]
         end = self.df_labels[self.df_labels["cut_no"] == cut_no]["window_end"].values[0]
         cut_array = cut_array[start:end, :]
 
-        # instantiate the "temporary" list to store the sub-cuts and metadata
+        # instantiate the "temporary" lists to store the sub-cuts and metadata
         sub_cut_list = []
         sub_cut_id_list = []
         sub_cut_label_list = []
