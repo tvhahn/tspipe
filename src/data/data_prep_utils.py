@@ -299,3 +299,8 @@ class MillingDataPrep:
         df = df[col_names_ordered].astype(col_dtype_dict) # reorder the columns
 
         return df
+
+
+class PronostiaDataPrep():
+    def __init__(self):
+        pass
