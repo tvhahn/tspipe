@@ -3,6 +3,128 @@ import scipy.io as sio
 import numpy as np
 import pandas as pd
 
+###############################################################################
+# Helper functions
+###############################################################################
+
+
+def set_directories():
+    """Sets the directory paths used for data, checkpoints, etc."""
+
+    # check if "scratch" path exists in the home directory
+    # if it does, assume we are on HPC
+    scratch_path = Path.home() / "scratch"
+    if scratch_path.exists():
+        print("Assume on HPC")
+    else:
+        print("Assume on local compute")
+
+    path_processed_data = Path(args.path_data)
+
+    # if loading the model from a checkpoint, a checkpoint folder name
+    # should be passed as an argument, like: -c 2021_07_14_185903
+    # the various .pt files will be inside the checkpoint folder
+    if args.ckpt_name:
+        prev_checkpoint_folder_name = args.ckpt_name
+    else:
+        # set dummy name for path_prev_checkpoint
+        path_prev_checkpoint = Path("no_prev_checkpoint_needed")
+
+    if args.proj_dir:
+        proj_dir = Path(args.proj_dir)
+    else:
+        # proj_dir assumed to be cwd
+        proj_dir = Path.cwd()
+
+    # set time
+    if args.model_time_suffix:
+        model_start_time = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S") + "_" + args.model_time_suffix
+    else:
+        model_start_time = datetime.datetime.now().strftime("%Y_%m_%d_%H%M%S")
+
+    if scratch_path.exists():
+        # for HPC
+        root_dir = scratch_path / "earth-mantle-surrogate"
+        print(root_dir)
+
+        if args.ckpt_name:
+            path_prev_checkpoint = (
+                root_dir / "models/interim/checkpoints" / prev_checkpoint_folder_name
+            )
+            if Path(path_prev_checkpoint).exists():
+                print(
+                    "Previous checkpoints exist. Training from most recent checkpoint."
+                )
+
+                path_prev_checkpoint = find_most_recent_checkpoint(path_prev_checkpoint)
+
+            else:
+                print(
+                    "Could not find previous checkpoint folder. Training from beginning."
+                )
+
+        path_input_folder = path_processed_data / "input"
+        path_truth_folder = path_processed_data / "truth"
+        path_checkpoint_folder = (
+            root_dir / "models/interim/checkpoints" / model_start_time
+        )
+        Path(path_checkpoint_folder).mkdir(parents=True, exist_ok=True)
+
+    else:
+
+        # for local compute
+        root_dir = Path.cwd()  # set the root directory as a Pathlib path
+        print(root_dir)
+
+        if args.ckpt_name:
+            path_prev_checkpoint = (
+                root_dir / "models/interim/checkpoints" / prev_checkpoint_folder_name
+            )
+            if Path(path_prev_checkpoint).exists():
+                print(
+                    "Previous checkpoints exist. Training from most recent checkpoint."
+                )
+
+                path_prev_checkpoint = find_most_recent_checkpoint(path_prev_checkpoint)
+
+            else:
+                print(
+                    "Could not find previous checkpoint folder. Training from beginning."
+                )
+
+        path_input_folder = path_processed_data / "input"
+        path_truth_folder = path_processed_data / "truth"
+        path_checkpoint_folder = (
+            root_dir / "models/interim/checkpoints" / model_start_time
+        )
+        Path(path_checkpoint_folder).mkdir(parents=True, exist_ok=True)
+
+    # save src directory as a zip into the checkpoint folder
+    shutil.make_archive(
+        path_checkpoint_folder / f"src_files_{model_start_time}",
+        "zip",
+        proj_dir / "src",
+    )
+    shutil.copy(
+        proj_dir / "bash_scripts/train_model_hpc.sh",
+        path_checkpoint_folder / "train_model_hpc.sh",
+    )
+
+    return (
+        root_dir,
+        path_input_folder,
+        path_truth_folder,
+        path_checkpoint_folder,
+        path_prev_checkpoint,
+        model_start_time,
+    )
+
+
+
+###############################################################################
+# Data Prep Classes
+###############################################################################
+
 
 class MillingDataPrep:
     def __init__(
