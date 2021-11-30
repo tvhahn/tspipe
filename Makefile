@@ -33,6 +33,14 @@ endif
 ## $(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
 ## $(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
+## Download data
+download:
+ifeq (True,$(HAS_CONDA)) # assume on local
+	bash src/data/download_data_local.sh $(PROJECT_DIR)
+else # assume on HPC
+	bash src/data/download_data_hpc.sh $(PROJECT_DIR)
+endif
+
 ## Make Dataset
 data: requirements
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py
