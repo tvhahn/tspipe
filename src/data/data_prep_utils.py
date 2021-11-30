@@ -301,15 +301,19 @@ class MillingDataPrep:
         return df
 
 
-class PronostiaDataPrep():
-    """Parameters
-    ===========
-    folder_raw_data_train : pathlib object 
-        Location of raw training data, likely in ./data/raw/FEMTO/Training_set/Learning_set/
+# skip pronostia data set
+# class PronostiaDataPrep():
+#     """Parameters
+#     ===========
+#     folder_raw_data_train : pathlib object 
+#         Location of raw training data, likely in ./data/raw/FEMTO/Training_set/Learning_set/
 
-    folder_raw_data_test : pathlib object """
+#     folder_raw_data_test : pathlib object """
 
-    def __init__(self):
-        pass
+#     def __init__(self):
+#         pass
+
+
+
 
     
