@@ -7,36 +7,52 @@ from tsfresh import extract_features
 from feat_param_dict import feat_dict
 
 ###############################################################################
-# Set arguments 
+# Set arguments
 ###############################################################################
 
-parser = argparse.ArgumentParser(description='Build features')
+parser = argparse.ArgumentParser(description="Build features")
 
-parser.add_argument('--path_data_folder', type=str, default='data/', help='Path to data folder that contains raw/interim/processed data folders')
+parser.add_argument(
+    "--path_data_folder",
+    type=str,
+    default="data/",
+    help="Path to data folder that contains raw/interim/processed data folders",
+)
 
-parser.add_argument('--chunk-number', type=int, default=1, help='Chunk number')
+parser.add_argument(
+    "--n_chunks", type=int, default=1, help="Number of chunks to split dataframe into"
+)
+
+parser.add_argument(
+    "--chunk_index",
+    type=int,
+    default=0,
+    help="Chunk index passed from the slurm script",
+)
 
 args = parser.parse_args()
 
 path_data_folder = Path(args.path_data_folder)
-chunk_number = args.chunk_number # number of chunks to split dataframe into
+n_chunks = int(args.n_chunks)  # number of chunks to split dataframe into
+chunk_index = int(args.chunk_index) - 1
 
 
 ###############################################################################
 # Functions
 ###############################################################################
 
-def milling_features(df_raw_milling, chunk_number):
+
+def milling_features(df, n_chunks, chunk_index):
     """Extracts features from the raw milling dataframe.
-    
+
     Parameters
     ----------
     df_raw_milling : pandas.DataFrame
         Raw milling dataframe. Includes the "tool_class" and "time" columns.
 
-    chunk_index : int
+    n_chunks : int
         Chunk index. Passed from the slurm script if on a HPC. Else, set to 0.
-    
+
     """
     logger = logging.getLogger(__name__)
     logger.info("extracting features from raw milling dataframe")
@@ -47,10 +63,35 @@ def milling_features(df_raw_milling, chunk_number):
 
     if scratch_path.exists():
         # get list of all cut_ids
-        cut_id_list = list(df_raw_milling["cut_id"].unique())
+        cut_id_list = list(df["cut_id"].unique())
 
-    # extract features
+        # create a list of the cut_ids to be processed in each chunk
+        n_samples_per_chunk = int(len(cut_id_list) / n_chunks)
+        cut_id_list_chunks = [
+            cut_id_list[i : i + n_samples_per_chunk]
+            for i in range(0, len(cut_id_list), n_samples_per_chunk)
+        ]
 
+        # extract features on HPC
+        df_feat = extract_features(
+            df[df["cut_id"].isin(cut_id_list_chunks[chunk_index])],
+            column_id="cut_id",
+            column_sort="time",
+            default_fc_parameters=feat_dict,
+            disable_progressbar=True,
+        )
+
+    else:
+        # extract features on local machine
+        df_feat = extract_features(
+            df,
+            column_id="cut_id",
+            column_sort="time",
+            default_fc_parameters=feat_dict,
+            disable_progressbar=False,
+        )
+
+    
 
 
 def main(path_data_folder):
@@ -70,7 +111,7 @@ def main(path_data_folder):
         window_size=64,
         stride=64,
     )
-    
+
     df = milldata.create_xy_dataframe()
     print("Shape of final df:", df.shape)
 
@@ -90,5 +131,3 @@ if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parents[2]
 
     main(project_dir)
-
-
