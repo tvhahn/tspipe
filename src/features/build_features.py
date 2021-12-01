@@ -91,6 +91,8 @@ def milling_features(df, n_chunks, chunk_index):
             disable_progressbar=False,
         )
 
+    return df_feat
+
     
 
 
@@ -99,21 +101,27 @@ def main(path_data_folder):
     features ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
+    logger.info("making final features set from raw data")
 
-    folder_raw_data_milling = project_dir / "data/raw/milling"
-    folder_processed_data_milling = project_dir / "data/processed/milling"
-    df_label_path = folder_processed_data_milling / "labels_with_tool_class.csv"
+    ### Milling data ###
+    folder_raw_data_milling = path_data_folder / "raw/milling"
+    folder_interim_data_milling = path_data_folder / "interim/milling"
+    folder_processed_data_milling = path_data_folder / "processed/milling"
 
-    milldata = MillingDataPrep(
-        folder_raw_data_milling / "mill.mat",
-        path_df_labels=df_label_path,
-        window_size=64,
-        stride=64,
-    )
+    # if interim & processed folders don't exist, create them
+    Path(folder_interim_data_milling).mkdir(parents=True, exist_ok=True)
+    Path(folder_processed_data_milling).mkdir(parents=True, exist_ok=True)
 
-    df = milldata.create_xy_dataframe()
-    print("Shape of final df:", df.shape)
+    # read in raw milling data to a pandas dataframe
+    df = pd.read_csv(folder_processed_data_milling / "milling.csv.gz", compression='gzip',)
+    df.drop(columns=['case', 'tool_class'], inplace=True)
+
+    # for testing purposes only include some cuts
+    df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
+
+    df_feat = milling_features(df, n_chunks, chunk_index)
+
+
 
     # save the dataframe
     df.to_csv(
