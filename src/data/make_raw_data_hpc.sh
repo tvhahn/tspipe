@@ -9,7 +9,7 @@ module load python/3.8
 
 PROJECT_DIR=$1
 
-SCRATCH_DATA_DIR = ~/scratch/feat-store/data
+SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
