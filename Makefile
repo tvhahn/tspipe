@@ -46,7 +46,7 @@ data: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/data/make_raw_data_hpc.sh $(PROJECT_DIR)
+	sbatch src/data/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
 
 

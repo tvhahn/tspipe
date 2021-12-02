@@ -1,9 +1,14 @@
 #!/bin/bash
-cd
-cd scratch/
+DIR=~/scratch/feat-store
+if [ ! -d $DIR ]; then
+    echo "feat-store folder in scratch does not exist"
+    mkdir ~/scratch/feat-store
+fi
 
-mkdir -p feat-store/data/raw
-cd feat-store/data/raw
+# copy data folder from the git repo project directory to the scratch folder
+cp -r ./data ~/scratch/feat-store
+
+cd $DIR/data/raw
 
 # UC Berkeley milling data set
 # Check if directory does not exist
