@@ -122,11 +122,9 @@ def main(path_data_folder):
     df_feat = milling_features(df, n_chunks, chunk_index)
 
 
-
     # save the dataframe
-    df.to_csv(
-        folder_processed_data_milling / "milling.csv.gz",
-        compression="gzip",
+    df_feat.to_csv(
+        folder_interim_data_milling / f"milling_{chunk_index}.csv",
         index=False,
     )
 
@@ -135,7 +133,7 @@ if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+    # # not used in this stub but often useful for finding various files
+    # project_dir = Path(__file__).resolve().parents[2]
 
-    main(project_dir)
+    main(path_data_folder)
