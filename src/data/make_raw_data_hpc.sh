@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=00:10:00 # 10 minutes
+#SBATCH --time=00:5:00 # 10 minutes
 #SBATCH --mem=4G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
