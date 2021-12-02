@@ -2,7 +2,7 @@ from itertools import product
 
 feat_dict = {}
 
-feat_dict.update({
+feat_dict.update({ 
     "time_reversal_asymmetry_statistic": [{"lag": lag} for lag in range(1, 4)],
     "c3": [{"lag": lag} for lag in range(1, 4)],
     "cid_ce": [{"normalize": True}, {"normalize": False}],
