@@ -1,5 +1,4 @@
 from pathlib import Path
-import numpy as np
 import pandas as pd
 import argparse
 import logging
@@ -121,12 +120,18 @@ def main(path_data_folder):
 
     df_feat = milling_features(df, n_chunks, chunk_index)
 
-
-    # save the dataframe
-    df_feat.to_csv(
-        folder_interim_data_milling / f"milling_{chunk_index}.csv",
-        index=False,
-    )
+    scratch_path = Path.home() / "scratch"
+    if scratch_path.exists():
+        # save the dataframe oh HPC
+        df_feat.to_csv(
+            folder_interim_data_milling / f"milling_{chunk_index}.csv",
+            index=False,
+        )
+    else:
+        # save the dataframe on local machine
+        df_feat.to_csv(
+            folder_processed_data_milling / "milling.csv", index=False,
+        )
 
 
 if __name__ == "__main__":

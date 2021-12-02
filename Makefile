@@ -43,7 +43,7 @@ endif
 
 ## Make Dataset
 data: requirements
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py
+	$(PYTHON_INTERPRETER) src/data/make_dataset.py --path_data_folder $(PROJECT_DIR)/data/
 
 
 ## Make Features
