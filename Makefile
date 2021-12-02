@@ -48,7 +48,11 @@ data: requirements
 
 ## Make Features
 features: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py --path_data_folder $(PROJECT_DIR)/data/
+else # assume on HPC
+	bash src/data/download_data_hpc.sh $(PROJECT_DIR)
+endif
 
 ## Delete all compiled Python files
 clean:
