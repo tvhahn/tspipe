@@ -55,7 +55,7 @@ features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/features/build_features_hpc.sh $(PROJECT_DIR)
+	sbatch src/features/build_features_hpc.sh $(PROJECT_DIR)
 endif
 
 ## Delete all compiled Python files

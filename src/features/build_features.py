@@ -77,7 +77,7 @@ def milling_features(df, n_chunks, chunk_index):
             column_id="cut_id",
             column_sort="time",
             default_fc_parameters=feat_dict,
-            disable_progressbar=True,
+            disable_progressbar=False,
         )
 
     else:
@@ -115,8 +115,10 @@ def main(path_data_folder):
     df = pd.read_csv(folder_processed_data_milling / "milling.csv.gz", compression='gzip',)
     df.drop(columns=['case', 'tool_class'], inplace=True)
 
+    print("Shape of df:", df.shape)
+
     # for testing purposes only include some cuts
-    df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
+    # df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
 
     df_feat = milling_features(df, n_chunks, chunk_index)
 
