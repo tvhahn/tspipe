@@ -112,7 +112,7 @@ def main(path_data_folder):
     Path(folder_processed_data_milling).mkdir(parents=True, exist_ok=True)
 
     # read in raw milling data to a pandas dataframe
-    df = pd.read_csv(folder_processed_data_milling / "milling.csv.gz", compression='gzip',)
+    df = pd.read_csv(folder_raw_data_milling / "milling.csv.gz", compression='gzip',)
     df.drop(columns=['case', 'tool_class'], inplace=True)
 
     print("Shape of df:", df.shape)
