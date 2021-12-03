@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=00:30:00 # 30 min
+#SBATCH --time=00:10:00 # 10 min
 #SBATCH --array=1-10
 #SBATCH --cpus-per-task=4
 #SBATCH --account=rrg-mechefsk
