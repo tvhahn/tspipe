@@ -30,8 +30,6 @@ else # assume on HPC
 	@echo ">>> venv created. Activate with source ~/featstore/bin/activate"
 endif
 
-## $(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-## $(PYTHON_INTERPRETER) -m pip install -r requirements.txt
 
 ## Download data
 download:
@@ -55,7 +53,7 @@ features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/features/test_feat.sh $(PROJECT_DIR)
+	bash src/features/scripts/chain_build_feat_collate.sh $(PROJECT_DIR)
 endif
 
 ## Delete all compiled Python files
