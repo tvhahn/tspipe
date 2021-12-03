@@ -53,7 +53,7 @@ features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/features/scripts/chain_build_feat_collate.sh $(PROJECT_DIR)
+	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif
 
 ## Delete all compiled Python files
