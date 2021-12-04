@@ -90,7 +90,7 @@ def milling_features(df, n_chunks, chunk_index):
             disable_progressbar=False,
         )
 
-    return df_feat
+    return df_feat.reset_index().rename(columns={'index':'cut_id'})
 
     
 
@@ -139,8 +139,5 @@ def main(path_data_folder):
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
-
-    # # not used in this stub but often useful for finding various files
-    # project_dir = Path(__file__).resolve().parents[2]
 
     main(path_data_folder)
