@@ -60,6 +60,9 @@ def milling_features(df, n_chunks, chunk_index):
     # if it does, assume we are on HPC
     scratch_path = Path.home() / "scratch"
 
+    df_raw_labels = df[['cut_id', 'case', 'tool_class']].drop_duplicates()
+    df = df.drop(columns=['case', 'tool_class'])
+
     if scratch_path.exists():
         # get list of all cut_ids
         cut_id_list = list(df["cut_id"].unique())
@@ -80,6 +83,10 @@ def milling_features(df, n_chunks, chunk_index):
             disable_progressbar=False,
         )
 
+        df_feat = df_feat.reset_index().rename(columns={'index':'cut_id'})
+        df_feat.merge(df_raw_labels[df_raw_labels["cut_id"].isin(cut_id_list_chunks[chunk_index])], on='cut_id', how='left')
+
+
     else:
         # extract features on local machine
         df_feat = extract_features(
@@ -90,9 +97,10 @@ def milling_features(df, n_chunks, chunk_index):
             disable_progressbar=False,
         )
 
-    df_feat.reset_index().rename(columns={'index':'cut_id'})
+        df_feat = df_feat.reset_index().rename(columns={'index':'cut_id'})
+        df_feat.merge(df_raw_labels, on='cut_id', how='left')
 
-    return df_feat.merge(df[['cut_id', 'case', 'tool_class']].drop_duplicates(), on='cut_id', how='left')
+    return df_feat
 
     
 
@@ -114,8 +122,8 @@ def main(path_data_folder):
 
     # read in raw milling data to a pandas dataframe
     df = pd.read_csv(folder_raw_data_milling / "milling.csv.gz", compression='gzip',)
-    df.drop(columns=['case', 'tool_class'], inplace=True)
-
+    print("df.columns", df.columns)
+    
     print("Shape of df:", df.shape)
 
     # for testing purposes only include some cuts
