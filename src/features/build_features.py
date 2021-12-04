@@ -90,10 +90,11 @@ def milling_features(df, n_chunks, chunk_index):
             disable_progressbar=False,
         )
 
-    return df_feat.reset_index().rename(columns={'index':'cut_id'})
+    df_feat.reset_index().rename(columns={'index':'cut_id'})
+
+    return df_feat.merge(df[['cut_id', 'case', 'tool_class']].drop_duplicates(), on='cut_id', how='left')
 
     
-
 
 def main(path_data_folder):
     """Runs feature engineering scripts to turn raw data from (../interim) into
