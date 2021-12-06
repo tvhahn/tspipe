@@ -30,8 +30,8 @@ def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
     # if it does, assume we are on HPC
     scratch_path = Path.home() / "scratch"
 
-    df_raw_labels = df[['cut_id', 'case', 'tool_class']].drop_duplicates().copy()
-    df = df.drop(columns=['case', 'tool_class'])
+    df_raw_labels = df[['cut_id', 'cut_no', 'case', 'tool_class']].drop_duplicates().copy()
+    df = df.drop(columns=['cut_no', 'case', 'tool_class'])
 
     if scratch_path.exists():
         # get list of all cut_ids
