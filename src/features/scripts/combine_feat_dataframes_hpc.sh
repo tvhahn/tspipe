@@ -15,4 +15,4 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/features/combine_feat_dataframes.py --path_data_folder $SCRATCH_DATA_DIR
+python $PROJECT_DIR/src/features/combine_feat_dataframes.py --path_data_folder $SCRATCH_DATA_DIR --num_pool_processes 2

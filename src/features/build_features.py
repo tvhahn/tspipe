@@ -108,7 +108,8 @@ def main(path_data_folder):
             folder_processed_data_milling / "milling.csv", index=False,
         )
 
-    print(df_feat["tool_class"][0:3])
+    # assert that tool_class column exists
+    assert "tool_class" in df_feat.columns, "tool_class column does not exist"
 
 
 if __name__ == "__main__":

@@ -18,9 +18,17 @@ parser.add_argument(
     help="Path to data folder that contains raw/interim/processed data folders",
 )
 
+parser.add_argument(
+    "--num_pool_processes",
+    type=int,
+    default=2,
+    help="Number of processes to use for multiprocessing",
+)
+
 args = parser.parse_args()
 
 path_data_folder = Path(args.path_data_folder)
+num_pool_processes = int(args.num_pool_processes)
 
 
 ###############################################################################
@@ -48,7 +56,7 @@ def main(folder_interim_data):
     ]
 
     # set up your pool
-    with Pool(processes=2) as pool:  # or whatever your hardware can support
+    with Pool(processes=num_pool_processes) as pool:  # or whatever your hardware can support
 
         # have your pool map the file names to dataframes
         df_list = pool.map(read_csv, file_list)
