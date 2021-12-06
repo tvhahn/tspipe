@@ -11,7 +11,7 @@ from feat_param_dict import feat_dict
 ###############################################################################
 
 
-def milling_features(df, n_chunks, chunk_index):
+def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
     """Extracts features from the raw milling dataframe.
 
     Parameters
@@ -49,7 +49,7 @@ def milling_features(df, n_chunks, chunk_index):
             df[df["cut_id"].isin(cut_id_list_chunks[chunk_index])],
             column_id="cut_id",
             column_sort="time",
-            default_fc_parameters=feat_dict,
+            default_fc_parameters=feature_dictionary,
             disable_progressbar=False,
         )
 
@@ -63,7 +63,7 @@ def milling_features(df, n_chunks, chunk_index):
             df,
             column_id="cut_id",
             column_sort="time",
-            default_fc_parameters=feat_dict,
+            default_fc_parameters=feature_dictionary,
             disable_progressbar=False,
         )
 
