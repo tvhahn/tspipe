@@ -5,36 +5,6 @@ import logging
 from tsfresh import extract_features
 from feat_param_dict import feat_dict
 
-###############################################################################
-# Set arguments
-###############################################################################
-
-parser = argparse.ArgumentParser(description="Build features")
-
-parser.add_argument(
-    "--path_data_folder",
-    type=str,
-    default="data/",
-    help="Path to data folder that contains raw/interim/processed data folders",
-)
-
-parser.add_argument(
-    "--n_chunks", type=int, default=1, help="Number of chunks to split dataframe into"
-)
-
-parser.add_argument(
-    "--chunk_index",
-    type=int,
-    default=0,
-    help="Chunk index passed from the slurm script",
-)
-
-args = parser.parse_args()
-
-path_data_folder = Path(args.path_data_folder)
-n_chunks = int(args.n_chunks)  # number of chunks to split dataframe into
-chunk_index = int(args.chunk_index) - 1
-
 
 ###############################################################################
 # Functions
@@ -148,5 +118,33 @@ def main(path_data_folder):
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
+
+    ### parse arguments
+
+    parser = argparse.ArgumentParser(description="Build features")
+
+    parser.add_argument(
+        "--path_data_folder",
+        type=str,
+        default="data/",
+        help="Path to data folder that contains raw/interim/processed data folders",
+    )
+
+    parser.add_argument(
+        "--n_chunks", type=int, default=1, help="Number of chunks to split dataframe into"
+    )
+
+    parser.add_argument(
+        "--chunk_index",
+        type=int,
+        default=0,
+        help="Chunk index passed from the slurm script",
+    )
+
+    args = parser.parse_args()
+
+    path_data_folder = Path(args.path_data_folder)
+    n_chunks = int(args.n_chunks)  # number of chunks to split dataframe into
+    chunk_index = int(args.chunk_index) - 1
 
     main(path_data_folder)
