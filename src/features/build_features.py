@@ -53,9 +53,6 @@ def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
             disable_progressbar=False,
         )
 
-        df_feat = df_feat.reset_index().rename(columns={'index':'cut_id'})
-        df_feat.merge(df_raw_labels, on='cut_id', how='left')
-
     else:
         # extract features on local machine
         df_feat = extract_features(
@@ -66,10 +63,8 @@ def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
             disable_progressbar=False,
         )
 
-        df_feat = df_feat.reset_index().rename(columns={'index':'cut_id'})
-        df_feat.merge(df_raw_labels, on='cut_id', how='left')
-
-    return df_feat
+    # return the dataframe with the features and the labels
+    return df_feat.reset_index().rename(columns={'index':'cut_id'}).merge(df_raw_labels, on='cut_id', how='left')
 
     
 
