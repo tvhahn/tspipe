@@ -30,7 +30,7 @@ def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
     # if it does, assume we are on HPC
     scratch_path = Path.home() / "scratch"
 
-    df_raw_labels = df[['cut_id', 'case', 'tool_class']].drop_duplicates()
+    df_raw_labels = df[['cut_id', 'case', 'tool_class']].drop_duplicates().copy()
     df = df.drop(columns=['case', 'tool_class'])
 
     if scratch_path.exists():
@@ -54,8 +54,7 @@ def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
         )
 
         df_feat = df_feat.reset_index().rename(columns={'index':'cut_id'})
-        df_feat.merge(df_raw_labels[df_raw_labels["cut_id"].isin(cut_id_list_chunks[chunk_index])], on='cut_id', how='left')
-
+        df_feat.merge(df_raw_labels, on='cut_id', how='left')
 
     else:
         # extract features on local machine
@@ -113,6 +112,8 @@ def main(path_data_folder):
         df_feat.to_csv(
             folder_processed_data_milling / "milling.csv", index=False,
         )
+
+    print(df_feat["tool_class"][0:3])
 
 
 if __name__ == "__main__":
