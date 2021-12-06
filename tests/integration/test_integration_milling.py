@@ -36,10 +36,13 @@ class TestMilling(unittest.TestCase):
 
         # create the results dataframe
         df = milldata.create_xy_dataframe()
+        print("df.shape:", df.shape)
+        print("df.columns:", df.columns)
 
         # load the ground truth results dataframe
         col_names_ordered = [
             "cut_id",
+            "cut_no",
             "case",
             "time",
             "ae_spindle",
@@ -53,6 +56,7 @@ class TestMilling(unittest.TestCase):
 
         col_dtype = [
             str,
+            int,
             int,
             np.float32,
             np.float32,
@@ -71,6 +75,9 @@ class TestMilling(unittest.TestCase):
             self.results_path,
             compression="gzip",
         ).astype(col_dtype_dict)
+
+        print("df_gt.shape:", df_gt.shape)
+        print("df_gt.columns:", df_gt.columns)
 
         # compare the results
         assert_frame_equal(df, df_gt)
