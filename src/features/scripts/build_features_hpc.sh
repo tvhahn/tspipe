@@ -18,7 +18,7 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/features/build_features.py /
-    --path_data_folder $SCRATCH_DATA_DIR /
-    --n_chunks 10 /
+python $PROJECT_DIR/src/features/build_features.py \
+    --path_data_folder $SCRATCH_DATA_DIR \
+    --n_chunks 10 \
     --chunk_index $SLURM_ARRAY_TASK_ID
