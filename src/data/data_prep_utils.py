@@ -8,28 +8,6 @@ import pandas as pd
 ###############################################################################
 
 
-def set_directories(project_dir):
-    """Sets the directory paths used for data, checkpoints, etc."""
-
-    # check if "scratch" path exists in the home directory
-    # if it does, assume we are on HPC
-    scratch_path = Path.home() / "scratch"
-    if scratch_path.exists():
-        print("Assume on HPC")
-    else:
-        print("Assume on local compute")
-
-    # make sure project_dir is a Path object and not a string
-    project_dir = Path(project_dir)
-
-    Path(path_checkpoint_folder).mkdir(parents=True, exist_ok=True)
-
-    pass
-
-
-
-
-
 
 ###############################################################################
 # Data Prep Classes
@@ -296,6 +274,7 @@ class MillingDataPrep:
 
         col_names_ordered = [
             "cut_id",
+            "cut_no",
             "case",
             "time",
             "ae_spindle",
@@ -309,6 +288,7 @@ class MillingDataPrep:
 
         col_dtype = [
             str,
+            int,
             int,
             np.float32,
             np.float32,
@@ -325,8 +305,11 @@ class MillingDataPrep:
         # create a dataframe from the x and y arrays
         df = pd.DataFrame(x_labels, columns=col_names, dtype=str)
 
-        # split the cut_id by "_" and take the first element (case)
-        df["case"] = df["cut_id"].str.split("_").str[0]  
+        # split the cut_id by "_" and take the first element (cut_no)
+        df["cut_no"] = df["cut_id"].str.split("_").str[0]
+
+        # get the case from each cut_no using the df_labels
+        df = df.merge(self.df_labels[['cut_no', 'case']].astype(dtype=str), on='cut_no', how='left')
 
         df = df[col_names_ordered].astype(col_dtype_dict) # reorder the columns
 
