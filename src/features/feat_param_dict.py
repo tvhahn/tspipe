@@ -1,8 +1,8 @@
 from itertools import product
 
-feat_dict = {}
+comprehensive_features = {}
 
-feat_dict.update({
+comprehensive_features.update({
     "time_reversal_asymmetry_statistic": [{"lag": lag} for lag in range(1, 4)],
     "c3": [{"lag": lag} for lag in range(1, 4)],
     "cid_ce": [{"normalize": True}, {"normalize": False}],

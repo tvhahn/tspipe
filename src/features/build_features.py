@@ -3,9 +3,8 @@ import pandas as pd
 import argparse
 import logging
 from tsfresh import extract_features
-from feat_param_dict import feat_dict
+from feat_param_dict import comprehensive_features
 import json
-
 
 ###############################################################################
 # Functions
@@ -34,7 +33,7 @@ def load_feat_json(path_feat_json):
 
     return feat_dictionary
 
-def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
+def milling_features(df, n_chunks, chunk_index, feature_dictionary=comprehensive_features):
     """Extracts features from the raw milling dataframe.
 
     Parameters
@@ -113,13 +112,13 @@ def main(path_data_folder):
     
     print("Shape of df:", df.shape)
 
-    # for testing purposes only include some cuts
-    # df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
 
     # load feat_dict json file if the argument is passed
     # else the default feat_dict will be used (from feat_param_dict.py)
     if args.path_feat_json:
         feat_dict = load_feat_json(args.path_feat_json)
+    else:
+        feat_dict = comprehensive_features
 
     df_feat = milling_features(df, n_chunks, chunk_index, feat_dict)
 
