@@ -113,11 +113,6 @@ def milling_stratify_cut_no(df, random_seed=76, train_size_pct=0.4):
         stratify=tool_classes_test,
     )
 
-    # print the shapes of the train/test/val splits
-    print("cut_numbers_train shape:", len(cut_numbers_train))
-    print("cut_numbers_test shape:", len(cut_numbers_test))
-    print("cut_numbers_val shape:", len(cut_numbers_val))
-
     # assert that there are no duplicates between the cut_numbers_train/val/test
     assert (
         len(np.intersect1d(cut_numbers_train, cut_numbers_test)) == 0
@@ -160,15 +155,26 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
         Features dataframe. Must contain the "cut_id", "cut_no", "case", 
         and "tool_class" columns (along with feature columns)
 
-    random_seed :
+    random_seed : int
+        Random seed for the train/test/val splits
 
+    train_size_pct : float
+        Percentage of the dataframe to use for the train split
 
+    Returns
+    -------
+    df_train, df_val, df_test : pandas dataframes
+        Train/val/test splits of the features dataframe, with the features
+        selected by the tsfresh library.
+
+    col_selected_no_y : list
+        List of the column names of the features selected by tsfresh.
 
     """
 
     df_feat = df_feat.reset_index(drop=True)  # reset index just in case
 
-    print("shape of df_feat:", df_feat.shape)
+    print("Original shape of df_feat:", df_feat.shape)
 
     # generate cut_numbers_train/val/test from entire dataframe
     cut_numbers_train, cut_numbers_val, cut_numbers_test = milling_stratify_cut_no(
@@ -189,11 +195,6 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
         df_feat, cut_numbers_train, cut_numbers_val, cut_numbers_test
     )
     
-    # print the shapes of the train/val/test splits
-    print("df_train shape:", df_train.shape)
-    print("df_val shape:", df_val.shape)
-    print("df_test shape:", df_test.shape)
-
     # assert that df_feat has a y column
     assert "y" in df_feat.columns, "df_feat must have a y column"
 
@@ -205,8 +206,8 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
         chunksize=10,
     )
 
-    col_selected = list(df_train_feat_sel.columns)
-    col_selected = col_selected + ["case", "tool_class", "y"]
+    col_selected_no_y = list(df_train_feat_sel.columns)
+    col_selected = col_selected_no_y + ["case", "tool_class", "y"]
 
     (df_train, df_val, df_test) = (
         df_train[col_selected],
@@ -214,18 +215,16 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
         df_test[col_selected],
     )
 
-    # print the shapes of the train/val/test splits
-    print("df_train shape:", df_train.shape)
-    print("df_val shape:", df_val.shape)
-    print("df_test shape:", df_test.shape)
-
-    # assert that df_train has a y column
-    assert "y" in df_train.columns, "Dataframe must have a y column"
     assert df_train.columns.equals(df_val.columns) and df_train.columns.equals(
         df_test.columns
     ), "Columns must be the same for all dataframes"
 
-    return df_train, df_val, df_test
+    # print shapes of the train/val/test splits and the percentage or rows compared to the combined total
+    print("Final df_train shape:", df_train.shape, f"({df_train.shape[0] / df_feat.shape[0] * 100:.2f}% of samples)")
+    print("Final df_val shape:", df_val.shape, f"({df_val.shape[0] / df_feat.shape[0] * 100:.2f}% of samples)")
+    print("Final df_test shape:", df_test.shape, f"({df_test.shape[0] / df_feat.shape[0] * 100:.2f}% of samples)")
+
+    return df_train, df_val, df_test, col_selected_no_y
 
 
 def main(folder_interim_data):
