@@ -6,7 +6,9 @@ import logging
 import argparse
 import numpy as np
 from sklearn.model_selection import train_test_split
-from tsfresh import select_features
+from tsfresh import select_features, feature_extraction
+import pickle
+import json
 
 """
 Script to select the "optimum" features from the features dataframe.
@@ -206,8 +208,8 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
         chunksize=10,
     )
 
-    col_selected_no_y = list(df_train_feat_sel.columns)
-    col_selected = col_selected_no_y + ["case", "tool_class", "y"]
+    col_selected = list(df_train_feat_sel.columns)
+    col_selected = col_selected + ["case", "tool_class", "y"]
 
     (df_train, df_val, df_test) = (
         df_train[col_selected],
@@ -224,7 +226,35 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
     print("Final df_val shape:", df_val.shape, f"({df_val.shape[0] / df_feat.shape[0] * 100:.2f}% of samples)")
     print("Final df_test shape:", df_test.shape, f"({df_test.shape[0] / df_feat.shape[0] * 100:.2f}% of samples)")
 
-    return df_train, df_val, df_test, col_selected_no_y
+    return df_train, df_val, df_test
+
+
+def save_feat_dict(df_feat, col_ignore_list, folder_save_path, save_name="feat_dict"):
+    """
+    Save the features dataframe as a dictionary.
+
+    Parameters
+    ----------
+    df_feat : pandas dataframe
+        Features dataframe.
+
+    folder_save_path : pathlib.Path
+        Folder path where the dictionary will be saved as a json file.
+
+    save_name : str
+        prefix of the file name.
+
+    """
+
+    feat_dict = feature_extraction.settings.from_columns(df_feat.columns, col_ignore_list)  # create the feature dictionary
+
+    # save the dictionary to a json file
+    with open(folder_save_path / f"{save_name}.json", "w") as f:
+        json.dump(feat_dict, f)
+
+    # save the col_selected list to a .txt file
+    with open(folder_save_path / f"{save_name}_col_list.txt", "w") as f:
+        f.write("\n".join(list(df_feat.columns)))
 
 
 def main(folder_interim_data):
