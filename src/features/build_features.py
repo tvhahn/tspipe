@@ -30,9 +30,9 @@ def load_feat_json(path_feat_json):
     logger.info("loading feat_dict json file")
 
     with open(path_feat_json, "r") as f:
-        feat_dict = json.load(f)
+        feat_dictionary = json.load(f)
 
-    return feat_dict
+    return feat_dictionary
 
 def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
     """Extracts features from the raw milling dataframe.
@@ -121,7 +121,7 @@ def main(path_data_folder):
     if args.path_feat_json:
         feat_dict = load_feat_json(args.path_feat_json)
 
-    df_feat = milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict)
+    df_feat = milling_features(df, n_chunks, chunk_index, feat_dict)
 
     scratch_path = Path.home() / "scratch"
     if scratch_path.exists():
