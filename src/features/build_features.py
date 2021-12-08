@@ -4,12 +4,35 @@ import argparse
 import logging
 from tsfresh import extract_features
 from feat_param_dict import feat_dict
+import json
 
 
 ###############################################################################
 # Functions
 ###############################################################################
 
+
+def load_feat_json(path_feat_json):
+    """Loads the feat_dict json file.
+
+    Parameters
+    ----------
+    path_feat_json : Path
+        Path to the feat_dict json file.
+
+    Returns
+    -------
+    feat_dict : dict
+        Dictionary of feature extraction parameters.
+
+    """
+    logger = logging.getLogger(__name__)
+    logger.info("loading feat_dict json file")
+
+    with open(path_feat_json, "r") as f:
+        feat_dict = json.load(f)
+
+    return feat_dict
 
 def milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict):
     """Extracts features from the raw milling dataframe.
@@ -93,6 +116,11 @@ def main(path_data_folder):
     # for testing purposes only include some cuts
     # df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
 
+    # load feat_dict json file if the argument is passed
+    # else the default feat_dict will be used (from feat_param_dict.py)
+    if args.path_feat_json:
+        feat_dict = load_feat_json(args.path_feat_json)
+
     df_feat = milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict)
 
     scratch_path = Path.home() / "scratch"
@@ -125,6 +153,12 @@ if __name__ == "__main__":
         type=str,
         default="data/",
         help="Path to data folder that contains raw/interim/processed data folders",
+    )
+
+    parser.add_argument(
+        "--path_feat_json",
+        type=str,
+        help="Path to feat_dict.json file",
     )
 
     parser.add_argument(
