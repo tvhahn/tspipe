@@ -95,7 +95,7 @@ def milling_stratify_cut_no(df, random_seed=76, train_size_pct=0.4):
     ) = train_test_split(
         np.array(cut_numbers),
         np.array(tool_classes),
-        test_size= 1 - train_size_pct,
+        test_size=1 - train_size_pct,
         random_state=random_seed,
         stratify=np.array(tool_classes),
     )
@@ -119,9 +119,15 @@ def milling_stratify_cut_no(df, random_seed=76, train_size_pct=0.4):
     print("cut_numbers_val shape:", len(cut_numbers_val))
 
     # assert that there are no duplicates between the cut_numbers_train/val/test
-    assert len(np.intersect1d(cut_numbers_train, cut_numbers_test)) == 0, "Duplicate cut_no's found in train/test split"
-    assert len(np.intersect1d(cut_numbers_train, cut_numbers_val)) == 0, "Duplicate cut_no's found in train/val split"
-    assert len(np.intersect1d(cut_numbers_val, cut_numbers_test)) == 0, "Duplicate cut_no's found in val/test split"
+    assert (
+        len(np.intersect1d(cut_numbers_train, cut_numbers_test)) == 0
+    ), "Duplicate cut_no's found in train/test split"
+    assert (
+        len(np.intersect1d(cut_numbers_train, cut_numbers_val)) == 0
+    ), "Duplicate cut_no's found in train/val split"
+    assert (
+        len(np.intersect1d(cut_numbers_val, cut_numbers_test)) == 0
+    ), "Duplicate cut_no's found in val/test split"
 
     return (
         cut_numbers_train,
@@ -130,7 +136,9 @@ def milling_stratify_cut_no(df, random_seed=76, train_size_pct=0.4):
     )
 
 
-def milling_train_test_split(df_feat, cut_numbers_train, cut_numbers_val, cut_numbers_test):
+def milling_train_test_split(
+    df_feat, cut_numbers_train, cut_numbers_val, cut_numbers_test
+):
     """
     Create the train/val/test splits for the features dataframe.
     """
@@ -142,17 +150,30 @@ def milling_train_test_split(df_feat, cut_numbers_train, cut_numbers_val, cut_nu
     return (df_train, df_val, df_test)
 
 
-
 def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
     """
-    Select the optimum features from the features df
+    Select the optimum features from the features dataframe.
+
+    Parameters
+    ----------
+    df_feat : pandas dataframe
+        Features dataframe. Must contain the "cut_id", "cut_no", "case", 
+        and "tool_class" columns (along with feature columns)
+
+    random_seed :
+
+
+
     """
 
     df_feat = df_feat.reset_index(drop=True)  # reset index just in case
 
-    # generate cut_numbers_train/val/test from entire dataframe
-    cut_numbers_train, cut_numbers_val, cut_numbers_test = milling_stratify_cut_no(df_feat, random_seed, train_size_pct)
+    print("shape of df_feat:", df_feat.shape)
 
+    # generate cut_numbers_train/val/test from entire dataframe
+    cut_numbers_train, cut_numbers_val, cut_numbers_test = milling_stratify_cut_no(
+        df_feat, random_seed, train_size_pct
+    )
 
     # add y label to the features dataframe
     df_feat = milling_add_y_label_anomaly(df_feat)
@@ -164,8 +185,10 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
     if pd.Index(np.arange(0, df_feat.shape[0])).equals(df_feat.index):
         df_feat = df_feat.set_index("cut_id")
 
-    df_train, df_val, df_test = milling_train_test_split(df_feat, cut_numbers_train, cut_numbers_val, cut_numbers_test)
-
+    df_train, df_val, df_test = milling_train_test_split(
+        df_feat, cut_numbers_train, cut_numbers_val, cut_numbers_test
+    )
+    
     # print the shapes of the train/val/test splits
     print("df_train shape:", df_train.shape)
     print("df_val shape:", df_val.shape)
@@ -175,13 +198,34 @@ def milling_select_features(df_feat, random_seed=76, train_size_pct=0.4):
     assert "y" in df_feat.columns, "df_feat must have a y column"
 
     # perform the feature selection on df_train
-    df_train_feat_sel = select_features(df_train.drop(['case', 'tool_class', 'y'], axis=1), df_train["y"], n_jobs=5, chunksize=10)
+    df_train_feat_sel = select_features(
+        df_train.drop(["case", "tool_class", "y"], axis=1),
+        df_train["y"],
+        n_jobs=5,
+        chunksize=10,
+    )
 
     col_selected = list(df_train_feat_sel.columns)
-    col_selected = col_selected + ['case', 'tool_class', 'y']
+    col_selected = col_selected + ["case", "tool_class", "y"]
 
-    return df_val[col_selected]
+    (df_train, df_val, df_test) = (
+        df_train[col_selected],
+        df_val[col_selected],
+        df_test[col_selected],
+    )
 
+    # print the shapes of the train/val/test splits
+    print("df_train shape:", df_train.shape)
+    print("df_val shape:", df_val.shape)
+    print("df_test shape:", df_test.shape)
+
+    # assert that df_train has a y column
+    assert "y" in df_train.columns, "Dataframe must have a y column"
+    assert df_train.columns.equals(df_val.columns) and df_train.columns.equals(
+        df_test.columns
+    ), "Columns must be the same for all dataframes"
+
+    return df_train, df_val, df_test
 
 
 def main(folder_interim_data):
