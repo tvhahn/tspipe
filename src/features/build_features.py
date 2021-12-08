@@ -93,7 +93,7 @@ def main(path_data_folder):
     # for testing purposes only include some cuts
     # df = df[df["cut_id"].isin(['0_0', '0_1', '0_2'])]
 
-    df_feat = milling_features(df, n_chunks, chunk_index)
+    df_feat = milling_features(df, n_chunks, chunk_index, feature_dictionary=feat_dict)
 
     scratch_path = Path.home() / "scratch"
     if scratch_path.exists():
