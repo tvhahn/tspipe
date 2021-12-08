@@ -6,6 +6,7 @@ import logging
 import argparse
 import numpy as np
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 from tsfresh import select_features, feature_extraction
 import pickle
 import json
@@ -255,6 +256,55 @@ def save_feat_dict(df_feat, col_ignore_list, folder_save_path, save_name="feat_d
     # save the col_selected list to a .txt file
     with open(folder_save_path / f"{save_name}_col_list.txt", "w") as f:
         f.write("\n".join(list(df_feat.columns)))
+
+# function to scale the df_train, df_val, and df_test dataframes with the same scaler
+def scale_dataframes(df_train, df_val, df_test, scaler, save_data=True, folder_save_path=None):
+    """
+    Scale the train/val/test dataframes with the same scaler.
+
+    Parameters
+    ----------
+    df_train : pandas dataframe
+        Train dataframe with no y labels, etc.
+
+    df_val : pandas dataframe
+        Validation dataframe.
+
+    df_test : pandas dataframe
+        Test dataframe.
+
+    scaler : sklearn scaler object
+        Scaler object to scale the dataframes.
+
+    Returns
+    -------
+    df_train, df_val, df_test : pandas dataframes
+        Scaled train/val/test dataframes.
+
+    """
+
+    x_train = scaler.transform(df_val)
+    x_val = scaler.transform(df_val)
+    x_test = scaler.transform(df_test)
+
+    # save the x_train, x_val, and x_test arrays as .npy files
+    if save_data:
+        np.save(folder_save_path / "x_train.npy", x_train)
+        np.save(folder_save_path / "x_val.npy", x_val)
+        np.save(folder_save_path / "x_test.npy", x_test)
+
+    # save the y_train, y_val, and y_test arrays as .npy files
+    # and include the "cut_no", "case", "y", and "tool_class" columns
+    y_train = df_train.reset_index()[['cut_id', 'case', 'tool_class', 'y' ]].to_numpy()
+    y_val = df_val.reset_index()[['cut_no', 'case', 'tool_class', 'y' ]].to_numpy()
+    y_test = df_test.reset_index()[['cut_no', 'case', 'tool_class', 'y' ]].to_numpy()
+
+    if save_data:
+        np.save(folder_save_path / "y_train.npy", y_train)
+        np.save(folder_save_path / "y_val.npy", y_val)
+        np.save(folder_save_path / "y_test.npy", y_test)
+
+
 
 
 def main(folder_interim_data):
