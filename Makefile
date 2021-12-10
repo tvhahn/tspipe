@@ -56,6 +56,15 @@ else # assume on HPC
 	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif
 
+
+## Select Features, Scale, and return Data Splits
+splits: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/features/select_feat_and_scale.py --path_data_folder $(PROJECT_DIR)/data/
+else # assume on HPC
+	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
+endif
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
