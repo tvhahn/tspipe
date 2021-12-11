@@ -264,6 +264,7 @@ class MillingDataPrep:
 
         # concatenate the x and y arrays and reshape them to be a flat array (2D)
         x_labels = np.reshape(np.concatenate((x, y_labels_ids_times), axis=2), (-1, 9))
+        
 
         # define the column names and the data types
         col_names = [s.lower() for s in list(self.signal_names)] + [
