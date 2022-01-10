@@ -62,13 +62,14 @@ splits: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/select_feat_and_scale.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
+	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
 endif
 
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
 	find . -type d -name "__pycache__" -delete
+	find . -type f -name "*.out" -delete
 
 
 ## Run unit and integration tests
