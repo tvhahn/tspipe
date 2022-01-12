@@ -34,17 +34,17 @@ endif
 ## Download data
 download:
 ifeq (True,$(HAS_CONDA)) # assume on local
-	bash src/data/download_data_local.sh $(PROJECT_DIR)
+	bash src/dataprep/download_data_local.sh $(PROJECT_DIR)
 else # assume on HPC
-	bash src/data/download_data_hpc.sh $(PROJECT_DIR)
+	bash src/dataprep/download_data_hpc.sh $(PROJECT_DIR)
 endif
 
 ## Make Dataset
 data: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/data/make_dataset.py --path_data_folder $(PROJECT_DIR)/data/
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py --path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	sbatch src/data/make_raw_data_hpc.sh $(PROJECT_DIR)
+	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
 
 

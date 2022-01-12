@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import argparse
 import zipfile
-from src.data.data_prep_utils import MillingDataPrep
+from src.datasets.milling import MillingDataPrep
 
 parser = argparse.ArgumentParser(description="Create dataframe from raw data")
 
