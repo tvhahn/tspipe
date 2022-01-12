@@ -7,6 +7,8 @@ https://github.com/tvhahn/feat-store
 
 ![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
 
+run tests: `python -m unittest discover -s tests`
+
 Project Organization
 ------------
 

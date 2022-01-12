@@ -3,7 +3,7 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.data.data_prep_utils import MillingDataPrep
+from src.dataprep.data_prep_utils import MillingDataPrep
 
 
 class TestMilling(unittest.TestCase):
