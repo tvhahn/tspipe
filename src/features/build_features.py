@@ -2,11 +2,9 @@ from pathlib import Path
 import pandas as pd
 import argparse
 import logging
-from tsfresh import extract_features
 from feat_param_dict import comprehensive_features
 from src.features.utils import load_feat_json
 from src.features.datasets.milling_utils import milling_features
-import json 
 
 ###############################################################################
 # Functions
