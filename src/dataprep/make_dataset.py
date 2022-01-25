@@ -4,6 +4,8 @@ from pathlib import Path
 import argparse
 import zipfile
 from src.datasets.milling import MillingDataPrep
+from pyphm.datasets.milling import MillingPrepMethodA
+
 
 parser = argparse.ArgumentParser(description="Create dataframe from raw data")
 
@@ -27,6 +29,7 @@ def main(path_data_folder):
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
 
+    folder_raw_data = path_data_folder / "raw"
     folder_raw_data_milling = path_data_folder / "raw/milling"
     folder_processed_data_milling = path_data_folder / "processed/milling"
     df_label_path = folder_processed_data_milling / "labels_with_tool_class.csv"
@@ -38,8 +41,8 @@ def main(path_data_folder):
             zip_ref.extractall(folder_raw_data_milling)
 
     print("Creating dataframe from raw data...")
-    milldata = MillingDataPrep(
-        folder_raw_data_milling / "mill.mat",
+    milldata = MillingPrepMethodA(
+        root = folder_raw_data,
         path_df_labels=df_label_path,
         window_size=64,
         stride=64,

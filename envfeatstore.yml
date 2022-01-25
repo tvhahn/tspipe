@@ -12,6 +12,8 @@ dependencies:
   - seaborn
   - pandas
   - scikit-learn
+  - py7zr
+  - rarfile 
   - pip:
     - tsfresh
 
