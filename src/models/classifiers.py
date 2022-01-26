@@ -13,223 +13,162 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
 
-def build_classifier_parameter_dict(clf, p_clf):
+
+def get_param_dict_named(clf, param_dict_raw):
 
     name = re.sub("'", "", str(type(clf)).replace(">", "").split(".")[-1])
 
     # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters[str(name) + "_" + k] = p_clf[k]
+    param_dict_named = {}
+    for k in param_dict_raw:
+        param_dict_named[str(name) + "_" + k] = param_dict_raw[k]
 
-    return classifier_parameters
+    return param_dict_named
 
-def random_forest_classifier(parameter_sampler_random_int):
-    parameters_sample_dict = {
-        "n_estimators": sp_randint(5, 500),
-        "max_depth": sp_randint(1, 500),
-        "random_state": sp_randint(1, 2 ** 16),
-        "min_samples_leaf": sp_randint(1, 10),
-        "bootstrap": [True, False],
-        "class_weight": ['balanced','balanced_subsample',None],
-    }
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+# random forest
+def rf_classifier(sampler_seed, rf_params=None):
+
+    param_dict_raw = list(
+        ParameterSampler(rf_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    clf = RandomForestClassifier(**p_clf)
+    clf = RandomForestClassifier(**param_dict_raw)
 
-    return clf, build_classifier_parameter_dict(clf, p_clf)
-
-
-def xgboost_classifier(parameter_sampler_random_int):
-    '''https://xgboost.readthedocs.io/en/latest/python/python_api.html#module-xgboost.sklearn'''
-    parameters_sample_dict = {
-        "max_depth": sp_randint(2, 64),
-        "eta": [0.1,0.3,0.7],
-        "objective": ['binary:logistic'],
-        "eval_metric": ['error','aucpr'],
-        "seed": sp_randint(1, 2 ** 16),
-        "scale_pos_weight": sp_randint(1, 100),
-        "lambda": [0.0, 0.5, 1, 1.5, 3],
-        "alpha": [0, 0.5, 1, 1.5 ,3]
-    }
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+# XGBoost
+def xgb_classifier(sampler_seed, xgb_params):
+
+    param_dict_raw = list(
+        ParameterSampler(xgb_params, n_iter=1, random_state=sampler_seed)
     )[0]
-
 
     # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters['XGB' + "_" + k] = p_clf[k]
+    param_dict_named = {}
+    for k in param_dict_raw:
+        param_dict_named["XGB" + "_" + k] = param_dict_raw[k]
 
-    clf = XGBClassifier(**p_clf)
+    clf = XGBClassifier(**param_dict_raw)
 
-    return clf, classifier_parameters
+    return clf, param_dict_raw, param_dict_named
 
-def knn_classifier(parameter_sampler_random_int):
+
+# knn
+def knn_classifier(sampler_seed, knn_params):
     parameters_sample_dict = {
         "n_neighbors": sp_randint(1, 25),
         "metric": ["euclidean", "manhattan", "chebyshev", "minkowski"],
         "weights": ["uniform", "distance"],
     }
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(knn_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    clf = KNeighborsClassifier(**p_clf)
+    clf = KNeighborsClassifier(**param_dict_raw)
 
-    return clf, build_classifier_parameter_dict(clf, p_clf)
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-def logistic_regression(parameter_sampler_random_int):
-    parameters_sample_dict = {
-        "penalty": ["l1", "l2", "elasticnet", "none"],
-        "random_state": sp_randint(1, 2 ** 16),
-        "solver": ["saga", "lbfgs"],
-        "class_weight": [None, "balanced"],
-        "l1_ratio": uniform(loc=0, scale=1),
-        "max_iter": [20000]
-    }
+# logistic regression
+def lr_classifier(sampler_seed, lr_params):
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(lr_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
     # l1_ratio is only used with elasticnet penalty
-    if p_clf["penalty"] != "elasticnet":
-        p_clf["l1_ratio"] = None
-    if p_clf["penalty"] in ["l1", "elasticnet"]:
-        p_clf["solver"] = "saga"
+    if param_dict_raw["penalty"] != "elasticnet":
+        param_dict_raw["l1_ratio"] = None
+    if param_dict_raw["penalty"] in ["l1", "elasticnet"]:
+        param_dict_raw["solver"] = "saga"
 
-    clf = LogisticRegression(**p_clf)
-    
-    return clf, build_classifier_parameter_dict(clf, p_clf)
+    clf = LogisticRegression(**param_dict_raw)
+
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-def sgd_classifier(parameter_sampler_random_int):
-    parameters_sample_dict = {
-        "penalty": ["l1", "l2", "elasticnet",],
-        "loss": [
-            "hinge",
-            "log",
-            "modified_huber",
-            "squared_hinge",
-            "perceptron",
-            "squared_loss",
-            "huber",
-            "epsilon_insensitive",
-            "squared_epsilon_insensitive",
-        ],
-        "random_state": sp_randint(1, 2 ** 16),
-        "fit_intercept": [True, False],
-        "l1_ratio": uniform(loc=0, scale=1),
-        "learning_rate": ["constant", "optimal", "invscaling", "adaptive"],
-        "eta0": uniform(loc=0, scale=2),
-    }
+# stochastic gradient descent classifier
+def sgd_classifier(sampler_seed, sgd_params):
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(sgd_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    if p_clf["learning_rate"] == "optimal":
-        p_clf["eta0"] = 0.0
+    # add any constrains to the parameter dict
+    if param_dict_raw["learning_rate"] == "optimal":
+        param_dict_raw["eta0"] = 0.0
 
-    clf = SGDClassifier(**p_clf)
-    name = re.sub("'", "", str(type(clf)).replace(">", "").split(".")[-1])
+    clf = SGDClassifier(**param_dict_raw)
 
-    # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters[str(name) + "_" + k] = p_clf[k]
-
-    return clf, classifier_parameters
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-def ridge_classifier(parameter_sampler_random_int):
-    parameters_sample_dict = {
-        "alpha": uniform(loc=0, scale=5),
-        "random_state": sp_randint(1, 2 ** 16),
-        "normalize": [True, False],
-    }
+# ridge
+def ridge_classifier(sampler_seed, ridge_params):
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(ridge_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    clf = RidgeClassifier(**p_clf)
-    name = re.sub("'", "", str(type(clf)).replace(">", "").split(".")[-1])
+    clf = RidgeClassifier(**param_dict_raw)
 
-    # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters[str(name) + "_" + k] = p_clf[k]
-
-    return clf, classifier_parameters
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-def svm_classifier(parameter_sampler_random_int):
-    parameters_sample_dict = {
-        "kernel": ["linear", "poly", "rbf", "sigmoid"],
-        "degree": sp_randint(1, 5),
-        "C": uniform(loc=0, scale=5),
-        "max_iter": [25000],
-        "verbose": [False],
-    }
+# svm
+def svm_classifier(sampler_seed, svm_params):
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(svm_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    clf = SVC(**p_clf)
-    name = re.sub("'", "", str(type(clf)).replace(">", "").split(".")[-1])
+    # add any constrains to the parameter dict
+    if param_dict_raw["kernel"] != "poly":
+        param_dict_raw["degree"] = None
 
-    if p_clf["kernel"] != "poly":
-        p_clf["degree"] = None
+    clf = SVC(**param_dict_raw)
 
-    # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters[str(name) + "_" + k] = p_clf[k]
-
-    return clf, classifier_parameters
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )
 
 
-def gaussian_nb_classifier(parameter_sampler_random_int):
-    parameters_sample_dict = {}
+# gaussian naive bayes
+def gaussian_classifier(sampler_seed, gaussian_params):
 
-    p_clf = list(
-        ParameterSampler(
-            parameters_sample_dict, n_iter=1, random_state=parameter_sampler_random_int
-        )
+    param_dict_raw = list(
+        ParameterSampler(gaussian_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    clf = GaussianNB(**p_clf)
-    name = re.sub("'", "", str(type(clf)).replace(">", "").split(".")[-1])
+    clf = GaussianNB(**param_dict_raw)
 
-    # rebuild the parameter dict and append the classifier name onto each parameter
-    classifier_parameters = {}
-    for k in p_clf:
-        classifier_parameters[str(name) + "_" + k] = p_clf[k]
-
-    return clf, classifier_parameters
-
+    return (
+        clf,
+        param_dict_raw,
+        get_param_dict_named(clf, param_dict_raw),
+    )

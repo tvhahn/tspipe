@@ -14,6 +14,9 @@ dependencies:
   - scikit-learn
   - py7zr
   - rarfile 
+  - xgboost 
+  - black
+  - imbalanced-learn
   - pip:
     - tsfresh
 

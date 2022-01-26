@@ -10,14 +10,14 @@ from scipy.stats import randint as sp_randint
 from scipy.stats import uniform
 import random
 from src.models.classifiers import (
-    random_forest_classifier,
+    rf_classifier,
+    xgb_classifier,
     knn_classifier,
-    logistic_regression,
+    lr_classifier,
     sgd_classifier,
     ridge_classifier,
     svm_classifier,
-    gaussian_nb_classifier,
-    xgboost_classifier,
+    gaussian_classifier,
 )
 
 
@@ -37,14 +37,14 @@ general_params = {
     ],
     "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
     "classifier": [
-        random_forest_classifier,
+        rf_classifier,
+        xgb_classifier,
         knn_classifier,
-        logistic_regression,
+        lr_classifier,
         sgd_classifier,
         ridge_classifier,
         svm_classifier,
-        gaussian_nb_classifier,
-        xgboost_classifier,
+        gaussian_classifier,
     ],
     "sampler_seed": sp_randint(0, 2 ** 16),
 }
@@ -122,7 +122,7 @@ sgd_params = {
 }
 
 # ridge parameters
-ridge_param = {
+ridge_params = {
     "alpha": uniform(loc=0, scale=5),
     "random_state": sp_randint(1, 2 ** 16),
     "normalize": [True, False],
