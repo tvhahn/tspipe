@@ -1,5 +1,10 @@
 from itertools import product
 
+dummy_features = {
+    "length": None,
+    "kurtosis": None,
+}
+
 comprehensive_features = {}
 
 comprehensive_features.update({

@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import argparse
 import logging
-from feat_param_dict import comprehensive_features
+from feat_param_dict import comprehensive_features, dummy_features
 from src.features.utils import load_feat_json
 from src.features.datasets.milling_utils import milling_features
 
@@ -39,7 +39,8 @@ def main(path_data_folder):
     if args.path_feat_json:
         feat_dict = load_feat_json(args.path_feat_json)
     else:
-        feat_dict = comprehensive_features
+        # feat_dict = comprehensive_features
+        feat_dict = dummy_features
 
     df_feat = milling_features(df, n_chunks, chunk_index, feat_dict)
 
