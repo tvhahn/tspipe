@@ -17,7 +17,7 @@ from src.models.classifiers import (
     sgd_classifier,
     ridge_classifier,
     svm_classifier,
-    gaussian_classifier,
+    nb_classifier,
 )
 
 
@@ -44,7 +44,7 @@ general_params = {
         sgd_classifier,
         ridge_classifier,
         svm_classifier,
-        gaussian_classifier,
+        nb_classifier,
     ],
 }
 
@@ -58,7 +58,6 @@ rf_params = {
     "n_estimators": sp_randint(5, 500),  # default=100
     "criterion": ["gini", "entropy"],  # default=gini
     "max_depth": sp_randint(1, 500),  # default=None
-    "random_state": sp_randint(1, 2 ** 16),
     "min_samples_leaf": sp_randint(1, 10),
     "bootstrap": [True, False],
     "min_samples_split": sp_randint(2, 10),  # default=2
@@ -88,7 +87,6 @@ knn_params = {
 # logistic regression parameters
 lr_params = {
     "penalty": ["l1", "l2", "elasticnet", "none"],
-    "random_state": sp_randint(1, 2 ** 16),
     "solver": ["saga", "lbfgs"],
     "class_weight": [None, "balanced"],
     "l1_ratio": uniform(loc=0, scale=1),
@@ -113,7 +111,6 @@ sgd_params = {
         "epsilon_insensitive",
         "squared_epsilon_insensitive",
     ],
-    "random_state": sp_randint(1, 2 ** 16),
     "fit_intercept": [True, False],
     "l1_ratio": uniform(loc=0, scale=1),
     "learning_rate": ["constant", "optimal", "invscaling", "adaptive"],
@@ -123,7 +120,6 @@ sgd_params = {
 # ridge parameters
 ridge_params = {
     "alpha": uniform(loc=0, scale=5),
-    "random_state": sp_randint(1, 2 ** 16),
     "normalize": [True, False],
 }
 
