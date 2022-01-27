@@ -46,7 +46,6 @@ general_params = {
         svm_classifier,
         gaussian_classifier,
     ],
-    "sampler_seed": sp_randint(0, 2 ** 16),
 }
 
 
