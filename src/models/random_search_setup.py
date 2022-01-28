@@ -37,14 +37,14 @@ general_params = {
     ],
     "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
     "classifier": [
-        rf_classifier,
-        xgb_classifier,
-        knn_classifier,
-        lr_classifier,
-        sgd_classifier,
-        ridge_classifier,
-        svm_classifier,
-        nb_classifier,
+        "rf",
+        "xgb",
+        "knn",
+        "lr",
+        "sgd",
+        "ridge",
+        "svm",
+        "nb",
     ],
 }
 
@@ -133,4 +133,4 @@ svm_params = {
 }
 
 # gaussian parameters
-gaussian_params = {}
+nb_params = {}

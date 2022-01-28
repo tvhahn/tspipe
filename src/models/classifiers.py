@@ -20,7 +20,7 @@ from xgboost import XGBClassifier
 #     sgd_params,
 #     ridge_params,
 #     svm_params,
-#     gaussian_params,
+#     nb_params,
 # )
 
 
