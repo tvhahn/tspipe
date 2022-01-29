@@ -120,14 +120,14 @@ sgd_params = {
 # ridge parameters
 ridge_params = {
     "alpha": uniform(loc=0, scale=5),
-    "normalize": [True, False],
+    # "normalize": [True, False],
 }
 
 # svm parameters
 svm_params = {
     "kernel": ["linear", "poly", "rbf", "sigmoid"],
-    "degree": sp_randint(1, 5),
-    "C": uniform(loc=0, scale=5),
+    # "degree": sp_randint(1, 5),
+    # "C": uniform(loc=0, scale=5),
     "max_iter": [25000],
     "verbose": [False],
 }

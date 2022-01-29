@@ -64,7 +64,7 @@ def xgb_classifier(sampler_seed, params):
     for k in param_dict_raw:
         param_dict_named["XGB" + "_" + k] = param_dict_raw[k]
 
-    clf = XGBClassifier(random_state=sampler_seed, **param_dict_raw)
+    clf = XGBClassifier(random_state=sampler_seed, use_label_encoder=False, **param_dict_raw)
 
     return clf, param_dict_raw, param_dict_named
 
