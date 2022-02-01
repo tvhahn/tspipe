@@ -116,7 +116,7 @@ def plot_pr_roc_curves_kfolds(
     roc_all_segmented = np.array(roc_all_segmented)
 
     for i, (t, f) in enumerate(zip(tpr_array, fpr_array)):
-        if i == np.shape(tpr)[0] - 1:
+        if i == np.shape(tpr_array)[0] - 1:
             axes[1].plot(
                 f[:], t[:], label="k-fold models", color="gray", alpha=0.5, linewidth=1
             )
