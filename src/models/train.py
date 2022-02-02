@@ -14,7 +14,14 @@ import random
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
-from src.models.utils import milling_add_y_label_anomaly, under_over_sampler, scale_data, calculate_scores, get_classifier_and_params
+from src.models.utils import (
+    milling_add_y_label_anomaly,
+    under_over_sampler,
+    scale_data,
+    calculate_scores,
+    get_classifier_and_params,
+    get_model_metrics_df,
+)
 from src.models.random_search_setup import general_params
 from src.models.classifiers import (
     rf_classifier,
@@ -51,7 +58,17 @@ from src.models.random_search_setup import (
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
 
 
-def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols, stratification_grouping_col=None, y_label_col='y', n_splits=5):
+def kfold_cv(
+    df,
+    clf,
+    uo_method,
+    scaler_method,
+    imbalance_ratio,
+    meta_label_cols,
+    stratification_grouping_col=None,
+    y_label_col="y",
+    n_splits=5,
+):
 
     n_thresholds_list = []
     precisions_list = []
@@ -63,9 +80,13 @@ def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols
     prauc_list = []
     rocauc_list = []
     f1_list = []
+    accuracy_list = []
 
     # perform stratified k-fold cross validation using the grouping of the y-label and another column
-    if stratification_grouping_col is not None and stratification_grouping_col is not y_label_col:
+    if (
+        stratification_grouping_col is not None
+        and stratification_grouping_col is not y_label_col
+    ):
         df_strat = df[[stratification_grouping_col, y_label_col]].drop_duplicates()
 
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
@@ -73,9 +94,15 @@ def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols
         # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
         clone_clf = clone(clf)
 
-        for train_index, test_index in skfolds.split(df_strat[[stratification_grouping_col]], df_strat[['y']]):
-            train_strat_vals = df_strat.iloc[train_index][stratification_grouping_col].values
-            test_strat_vals = df_strat.iloc[test_index][stratification_grouping_col].values
+        for train_index, test_index in skfolds.split(
+            df_strat[[stratification_grouping_col]], df_strat[["y"]]
+        ):
+            train_strat_vals = df_strat.iloc[train_index][
+                stratification_grouping_col
+            ].values
+            test_strat_vals = df_strat.iloc[test_index][
+                stratification_grouping_col
+            ].values
 
             x_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
             y_train = x_train[y_label_col].values.astype(int)
@@ -100,25 +127,26 @@ def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
 
-            n_thresholds_list.append(ind_score_dict['n_thresholds'])
-            precisions_list.append(ind_score_dict['precisions'])
-            recalls_list.append(ind_score_dict['recalls'])
-            precision_score_list.append(ind_score_dict['precision_result'])
-            recall_score_list.append(ind_score_dict['recall_result'])
-            fpr_list.append(ind_score_dict['fpr'])
-            tpr_list.append(ind_score_dict['tpr'])
-            prauc_list.append(ind_score_dict['prauc_result'])
-            rocauc_list.append(ind_score_dict['rocauc_result'])
-            f1_list.append(ind_score_dict['f1_result'])
-        
-    # perform stratified k-fold cross if only using the y-label for stratification 
+            n_thresholds_list.append(ind_score_dict["n_thresholds"])
+            precisions_list.append(ind_score_dict["precisions"])
+            recalls_list.append(ind_score_dict["recalls"])
+            precision_score_list.append(ind_score_dict["precision_result"])
+            recall_score_list.append(ind_score_dict["recall_result"])
+            fpr_list.append(ind_score_dict["fpr"])
+            tpr_list.append(ind_score_dict["tpr"])
+            prauc_list.append(ind_score_dict["prauc_result"])
+            rocauc_list.append(ind_score_dict["rocauc_result"])
+            f1_list.append(ind_score_dict["f1_result"])
+            accuracy_list.append(ind_score_dict["accuracy_result"])
+
+    # perform stratified k-fold cross if only using the y-label for stratification
     else:
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         # use clone to do a deep copy of model without copying attached data
         # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
         clone_clf = clone(clf)
 
-        for train_index, test_index in skfolds.split(df, df[['y']]):
+        for train_index, test_index in skfolds.split(df, df[["y"]]):
             df_train = df.iloc[train_index]
             df_test = df.iloc[test_index]
 
@@ -143,16 +171,17 @@ def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
 
-            n_thresholds_list.append(ind_score_dict['n_thresholds'])
-            precisions_list.append(ind_score_dict['precisions'])
-            recalls_list.append(ind_score_dict['recalls'])
-            precision_score_list.append(ind_score_dict['precision_result'])
-            recall_score_list.append(ind_score_dict['recall_result'])
-            fpr_list.append(ind_score_dict['fpr'])
-            tpr_list.append(ind_score_dict['tpr'])
-            prauc_list.append(ind_score_dict['prauc_result'])
-            rocauc_list.append(ind_score_dict['rocauc_result'])
-            f1_list.append(ind_score_dict['f1_result'])
+            n_thresholds_list.append(ind_score_dict["n_thresholds"])
+            precisions_list.append(ind_score_dict["precisions"])
+            recalls_list.append(ind_score_dict["recalls"])
+            precision_score_list.append(ind_score_dict["precision_result"])
+            recall_score_list.append(ind_score_dict["recall_result"])
+            fpr_list.append(ind_score_dict["fpr"])
+            tpr_list.append(ind_score_dict["tpr"])
+            prauc_list.append(ind_score_dict["prauc_result"])
+            rocauc_list.append(ind_score_dict["rocauc_result"])
+            f1_list.append(ind_score_dict["f1_result"])
+            accuracy_list.append(ind_score_dict["accuracy_result"])
 
     n_thresholds_array = np.array(n_thresholds_list, dtype=int)
     precisions_array = np.array(precisions_list, dtype=object)
@@ -163,44 +192,64 @@ def kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols
     tpr_array = np.array(tpr_list, dtype=object)
     prauc_array = np.array(prauc_list, dtype=object)
     rocauc_array = np.array(rocauc_list, dtype=object)
-    f1_array = np.array(f1_list, dtype=object)
+    f1_score_array = np.array(f1_list, dtype=object)
+    accuracy_array = np.array(accuracy_list, dtype=object)
 
     # create a dictionary of the result arrays
-    trained_result_dict = {"precisions_array": precisions_array, "recalls_array": recalls_array, 
-                "precision_score_array": precision_score_array, "recall_score_array": recall_score_array,
-                "fpr_array": fpr_array, 
-                "tpr_array": tpr_array, "prauc_array": prauc_array, "rocauc_array": rocauc_array, 
-                "f1_array": f1_array, "n_thresholds_array": n_thresholds_array}
+    trained_result_dict = {
+        "precisions_array": precisions_array,
+        "recalls_array": recalls_array,
+        "precision_score_array": precision_score_array,
+        "recall_score_array": recall_score_array,
+        "fpr_array": fpr_array,
+        "tpr_array": tpr_array,
+        "prauc_array": prauc_array,
+        "rocauc_array": rocauc_array,
+        "f1_score_array": f1_score_array,
+        "n_thresholds_array": n_thresholds_array,
+        "accuracy_array": accuracy_array,
+    }
 
     return trained_result_dict
 
 
-def train_single_model(df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col='y'):
+def train_single_model(
+    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y"
+):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
-        ParameterSampler(
-            general_params, n_iter=1, random_state=sampler_seed
-        )
+        ParameterSampler(general_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    uo_method = params_dict_train_setup['uo_method']
-    scaler_method = params_dict_train_setup['scaler_method']
-    imbalance_ratio = params_dict_train_setup['imbalance_ratio']
-    classifier = params_dict_train_setup['classifier']
-    print(f"classifier: {classifier}, uo_method: {uo_method}, imbalance_ratio: {imbalance_ratio}")
+    uo_method = params_dict_train_setup["uo_method"]
+    scaler_method = params_dict_train_setup["scaler_method"]
+    imbalance_ratio = params_dict_train_setup["imbalance_ratio"]
+    classifier = params_dict_train_setup["classifier"]
+    print(
+        f"classifier: {classifier}, uo_method: {uo_method}, imbalance_ratio: {imbalance_ratio}"
+    )
 
     # get classifier and its parameters
     clf_function, params_clf = get_classifier_and_params(classifier)
 
     # instantiate the model
-    clf, param_dict_clf_raw, params_dict_clf_named = clf_function(sampler_seed, params_clf)
+    clf, param_dict_clf_raw, params_dict_clf_named = clf_function(
+        sampler_seed, params_clf
+    )
     print("\n", params_dict_clf_named)
 
-    trained_result_dict = kfold_cv(df, clf, uo_method, scaler_method, imbalance_ratio, meta_label_cols, stratification_grouping_col, y_label_col)
+    model_metrics_dict = kfold_cv(
+        df,
+        clf,
+        uo_method,
+        scaler_method,
+        imbalance_ratio,
+        meta_label_cols,
+        stratification_grouping_col,
+        y_label_col,
+    )
 
     # added additional parameters to the training setup dictionary
     params_dict_train_setup["sampler_seed"] = sampler_seed
 
-    return trained_result_dict, params_dict_clf_named, params_dict_train_setup
-    
-    
+    return model_metrics_dict, params_dict_clf_named, params_dict_train_setup

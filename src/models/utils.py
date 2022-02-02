@@ -8,6 +8,7 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE, ADASYN
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
+import pandas as pd
 
 from src.models.random_search_setup import (
     rf_params,
@@ -39,6 +40,7 @@ from sklearn.metrics import (
     recall_score,
     f1_score,
     roc_curve,
+    accuracy_score,
 )
 
 def under_over_sampler(x, y, method=None, ratio=0.5):
@@ -131,6 +133,9 @@ def calculate_scores(clf, x_test, y_test,):
 
     n_correct = sum(y_pred == y_test)
 
+    # calculate the percent accuracy
+    accuracy_result = accuracy_score(y_test, y_pred)
+    
     # need to use decision scores, or probabilities, in roc_score
     precisions, recalls, pr_thresholds = precision_recall_curve(y_test, y_scores)
     fpr, tpr, roc_thresholds = roc_curve(y_test, y_scores)
@@ -150,7 +155,7 @@ def calculate_scores(clf, x_test, y_test,):
     scores = {"n_correct": n_correct, "n_thresholds": n_thresholds, "prauc_result": prauc_result, "rocauc_result": rocauc_result,
                 "precision_result": precision_result, "recall_result": recall_result, "f1_result": f1_result, 
                 "precisions": precisions, "recalls": recalls, "pr_thresholds": pr_thresholds,
-                "fpr": fpr, "tpr": tpr, "roc_thresholds": roc_thresholds, "y_scores": y_scores}
+                "fpr": fpr, "tpr": tpr, "roc_thresholds": roc_thresholds, "y_scores": y_scores, "accuracy_result": accuracy_result}
 
 
     return scores
@@ -170,6 +175,42 @@ def scale_data(x_train, x_test, scaler_method=None):
     else:
         pass
     return x_train, x_test
+
+
+def get_model_metrics_df(model_metrics_dict):
+
+    selected_metrics_dict = {
+        'precision_score_min': np.min(model_metrics_dict['precision_score_array']),
+        'precision_score_max': np.max(model_metrics_dict['precision_score_array']),
+        'precision_score_avg': np.mean(model_metrics_dict['precision_score_array']),
+        'precision_score_std': np.std(model_metrics_dict['precision_score_array']),
+        'recall_score_min': np.min(model_metrics_dict['recall_score_array']),
+        'recall_score_max': np.max(model_metrics_dict['recall_score_array']),
+        'recall_score_avg': np.mean(model_metrics_dict['recall_score_array']),
+        'recall_score_std': np.std(model_metrics_dict['recall_score_array']),
+        'f1_score_min': np.min(model_metrics_dict['f1_score_array']),
+        'f1_score_max': np.max(model_metrics_dict['f1_score_array']),
+        'f1_score_avg': np.mean(model_metrics_dict['f1_score_array']),
+        'f1_score_std': np.std(model_metrics_dict['f1_score_array']),
+        'rocauc_min': np.min(model_metrics_dict['rocauc_array']),
+        'rocauc_max': np.max(model_metrics_dict['rocauc_array']),
+        'rocauc_avg': np.mean(model_metrics_dict['rocauc_array']),
+        'rocauc_std': np.std(model_metrics_dict['rocauc_array']),
+        'prauc_min': np.min(model_metrics_dict['prauc_array']),
+        'prauc_max': np.max(model_metrics_dict['prauc_array']),
+        'prauc_avg': np.mean(model_metrics_dict['prauc_array']),
+        'prauc_std': np.std(model_metrics_dict['prauc_array']),
+        'accuracy_min': np.min(model_metrics_dict['accuracy_array']),
+        'accuracy_max': np.max(model_metrics_dict['accuracy_array']),
+        'accuracy_avg': np.mean(model_metrics_dict['accuracy_array']),
+        'accuracy_std': np.std(model_metrics_dict['accuracy_array']),
+        'n_thresholds_min': np.min(model_metrics_dict['n_thresholds_array']),
+        'n_thresholds_max': np.max(model_metrics_dict['n_thresholds_array']),
+    }
+
+    df_m = pd.DataFrame.from_dict(selected_metrics_dict, orient="index").T
+
+    return df_m
     
 
 
