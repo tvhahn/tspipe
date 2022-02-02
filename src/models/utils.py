@@ -6,6 +6,7 @@ from sklearn.model_selection import ParameterSampler
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE, ADASYN
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 from src.models.random_search_setup import (
     rf_params,
@@ -150,6 +151,23 @@ def calculate_scores(clf, x_test, y_test,):
 
 
     return scores
+
+
+def scale_data(x_train, x_test, scaler_method=None):
+    if scaler_method == "standard":
+        scaler = StandardScaler()
+        scaler.fit(x_train)
+        x_train = scaler.transform(x_train)
+        x_test = scaler.transform(x_test)
+    elif scaler_method == "min_max":
+        scaler = MinMaxScaler()
+        scaler.fit(x_train)
+        x_train = scaler.transform(x_train)
+        x_test = scaler.transform(x_test)
+    else:
+        pass
+    return x_train, x_test
+    
 
 
 ###############################################################################
