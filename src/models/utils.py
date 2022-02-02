@@ -7,6 +7,7 @@ from imblearn.over_sampling import RandomOverSampler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE, ADASYN
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import numpy as np
 
 from src.models.random_search_setup import (
     rf_params,
@@ -126,6 +127,8 @@ def calculate_scores(clf, x_test, y_test,):
     except:
         y_scores = clf.predict_proba(x_test)[:, 1]
 
+    n_thresholds = len(np.unique(y_scores))
+
     n_correct = sum(y_pred == y_test)
 
     # need to use decision scores, or probabilities, in roc_score
@@ -144,7 +147,7 @@ def calculate_scores(clf, x_test, y_test,):
     f1_result = f1_score(y_test, y_pred)
 
     # create a dictionary of all the scores
-    scores = {"n_correct": n_correct, "prauc_result": prauc_result, "rocauc_result": rocauc_result,
+    scores = {"n_correct": n_correct, "n_thresholds": n_thresholds, "prauc_result": prauc_result, "rocauc_result": rocauc_result,
                 "precision_result": precision_result, "recall_result": recall_result, "f1_result": f1_result, 
                 "precisions": precisions, "recalls": recalls, "pr_thresholds": pr_thresholds,
                 "fpr": fpr, "tpr": tpr, "roc_thresholds": roc_thresholds, "y_scores": y_scores}
