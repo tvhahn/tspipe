@@ -253,3 +253,31 @@ def train_single_model(
     params_dict_train_setup["sampler_seed"] = sampler_seed
 
     return model_metrics_dict, params_dict_clf_named, params_dict_train_setup
+
+
+def random_search_runner(df, rand_search_iter, meta_label_cols, stratification_grouping_col, path_save_dir=None, y_label_col='y', save_freq=1):
+    
+    for i in range(rand_search_iter):
+
+        # set random sample seed
+        sample_seed = random.randint(0, 2 ** 25)
+
+        model_metrics_dict, params_dict_clf_named, params_dict_train_setup = train_single_model(df, sample_seed, 
+        meta_label_cols, stratification_grouping_col, y_label_col)
+
+        df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T # train setup params
+        df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T # classifier params
+        df_m = get_model_metrics_df(model_metrics_dict)
+
+        if i == 0:
+            df_results = pd.concat([df_t, df_m, df_c], axis=1)
+
+            file_name = f'results_{sample_seed}.csv'
+        else:
+            df_results = df_results.append(pd.concat([df_t, df_m, df_c], axis=1))
+
+        if i % save_freq == 0:
+            if path_save_dir is not None:
+                df_results.to_csv(path_save_dir / file_name, index=False)
+            else:
+                df_results.to_csv(file_name, index=False)
