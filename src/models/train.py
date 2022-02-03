@@ -11,6 +11,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 import seaborn as sns
 import re
 import random
+import logging
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
@@ -255,29 +256,123 @@ def train_single_model(
     return model_metrics_dict, params_dict_clf_named, params_dict_train_setup
 
 
-def random_search_runner(df, rand_search_iter, meta_label_cols, stratification_grouping_col, path_save_dir=None, y_label_col='y', save_freq=1):
-    
-    for i in range(rand_search_iter):
+def random_search_runner(
+    df,
+    rand_search_iter,
+    meta_label_cols,
+    stratification_grouping_col,
+    path_save_dir=None,
+    y_label_col="y",
+    save_freq=1,
+    debug=False,
+):
 
+    df_results = pd.DataFrame()
+    for i in range(rand_search_iter):
         # set random sample seed
         sample_seed = random.randint(0, 2 ** 25)
+        sample_seed = 10
 
-        model_metrics_dict, params_dict_clf_named, params_dict_train_setup = train_single_model(df, sample_seed, 
-        meta_label_cols, stratification_grouping_col, y_label_col)
-
-        df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T # train setup params
-        df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T # classifier params
-        df_m = get_model_metrics_df(model_metrics_dict)
 
         if i == 0:
-            df_results = pd.concat([df_t, df_m, df_c], axis=1)
+            file_name = f"results_{sample_seed}.csv"
+        
+        try:
 
-            file_name = f'results_{sample_seed}.csv'
-        else:
+            (
+                model_metrics_dict,
+                params_dict_clf_named,
+                params_dict_train_setup,
+            ) = train_single_model(
+                df,
+                sample_seed,
+                meta_label_cols,
+                stratification_grouping_col,
+                y_label_col,
+            )
+
+            df_t = pd.DataFrame.from_dict(
+                params_dict_train_setup, orient="index"
+            ).T  # train setup params
+            df_c = pd.DataFrame.from_dict(
+                params_dict_clf_named, orient="index"
+            ).T  # classifier params
+            df_m = get_model_metrics_df(model_metrics_dict)
+
             df_results = df_results.append(pd.concat([df_t, df_m, df_c], axis=1))
 
-        if i % save_freq == 0:
-            if path_save_dir is not None:
-                df_results.to_csv(path_save_dir / file_name, index=False)
-            else:
-                df_results.to_csv(file_name, index=False)
+            if i % save_freq == 0:
+                if path_save_dir is not None:
+                    df_results.to_csv(path_save_dir / file_name, index=False)
+                else:
+                    df_results.to_csv(file_name, index=False)
+        # except Exception as e and log the exception
+        except Exception as e:
+            if debug:
+                print('####### Exception #######')
+                print(e)
+                logging.exception(f"##### Exception in random_search_runner:\n{e}\n\n")
+            pass
+
+
+def main():
+
+    root_path = Path().cwd()
+    print('root_path: ', root_path)
+    path_data_folder = Path().cwd() / "data"
+    print(path_data_folder)
+
+    folder_raw_data_milling = path_data_folder / "raw/milling"
+    folder_interim_data_milling = path_data_folder / "interim/milling"
+    folder_processed_data_milling = path_data_folder / "processed/milling"
+    folder_models = root_path / "models"
+
+    Y_LABEL_COL = "y"
+
+    # identify if there is another column you want to
+    # stratify on, besides the y label
+    STRATIFICATION_GROUPING_COL = "cut_no"
+
+    # list of the columns that are not features columns
+    # (not including the y-label column)
+    META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
+
+    RAND_SEARCH_ITER = 2
+
+    # set a seed for the parameter sampler
+    # SAMPLER_SEED = random.randint(0, 2 ** 16)
+
+    # load feature dataframe
+    df = pd.read_csv(
+        folder_processed_data_milling / "milling.csv",
+    )
+
+    # add y label
+    df = milling_add_y_label_anomaly(df)
+
+    Y_LABEL_COL = "y"
+
+    # identify if there is another column you want to
+    # stratify on, besides the y label
+    STRATIFICATION_GROUPING_COL = "cut_no"
+
+    # list of the columns that are not features columns
+    # (not including the y-label column)
+    META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
+
+    LOG_FILENAME = folder_models / 'logging_example.out'
+    logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
+
+    random_search_runner(
+        df,
+        RAND_SEARCH_ITER,
+        META_LABEL_COLS,
+        STRATIFICATION_GROUPING_COL,
+        path_save_dir= root_path / "models",
+        y_label_col="y",
+        save_freq=1,
+        debug=True,
+    )
+
+if __name__ == "__main__":
+    main()

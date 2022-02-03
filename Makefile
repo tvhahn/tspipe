@@ -65,6 +65,13 @@ else # assume on HPC
 	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
 endif
 
+train: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/train.py
+else # assume on HPC
+	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
+endif
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
