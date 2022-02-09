@@ -271,12 +271,11 @@ def random_search_runner(
     for i in range(rand_search_iter):
         # set random sample seed
         sample_seed = random.randint(0, 2 ** 25)
-        sample_seed = 10
-
+        sample_seed = 12
 
         if i == 0:
             file_name = f"results_{sample_seed}.csv"
-        
+
         try:
 
             (
@@ -291,12 +290,13 @@ def random_search_runner(
                 y_label_col,
             )
 
-            df_t = pd.DataFrame.from_dict(
-                params_dict_train_setup, orient="index"
-            ).T  # train setup params
-            df_c = pd.DataFrame.from_dict(
-                params_dict_clf_named, orient="index"
-            ).T  # classifier params
+            # train setup params
+            df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
+
+            # classifier params
+            df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
+
+            # model metric results
             df_m = get_model_metrics_df(model_metrics_dict)
 
             df_results = df_results.append(pd.concat([df_t, df_m, df_c], axis=1))
@@ -306,10 +306,11 @@ def random_search_runner(
                     df_results.to_csv(path_save_dir / file_name, index=False)
                 else:
                     df_results.to_csv(file_name, index=False)
+                    
         # except Exception as e and log the exception
         except Exception as e:
             if debug:
-                print('####### Exception #######')
+                print("####### Exception #######")
                 print(e)
                 logging.exception(f"##### Exception in random_search_runner:\n{e}\n\n")
             pass
@@ -318,7 +319,7 @@ def random_search_runner(
 def main():
 
     root_path = Path().cwd()
-    print('root_path: ', root_path)
+    print("root_path: ", root_path)
     path_data_folder = Path().cwd() / "data"
     print(path_data_folder)
 
@@ -326,16 +327,6 @@ def main():
     folder_interim_data_milling = path_data_folder / "interim/milling"
     folder_processed_data_milling = path_data_folder / "processed/milling"
     folder_models = root_path / "models"
-
-    Y_LABEL_COL = "y"
-
-    # identify if there is another column you want to
-    # stratify on, besides the y label
-    STRATIFICATION_GROUPING_COL = "cut_no"
-
-    # list of the columns that are not features columns
-    # (not including the y-label column)
-    META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
 
     RAND_SEARCH_ITER = 2
 
@@ -360,7 +351,7 @@ def main():
     # (not including the y-label column)
     META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
 
-    LOG_FILENAME = folder_models / 'logging_example.out'
+    LOG_FILENAME = folder_models / "logging_example.out"
     logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 
     random_search_runner(
@@ -368,11 +359,12 @@ def main():
         RAND_SEARCH_ITER,
         META_LABEL_COLS,
         STRATIFICATION_GROUPING_COL,
-        path_save_dir= root_path / "models",
+        path_save_dir=root_path / "models",
         y_label_col="y",
         save_freq=1,
         debug=True,
     )
+
 
 if __name__ == "__main__":
     main()
