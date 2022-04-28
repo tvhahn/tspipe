@@ -67,7 +67,7 @@ endif
 
 train: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/train.py
+	$(PYTHON_INTERPRETER) src/models/train.py --save_dir_name interim_results
 else # assume on HPC
 	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
 endif

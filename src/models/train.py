@@ -1,19 +1,13 @@
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import ParameterSampler
-from scipy.stats import randint as sp_randint
-from scipy.stats import uniform
 from pathlib import Path
-from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
-import matplotlib.pyplot as plt
-from numpy.lib.stride_tricks import sliding_window_view
-import seaborn as sns
-import re
 import random
+import argparse
 import logging
+import shutil
+from datetime import datetime
 from sklearn.base import clone
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import StratifiedKFold
 from src.models.utils import (
     milling_add_y_label_anomaly,
@@ -261,7 +255,8 @@ def random_search_runner(
     rand_search_iter,
     meta_label_cols,
     stratification_grouping_col,
-    path_save_dir=None,
+    proj_dir,
+    path_save_dir,
     y_label_col="y",
     save_freq=1,
     debug=False,
@@ -274,7 +269,15 @@ def random_search_runner(
         sample_seed = 12
 
         if i == 0:
-            file_name = f"results_{sample_seed}.csv"
+            now = datetime.now()
+            now_str = now.strftime("%Y-%m-%d-%H%M-%S")
+            file_name_results = f"{now_str}_results_{sample_seed}.csv"
+
+            # copy the random_search_setup.py file to path_save_dir using shutil
+            shutil.copy(
+                proj_dir / "src/models/random_search_setup.py",
+                path_save_dir / "setup_files" / f"{now_str}_random_search_setup.py",
+            )
 
         try:
 
@@ -303,10 +306,10 @@ def random_search_runner(
 
             if i % save_freq == 0:
                 if path_save_dir is not None:
-                    df_results.to_csv(path_save_dir / file_name, index=False)
+                    df_results.to_csv(path_save_dir / file_name_results, index=False)
                 else:
-                    df_results.to_csv(file_name, index=False)
-                    
+                    df_results.to_csv(file_name_results, index=False)
+
         # except Exception as e and log the exception
         except Exception as e:
             if debug:
@@ -315,18 +318,50 @@ def random_search_runner(
                 logging.exception(f"##### Exception in random_search_runner:\n{e}\n\n")
             pass
 
+def set_directories(args):
 
-def main():
+    if args.proj_dir:
+        proj_dir = Path(args.proj_dir)
+    else:
+        proj_dir = Path().cwd()
 
-    root_path = Path().cwd()
-    print("root_path: ", root_path)
-    path_data_folder = Path().cwd() / "data"
-    print(path_data_folder)
+    if args.path_data_dir:
+        path_data_dir = Path(args.path_data_dir)
+    else:
+        path_data_dir = proj_dir / "data"
 
-    folder_raw_data_milling = path_data_folder / "raw/milling"
-    folder_interim_data_milling = path_data_folder / "interim/milling"
-    folder_processed_data_milling = path_data_folder / "processed/milling"
-    folder_models = root_path / "models"
+    if args.save_dir_name:
+        save_dir_name = args.save_dir_name
+    else:
+        save_dir_name = "interim_results"
+
+    # check if "scratch" path exists in the home directory
+    # if it does, assume we are on HPC
+    
+    scratch_path = Path.home() / "scratch"
+    if scratch_path.exists():
+        print("Assume on HPC")
+
+        path_save_dir = scratch_path / "feat_store" / args.save_dir_name
+        Path(path_save_dir).mkdir(parents=True, exist_ok=True)
+
+    else:
+        print("Assume on local compute")
+        path_save_dir = proj_dir / "models" / save_dir_name
+        Path(path_save_dir / "setup_files").mkdir(parents=True, exist_ok=True)
+
+    return proj_dir, path_data_dir, path_save_dir
+
+
+def main(args):
+
+    # set directories
+    proj_dir, path_data_dir, path_save_dir = set_directories(args)
+
+    folder_raw_data_milling = path_data_dir / "raw/milling"
+    folder_interim_data_milling = path_data_dir / "interim/milling"
+    folder_processed_data_milling = path_data_dir / "processed/milling"
+    folder_models = proj_dir / "models"
 
     RAND_SEARCH_ITER = 2
 
@@ -351,7 +386,7 @@ def main():
     # (not including the y-label column)
     META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
 
-    LOG_FILENAME = folder_models / "logging_example.out"
+    LOG_FILENAME = path_save_dir / "logging_example.out"
     logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 
     random_search_runner(
@@ -359,7 +394,8 @@ def main():
         RAND_SEARCH_ITER,
         META_LABEL_COLS,
         STRATIFICATION_GROUPING_COL,
-        path_save_dir=root_path / "models",
+        proj_dir,
+        path_save_dir,
         y_label_col="y",
         save_freq=1,
         debug=True,
@@ -367,4 +403,40 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(description="Build data sets for analysis")
+
+    parser.add_argument(
+        "--n_cores",
+        type=int,
+        default=1,
+        help="Number of cores to use for multiprocessing",
+    )
+
+    parser.add_argument(
+        "-p",
+        "--proj_dir",
+        dest="proj_dir",
+        type=str,
+        help="Location of project folder",
+    )
+
+    parser.add_argument(
+        "--path_data_dir",
+        dest="path_data_dir",
+        type=str,
+        help="Location of the data folder, containing the raw, interim, and processed folders",
+    )
+
+    parser.add_argument(
+        "--save_dir_name",
+        default="results",
+        type=str,
+        help="Name of the save directory. Used to store the results of the random search",
+    )
+
+
+
+    args = parser.parse_args()
+
+    main(args)
