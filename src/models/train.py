@@ -266,18 +266,22 @@ def random_search_runner(
     for i in range(rand_search_iter):
         # set random sample seed
         sample_seed = random.randint(0, 2 ** 25)
-        sample_seed = 12
+        # sample_seed = 12
 
         if i == 0:
-            now = datetime.now()
-            now_str = now.strftime("%Y-%m-%d-%H%M-%S")
-            file_name_results = f"{now_str}_results_{sample_seed}.csv"
+            # now = datetime.now()
+            # now_str = now.strftime("%Y-%m-%d-%H%M-%S") # don't actually need this...
+            file_name_results = f"results_{sample_seed}.csv"
 
-            # copy the random_search_setup.py file to path_save_dir using shutil
-            shutil.copy(
-                proj_dir / "src/models/random_search_setup.py",
-                path_save_dir / "setup_files" / f"{now_str}_random_search_setup.py",
-            )
+            # copy the random_search_setup.py file to path_save_dir using shutil if it doesn't exist
+
+            if (path_save_dir / "setup_files" / "random_search_setup.py").exists():
+                pass
+            else:
+                shutil.copy(
+                    proj_dir / "src/models/random_search_setup.py",
+                    path_save_dir / "setup_files" / "random_search_setup.py",
+                )
 
         try:
 

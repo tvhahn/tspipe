@@ -5,6 +5,7 @@
 #################################################################################
 
 PROJECT_DIR := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+NOW_TIME := $(shell date +"%Y-%m-%d-%H%M-%S")
 BUCKET = [OPTIONAL] your-bucket-for-syncing-data (do not include 's3://')
 PROFILE = default
 PROJECT_NAME = feat-store
@@ -67,9 +68,9 @@ endif
 
 train: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/train.py --save_dir_name interim_results
+	$(PYTHON_INTERPRETER) src/models/train.py --save_dir_name interim_results_$(NOW_TIME)
 else # assume on HPC
-	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
+	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
 
 ## Delete all compiled Python files
