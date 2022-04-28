@@ -2,10 +2,11 @@
 module load python/3.8
 virtualenv ~/featstore
 source ~/featstore/bin/activate
-pip install --no-index --upgrade pip
+pip install --upgrade pip
+pip install wheel
+pip install pyphm
 pip install --no-index pandas scipy scikit_learn matplotlib seaborn
 pip install --no-index jupyterlab click
-pip install pyphm
 pip install statsmodels==0.12.1
 pip install tsfresh
 pip install -e .
