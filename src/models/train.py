@@ -307,7 +307,7 @@ def random_search_runner(
                 logging.exception(f"##### Exception in random_search_runner:\n{e}\n\n")
             pass
 
-def set_directories():
+def set_directories(args):
 
     if args.proj_dir:
         proj_dir = Path(args.proj_dir)
@@ -333,14 +333,16 @@ def set_directories():
     else:
         print("Assume on local compute")
         path_save_dir = proj_dir / "models" / args.save_dir_name
+        print("path_save_dir:", path_save_dir)
+        Path(path_save_dir).mkdir(parents=True, exist_ok=True)
 
     return proj_dir, path_data_dir, path_save_dir
 
 
-def main():
+def main(args):
 
     # set directories
-    proj_dir, path_data_dir, path_save_dir = set_directories()
+    proj_dir, path_data_dir, path_save_dir = set_directories(args)
 
     folder_raw_data_milling = path_data_dir / "raw/milling"
     folder_interim_data_milling = path_data_dir / "interim/milling"
@@ -413,7 +415,6 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--save_dir_name",
-        dest="save_dir_name",
         default="results",
         type=str,
         help="Name of the save directory. Used to store the results of the random search",
@@ -423,4 +424,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main()
+    main(args)
