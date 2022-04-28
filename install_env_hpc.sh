@@ -5,6 +5,7 @@ source ~/featstore/bin/activate
 pip install --no-index --upgrade pip
 pip install --no-index pandas scipy scikit_learn matplotlib seaborn
 pip install --no-index jupyterlab click
+pip install pyphm
 pip install statsmodels==0.12.1
 pip install tsfresh
 pip install -e .

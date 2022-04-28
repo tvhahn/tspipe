@@ -21,13 +21,13 @@ endif
 # COMMANDS                                                                      #
 #################################################################################
 
-create_environment: test_environment
+create_environment:
 ifeq (True,$(HAS_CONDA)) # assume on local
 	@echo ">>> Detected conda. Assume local computer. Installing packages from yml."
 	bash install_conda_local.sh
 else # assume on HPC
 	@echo ">>> No Conda detected. Assume on HPC."
-	bash hpc_install_env.sh
+	bash install_env_hpc.sh
 	@echo ">>> venv created. Activate with source ~/featstore/bin/activate"
 endif
 
