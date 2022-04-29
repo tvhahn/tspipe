@@ -35,9 +35,9 @@ endif
 ## Download data
 download:
 ifeq (True,$(HAS_CONDA)) # assume on local
-	bash src/dataprep/download_data_local.sh $(PROJECT_DIR)
+	python src/dataprep/download_data.py --path_data_folder $(PROJECT_DIR)/data/raw
 else # assume on HPC
-	bash src/dataprep/download_data_hpc.sh $(PROJECT_DIR)
+	python src/dataprep/download_data.py --path_data_folder ~/scratch/feat-store/data/raw
 endif
 
 ## Make Dataset
