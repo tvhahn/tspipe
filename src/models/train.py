@@ -266,7 +266,7 @@ def random_search_runner(
     for i in range(rand_search_iter):
         # set random sample seed
         sample_seed = random.randint(0, 2 ** 25)
-        # sample_seed = 12
+        # sample_seed = 13
 
         if i == 0:
             # now = datetime.now()
@@ -367,7 +367,7 @@ def main(args):
     folder_processed_data_milling = path_data_dir / "processed/milling"
     folder_models = proj_dir / "models"
 
-    RAND_SEARCH_ITER = 2
+    RAND_SEARCH_ITER = 6
 
     # set a seed for the parameter sampler
     # SAMPLER_SEED = random.randint(0, 2 ** 16)
