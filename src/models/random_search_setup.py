@@ -41,7 +41,7 @@ general_params = {
         # "rf",
         # "xgb",
         # "knn",
-        "lr",
+        # "lr",
         # "sgd",
         # "ridge",
         # "svm",

@@ -262,7 +262,7 @@ def random_search_runner(
     debug=False,
 ):
 
-    df_results = pd.DataFrame()
+    results_list = []
     for i in range(rand_search_iter):
         # set random sample seed
         sample_seed = random.randint(0, 2 ** 25)
@@ -274,7 +274,6 @@ def random_search_runner(
             file_name_results = f"results_{sample_seed}.csv"
 
             # copy the random_search_setup.py file to path_save_dir using shutil if it doesn't exist
-
             if (path_save_dir / "setup_files" / "random_search_setup.py").exists():
                 pass
             else:
@@ -306,9 +305,13 @@ def random_search_runner(
             # model metric results
             df_m = get_model_metrics_df(model_metrics_dict)
 
-            df_results = df_results.append(pd.concat([df_t, df_m, df_c], axis=1))
+            results_list.append(
+                pd.concat([df_t, df_m, df_c], axis=1)
+            )  
 
             if i % save_freq == 0:
+                df_results = pd.concat(results_list)
+
                 if path_save_dir is not None:
                     df_results.to_csv(path_save_dir / file_name_results, index=False)
                 else:
@@ -367,7 +370,7 @@ def main(args):
     folder_processed_data_milling = path_data_dir / "processed/milling"
     folder_models = proj_dir / "models"
 
-    RAND_SEARCH_ITER = 2
+    RAND_SEARCH_ITER = args.rand_search_iter
 
     # set a seed for the parameter sampler
     # SAMPLER_SEED = random.randint(0, 2 ** 16)
@@ -416,6 +419,14 @@ if __name__ == "__main__":
         default=1,
         help="Number of cores to use for multiprocessing",
     )
+
+    parser.add_argument(
+        "--rand_search_iter",
+        type=int,
+        default=2,
+        help="Number number of randem search iterations",
+    )
+
 
     parser.add_argument(
         "-p",
