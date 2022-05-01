@@ -44,6 +44,9 @@ def main(path_data_folder):
 
     df_feat = milling_features(df, n_chunks, chunk_index, feat_dict)
 
+    assert "tool_class" in df_feat.columns, "tool_class column does not exist"
+    assert "cut_id" in df_feat.columns, "tool_class column does not exist"
+
     scratch_path = Path.home() / "scratch"
     if scratch_path.exists():
         # save the dataframe oh HPC
@@ -54,11 +57,10 @@ def main(path_data_folder):
     else:
         # save the dataframe on local machine
         df_feat.to_csv(
-            folder_processed_data_milling / "milling.csv", index=False,
+            folder_processed_data_milling / "milling_features.csv.gz", index=False, compression="gzip"
         )
 
-    # assert that tool_class column exists
-    assert "tool_class" in df_feat.columns, "tool_class column does not exist"
+
 
 
 if __name__ == "__main__":

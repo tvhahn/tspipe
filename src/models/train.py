@@ -374,7 +374,7 @@ def main(args):
 
     # load feature dataframe
     df = pd.read_csv(
-        folder_processed_data_milling / "milling.csv.gz", compression="gzip"
+        folder_processed_data_milling / "milling_features.csv.gz", compression="gzip"
     )
 
     # add y label
