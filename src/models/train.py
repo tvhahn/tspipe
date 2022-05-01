@@ -367,7 +367,7 @@ def main(args):
     folder_processed_data_milling = path_data_dir / "processed/milling"
     folder_models = proj_dir / "models"
 
-    RAND_SEARCH_ITER = 6
+    RAND_SEARCH_ITER = 2
 
     # set a seed for the parameter sampler
     # SAMPLER_SEED = random.randint(0, 2 ** 16)
