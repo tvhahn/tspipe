@@ -346,8 +346,8 @@ def set_directories(args):
     if scratch_path.exists():
         print("Assume on HPC")
 
-        path_save_dir = scratch_path / "feat_store" / args.save_dir_name
-        Path(path_save_dir).mkdir(parents=True, exist_ok=True)
+        path_save_dir = scratch_path / "feat-store/models" / args.save_dir_name
+        Path(path_save_dir / "setup_files").mkdir(parents=True, exist_ok=True)
 
     else:
         print("Assume on local compute")
@@ -374,7 +374,7 @@ def main(args):
 
     # load feature dataframe
     df = pd.read_csv(
-        folder_processed_data_milling / "milling.csv",
+        folder_processed_data_milling / "milling.csv.gz", compression="gzip"
     )
 
     # add y label

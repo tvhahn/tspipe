@@ -3,7 +3,7 @@ module load python/3.8
 virtualenv ~/featstore
 source ~/featstore/bin/activate
 pip install --no-index --upgrade pip
-pip install --no-index pandas scipy scikit_learn matplotlib seaborn jupyterlab
+pip install --no-index pandas scipy scikit_learn matplotlib seaborn jupyterlab imbalanced_learn xgboost
 pip install numba==0.53.1 tsfresh pyphm
 pip install -e .
 
