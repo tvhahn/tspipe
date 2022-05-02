@@ -63,6 +63,8 @@ def kfold_cv(
     stratification_grouping_col=None,
     y_label_col="y",
     n_splits=5,
+    feat_selection=False,
+    feat_col_list=None,
 ):
 
     n_thresholds_list = []
@@ -92,6 +94,7 @@ def kfold_cv(
         for i, (train_index, test_index) in enumerate(skfolds.split(
             df_strat[[stratification_grouping_col]], df_strat[["y"]]
         )):
+            print(i)
             train_strat_vals = df_strat.iloc[train_index][
                 stratification_grouping_col
             ].values
@@ -99,16 +102,50 @@ def kfold_cv(
                 stratification_grouping_col
             ].values
 
+            
+
             x_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            x_train_index = x_train.index
             y_train = x_train[y_label_col].values.astype(int)
-            x_train = x_train.drop(meta_label_cols + [y_label_col], axis=1).values
+            x_train = x_train.drop(meta_label_cols + [y_label_col], axis=1)
+            x_train_cols = x_train.columns
+            x_train = x_train.values
+            print("x_train type: ", type(x_train))
 
             x_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            # x_test_cols = x_test.columns
+            # x_test_index = x_test.index
             y_test = x_test[y_label_col].values.astype(int)
             x_test = x_test.drop(meta_label_cols + [y_label_col], axis=1).values
 
             # scale the data
-            scale_data(x_train, x_test, scaler_method)
+            x_train, x_test = scale_data(x_train, x_test, scaler_method)
+
+            print("x_train type: ", type(x_train))
+
+
+            # do feature selection if specified
+            if feat_selection and i==0 and feat_col_list is None:
+                from tsfresh import select_features # import in loop because it is a heavy package
+                print("Performing feature selection")
+                x_train = select_features(
+                    pd.DataFrame(x_train, index=x_train_index, columns=x_train_cols),
+                    y_train,
+                    n_jobs=5,
+                    chunksize=10)
+                
+                feat_col_list = list(x_train.columns)
+                print("Selected features:", feat_col_list)
+                print("Number of features:", len(feat_col_list))
+            elif feat_selection and feat_col_list is not None:
+                # use the same columns for all folds
+                pass
+                # x_train = x_train[feat_col_list]
+                # x_test = x_test[feat_col_list]
+            else:
+                # no feature selection
+                pass
+
 
             # under-over-sample the data
             x_train, y_train = under_over_sampler(
@@ -209,7 +246,7 @@ def kfold_cv(
 
 
 def train_single_model(
-    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y"
+    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -242,6 +279,8 @@ def train_single_model(
         meta_label_cols,
         stratification_grouping_col,
         y_label_col,
+        n_splits=5,
+        feat_selection=feat_selection,
     )
 
     # added additional parameters to the training setup dictionary
@@ -257,6 +296,7 @@ def random_search_runner(
     stratification_grouping_col,
     proj_dir,
     path_save_dir,
+    feat_selection,
     y_label_col="y",
     save_freq=1,
     debug=False,
@@ -294,6 +334,7 @@ def random_search_runner(
                 meta_label_cols,
                 stratification_grouping_col,
                 y_label_col,
+                feat_selection,
             )
 
             # train setup params
@@ -403,6 +444,7 @@ def main(args):
         STRATIFICATION_GROUPING_COL,
         proj_dir,
         path_save_dir,
+        feat_selection=args.feat_selection,
         y_label_col="y",
         save_freq=1,
         debug=True,
@@ -448,6 +490,13 @@ if __name__ == "__main__":
         default="results",
         type=str,
         help="Name of the save directory. Used to store the results of the random search",
+    )
+
+    parser.add_argument(
+        "--feat_selection",
+        default=False,
+        action="store_true",
+        help="Conduct feature selection on first iteration",
     )
 
 
