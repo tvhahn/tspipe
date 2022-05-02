@@ -89,9 +89,9 @@ def kfold_cv(
         # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
         clone_clf = clone(clf)
 
-        for train_index, test_index in skfolds.split(
+        for i, (train_index, test_index) in enumerate(skfolds.split(
             df_strat[[stratification_grouping_col]], df_strat[["y"]]
-        ):
+        )):
             train_strat_vals = df_strat.iloc[train_index][
                 stratification_grouping_col
             ].values
