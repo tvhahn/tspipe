@@ -73,6 +73,10 @@ else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
 
+train_dummy: requirements
+	bash src/models/train_hpc_dummy.sh $(PROJECT_DIR) $(NOW_TIME)
+
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

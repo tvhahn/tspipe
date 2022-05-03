@@ -89,12 +89,14 @@ def kfold_cv(
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         # use clone to do a deep copy of model without copying attached data
         # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
-        clone_clf = clone(clf)
+        
 
         for i, (train_index, test_index) in enumerate(skfolds.split(
             df_strat[[stratification_grouping_col]], df_strat[["y"]]
         )):
             print(i)
+
+            clone_clf = clone(clf)
             train_strat_vals = df_strat.iloc[train_index][
                 stratification_grouping_col
             ].values
@@ -103,25 +105,31 @@ def kfold_cv(
             ].values
 
             
-
+            # train
             x_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
             x_train_index = x_train.index
+
             y_train = x_train[y_label_col].values.astype(int)
             x_train = x_train.drop(meta_label_cols + [y_label_col], axis=1)
             x_train_cols = x_train.columns
             x_train = x_train.values
-            print("x_train type: ", type(x_train))
+            # print("x_train type: ", type(x_train))
 
+            # test
             x_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
-            # x_test_cols = x_test.columns
-            # x_test_index = x_test.index
+            x_test_index = x_test.index
+
             y_test = x_test[y_label_col].values.astype(int)
-            x_test = x_test.drop(meta_label_cols + [y_label_col], axis=1).values
+            x_test = x_test.drop(meta_label_cols + [y_label_col], axis=1)
+            x_test_cols = x_test.columns
+            x_test = x_test.values
+            
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
             print("x_train type: ", type(x_train))
+            print("x_test type: ", type(x_test))
 
 
             # do feature selection if specified
@@ -135,13 +143,15 @@ def kfold_cv(
                     chunksize=10)
                 
                 feat_col_list = list(x_train.columns)
+                x_train = x_train.values
                 print("Selected features:", feat_col_list)
                 print("Number of features:", len(feat_col_list))
+                x_test = pd.DataFrame(x_test, index=x_test_index, columns=x_test_cols)[feat_col_list].values
             elif feat_selection and feat_col_list is not None:
                 # use the same columns for all folds
-                pass
-                # x_train = x_train[feat_col_list]
-                # x_test = x_test[feat_col_list]
+                # pass
+                x_train = pd.DataFrame(x_train, index=x_train_index, columns=x_train_cols)[feat_col_list].values
+                x_test = pd.DataFrame(x_test, index=x_test_index, columns=x_test_cols)[feat_col_list].values
             else:
                 # no feature selection
                 pass
@@ -153,11 +163,15 @@ def kfold_cv(
             )
 
             # train model
+            print("x_train shape:", x_train.shape)
             clone_clf.fit(x_train, y_train)
 
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
-            ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
+            ind_score_dict = calculate_scores(
+                clone_clf, 
+                x_test, 
+                y_test)
 
             n_thresholds_list.append(ind_score_dict["n_thresholds"])
             precisions_list.append(ind_score_dict["precisions"])
