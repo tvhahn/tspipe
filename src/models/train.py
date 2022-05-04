@@ -324,6 +324,7 @@ def random_search_runner(
     proj_dir,
     path_save_dir,
     feat_selection,
+    dataset_name=None,
     y_label_col="y",
     save_freq=1,
     debug=False,
@@ -376,6 +377,7 @@ def random_search_runner(
                 now_str = now.strftime("%Y-%m-%d-%H%M-%S")
 
             df_t['date_time'] = now_str
+            df_t['dataset'] = dataset_name
 
             # classifier params
             df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
@@ -483,6 +485,7 @@ def main(args):
         proj_dir,
         path_save_dir,
         feat_selection=args.feat_selection,
+        dataset_name="milling",
         y_label_col="y",
         save_freq=1,
         debug=True,
