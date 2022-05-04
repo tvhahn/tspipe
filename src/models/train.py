@@ -459,6 +459,7 @@ def main(args):
     # identify if there is another column you want to
     # stratify on, besides the y label
     STRATIFICATION_GROUPING_COL = "cut_no"
+    # STRATIFICATION_GROUPING_COL = None
 
     # list of the columns that are not features columns
     # (not including the y-label column)
