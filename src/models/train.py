@@ -92,7 +92,7 @@ def kfold_cv(
         
 
         for i, (train_index, test_index) in enumerate(skfolds.split(
-            df_strat[[stratification_grouping_col]], df_strat[["y"]]
+            df_strat[[stratification_grouping_col]], df_strat[[y_label_col]]
         )):
             print(i)
 
@@ -100,61 +100,49 @@ def kfold_cv(
             train_strat_vals = df_strat.iloc[train_index][
                 stratification_grouping_col
             ].values
+
             test_strat_vals = df_strat.iloc[test_index][
                 stratification_grouping_col
             ].values
 
-            
             # train
-            x_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
-            x_train_index = x_train.index
-
-            y_train = x_train[y_label_col].values.astype(int)
-            x_train = x_train.drop(meta_label_cols + [y_label_col], axis=1)
-            x_train_cols = x_train.columns
-            x_train = x_train.values
-            # print("x_train type: ", type(x_train))
+            df_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            y_train = df_train[y_label_col].values.astype(int)
+            df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
+            x_train_cols = df_train.columns
+            x_train = df_train.values
 
             # test
-            x_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
-            x_test_index = x_test.index
-
-            y_test = x_test[y_label_col].values.astype(int)
-            x_test = x_test.drop(meta_label_cols + [y_label_col], axis=1)
-            x_test_cols = x_test.columns
-            x_test = x_test.values
+            df_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            y_test = df_test[y_label_col].values.astype(int)            
+            df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
+            x_test_cols = df_test.columns
+            x_test = df_test.values
             
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-            print("x_train type: ", type(x_train))
-            print("x_test type: ", type(x_test))
-
-
             # do feature selection if specified
             if feat_selection and i==0 and feat_col_list is None:
                 from tsfresh import select_features # import in loop because it is a heavy package
                 print("Performing feature selection")
+
                 x_train = select_features(
-                    pd.DataFrame(x_train, index=x_train_index, columns=x_train_cols),
+                    pd.DataFrame(x_train, columns=x_train_cols),
                     y_train,
                     n_jobs=5,
-                    chunksize=10)
+                    chunksize=10, ml_task="classification", multiclass=False)
                 
                 feat_col_list = list(x_train.columns)
+
                 x_train = x_train.values
-                print("Selected features:", feat_col_list)
-                print("Number of features:", len(feat_col_list))
-                x_test = pd.DataFrame(x_test, index=x_test_index, columns=x_test_cols)[feat_col_list].values
+                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
             elif feat_selection and feat_col_list is not None:
-                # use the same columns for all folds
-                # pass
-                x_train = pd.DataFrame(x_train, index=x_train_index, columns=x_train_cols)[feat_col_list].values
-                x_test = pd.DataFrame(x_test, index=x_test_index, columns=x_test_cols)[feat_col_list].values
+                x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
+                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
             else:
-                # no feature selection
-                pass
+                pass  # no feature selection
 
 
             # under-over-sample the data
@@ -188,22 +176,46 @@ def kfold_cv(
     # perform stratified k-fold cross if only using the y-label for stratification
     else:
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
-        # use clone to do a deep copy of model without copying attached data
-        # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
-        clone_clf = clone(clf)
 
-        for train_index, test_index in skfolds.split(df, df[["y"]]):
+        for i, (train_index, test_index) in enumerate(skfolds.split(df, df[[y_label_col]])):
+            clone_clf = clone(clf)
+
             df_train = df.iloc[train_index]
             df_test = df.iloc[test_index]
 
             y_train = df_train[y_label_col].values.astype(int)
-            x_train = df_train.drop(meta_label_cols + [y_label_col], axis=1).values
+            df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
+            x_train_cols = df_train.columns
+            x_train = df_train.values
 
             y_test = df_test[y_label_col].values.astype(int)
-            x_test = df_test.drop(meta_label_cols + [y_label_col], axis=1).values
+            df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
+            x_test_cols = df_test.columns
+            x_test = df_test.values
 
             # scale the data
             scale_data(x_train, x_test, scaler_method)
+
+                        # do feature selection if specified
+            if feat_selection and i==0 and feat_col_list is None:
+                from tsfresh import select_features # import in loop because it is a heavy package
+                print("Performing feature selection")
+
+                x_train = select_features(
+                    pd.DataFrame(x_train, columns=x_train_cols),
+                    y_train,
+                    n_jobs=5,
+                    chunksize=10, ml_task="classification", multiclass=False)
+                
+                feat_col_list = list(x_train.columns)
+
+                x_train = x_train.values
+                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+            elif feat_selection and feat_col_list is not None:
+                x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
+                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+            else:
+                pass  # no feature selection
 
             # under-over-sample the data
             x_train, y_train = under_over_sampler(
@@ -256,11 +268,11 @@ def kfold_cv(
         "accuracy_array": accuracy_array,
     }
 
-    return trained_result_dict
+    return trained_result_dict, feat_col_list
 
 
 def train_single_model(
-    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False,
+    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False, feat_col_list=None
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -284,7 +296,7 @@ def train_single_model(
     )
     print("\n", params_dict_clf_named)
 
-    model_metrics_dict = kfold_cv(
+    model_metrics_dict, feat_col_list = kfold_cv(
         df,
         clf,
         uo_method,
@@ -295,12 +307,13 @@ def train_single_model(
         y_label_col,
         n_splits=5,
         feat_selection=feat_selection,
+        feat_col_list=feat_col_list
     )
 
     # added additional parameters to the training setup dictionary
     params_dict_train_setup["sampler_seed"] = sampler_seed
 
-    return model_metrics_dict, params_dict_clf_named, params_dict_train_setup
+    return model_metrics_dict, params_dict_clf_named, params_dict_train_setup, feat_col_list
 
 
 def random_search_runner(
@@ -314,6 +327,7 @@ def random_search_runner(
     y_label_col="y",
     save_freq=1,
     debug=False,
+    feat_col_list=None
 ):
 
     results_list = []
@@ -342,6 +356,7 @@ def random_search_runner(
                 model_metrics_dict,
                 params_dict_clf_named,
                 params_dict_train_setup,
+                feat_col_list
             ) = train_single_model(
                 df,
                 sample_seed,
@@ -349,6 +364,7 @@ def random_search_runner(
                 stratification_grouping_col,
                 y_label_col,
                 feat_selection,
+                feat_col_list
             )
 
             # train setup params
