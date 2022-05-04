@@ -369,6 +369,7 @@ def random_search_runner(
 
             # train setup params
             df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
+            df_t["feat_col_list"] = str(feat_col_list)
 
             # classifier params
             df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
