@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=00:10:00 # 30 min
+#SBATCH --time=00:3:00 # 30 min
 #SBATCH --array=1-10
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
@@ -16,5 +16,5 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 module load python/3.8
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/models/train.py --save_dir_name interim_results_$NOW_TIME --path_data_dir $SCRATCH_DATA_DIR --rand_search_iter 300 --feat_selection
+python $PROJECT_DIR/src/models/train.py --save_dir_name interim_results_milling --date_time $NOW_TIME --path_data_dir $SCRATCH_DATA_DIR --rand_search_iter 300 --feat_selection
 

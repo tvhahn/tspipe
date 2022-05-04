@@ -370,8 +370,8 @@ def random_search_runner(
             df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
             df_t["feat_col_list"] = str(feat_col_list)
 
-            if args.save_dir_name:
-                now_str = str(args.save_dir_name).split("_")[-1]
+            if args.date_time:
+                now_str = str(args.date_time)
             else:
                 now = datetime.now()
                 now_str = now.strftime("%Y-%m-%d-%H%M-%S")
@@ -417,10 +417,8 @@ def set_directories(args):
     else:
         path_data_dir = proj_dir / "data"
 
-    if args.save_dir_name:
-        save_dir_name = args.save_dir_name
-    else:
-        save_dir_name = "interim_results"
+    save_dir_name = args.save_dir_name
+
 
     # check if "scratch" path exists in the home directory
     # if it does, assume we are on HPC
@@ -528,9 +526,22 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--save_dir_name",
-        default="results",
+        default="interim_results",
         type=str,
         help="Name of the save directory. Used to store the results of the random search",
+    )
+
+    parser.add_argument(
+        "--date_time",
+        type=str,
+        help="Date and time that random search was executed.",
+    )
+
+    parser.add_argument(
+        "--dataset",
+        default="milling",
+        type=str,
+        help="Date and time that random search was executed.",
     )
 
     parser.add_argument(
