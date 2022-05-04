@@ -337,8 +337,6 @@ def random_search_runner(
         # sample_seed = 13
 
         if i == 0:
-            # now = datetime.now()
-            # now_str = now.strftime("%Y-%m-%d-%H%M-%S") # don't actually need this...
             file_name_results = f"results_{sample_seed}.csv"
 
             # copy the random_search_setup.py file to path_save_dir using shutil if it doesn't exist
@@ -370,6 +368,14 @@ def random_search_runner(
             # train setup params
             df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
             df_t["feat_col_list"] = str(feat_col_list)
+
+            if args.save_dir_name:
+                now_str = str(args.save_dir_name).split("_")[-1]
+            else:
+                now = datetime.now()
+                now_str = now.strftime("%Y-%m-%d-%H%M-%S")
+
+            df_t['date_time'] = now_str
 
             # classifier params
             df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
