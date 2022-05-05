@@ -213,10 +213,19 @@ def kfold_cv(
                 feat_col_list = list(x_train.columns)
 
                 x_train = x_train.values
+                print("min x_train", np.min(x_train))
+                print("max x_train", np.max(x_train))
                 x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+                print("min x_test", np.min(x_test))
+                print("max x_test", np.max(x_test))
             elif feat_selection and feat_col_list is not None:
                 x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
                 x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+                print("min x_train", np.min(x_train))
+                print("max x_train", np.max(x_train))
+                print("min x_test", np.min(x_test))
+                print("max x_test", np.max(x_test))
+
             else:
                 pass  # no feature selection
 
