@@ -378,6 +378,8 @@ def random_search_runner(
 
             df_t['date_time'] = now_str
             df_t['dataset'] = dataset_name
+            classifier_used = params_dict_train_setup["classifier"]
+            df_t['id'] = f"{sample_seed}_{classifier_used}_{now_str}_{dataset_name}"
 
             # classifier params
             df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
