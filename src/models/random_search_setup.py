@@ -10,16 +10,16 @@ from scipy.stats import randint as sp_randint
 from scipy.stats import uniform
 import numpy as np
 import random
-from src.models.classifiers import (
-    rf_classifier,
-    xgb_classifier,
-    knn_classifier,
-    lr_classifier,
-    sgd_classifier,
-    ridge_classifier,
-    svm_classifier,
-    nb_classifier,
-)
+# from src.models.classifiers import (
+#     rf_classifier,
+#     xgb_classifier,
+#     knn_classifier,
+#     lr_classifier,
+#     sgd_classifier,
+#     ridge_classifier,
+#     svm_classifier,
+#     nb_classifier,
+# )
 
 
 ###############################################################################
