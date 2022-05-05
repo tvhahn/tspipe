@@ -168,13 +168,14 @@ def scale_data(x_train, x_test, scaler_method=None):
         scaler.fit(x_train)
         x_train = scaler.transform(x_train)
         x_test = scaler.transform(x_test)
-    elif scaler_method == "min_max":
+    elif scaler_method == "minmax":
         print("scaling - min/max")
         scaler = MinMaxScaler()
         scaler.fit(x_train)
         x_train = scaler.transform(x_train)
         x_test = scaler.transform(x_test)
     else:
+        print("no scaling")
         pass
     return x_train, x_test
 

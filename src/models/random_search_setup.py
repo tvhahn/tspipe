@@ -44,8 +44,8 @@ general_params = {
         # "lr",
         # "sgd",
         # "ridge",
-        "svm",
-        # "nb",
+        # "svm",
+        "nb",
     ],
 }
 
