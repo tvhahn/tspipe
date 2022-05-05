@@ -163,11 +163,13 @@ def calculate_scores(clf, x_test, y_test,):
 
 def scale_data(x_train, x_test, scaler_method=None):
     if scaler_method == "standard":
+        print("scaling - standard")
         scaler = StandardScaler()
         scaler.fit(x_train)
         x_train = scaler.transform(x_train)
         x_test = scaler.transform(x_test)
     elif scaler_method == "min_max":
+        print("scaling - min/max")
         scaler = MinMaxScaler()
         scaler.fit(x_train)
         x_train = scaler.transform(x_train)

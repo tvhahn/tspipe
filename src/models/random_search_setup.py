@@ -38,14 +38,14 @@ general_params = {
     ],
     "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
     "classifier": [
-        "rf",
-        "xgb",
-        "knn",
-        "lr",
-        "sgd",
-        "ridge",
+        # "rf",
+        # "xgb",
+        # "knn",
+        # "lr",
+        # "sgd",
+        # "ridge",
         "svm",
-        "nb",
+        # "nb",
     ],
 }
 

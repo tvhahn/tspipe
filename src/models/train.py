@@ -121,7 +121,10 @@ def kfold_cv(
             
 
             # scale the data
+            print("np.max(x_train)", np.max(x_train))
+            print("scaler_method", scaler_method)
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
+            print("np.max(x_train)", np.max(x_train))
 
             # do feature selection if specified
             if feat_selection and i==0 and feat_col_list is None:
@@ -194,7 +197,7 @@ def kfold_cv(
             x_test = df_test.values
 
             # scale the data
-            scale_data(x_train, x_test, scaler_method)
+            x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
                         # do feature selection if specified
             if feat_selection and i==0 and feat_col_list is None:
