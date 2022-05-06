@@ -80,6 +80,13 @@ else # assume on HPC
 	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
 endif
 
+filter: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/filter.py
+else # assume on HPC
+	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
+endif
+
 train_dummy: requirements
 	bash src/models/train_hpc_dummy.sh $(PROJECT_DIR) $(NOW_TIME)
 

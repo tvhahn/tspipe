@@ -33,6 +33,9 @@ def plot_pr_roc_curves_kfolds(
     rocauc_array,
     prauc_array,
     percent_anomalies_truth=0.073,
+    path_save_name="model_curves.pdf",
+    save_plot=False,
+    dpi=300,
 ):
     """
     Plot the precision-recall curves and the ROC curves for the different k-folds used in 
@@ -160,4 +163,9 @@ def plot_pr_roc_curves_kfolds(
         ax.yaxis.set_tick_params(labelleft=True, which="major")
         ax.grid(False)
 
-    plt.show()
+    if save_plot:
+        plt.savefig(path_save_name, dpi=dpi, bbox_inches="tight")
+        plt.cla()
+        plt.close()
+    else:
+        plt.show()

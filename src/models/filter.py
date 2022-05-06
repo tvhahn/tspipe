@@ -3,7 +3,16 @@ from pathlib import Path
 import argparse
 import logging
 import os
-from multiprocessing import Pool
+import matplotlib
+
+# run matplotlib without display
+# https://stackoverflow.com/a/4706614/9214620
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from src.models.train import train_single_model
+from src.models.utils import milling_add_y_label_anomaly, get_model_metrics_df
+from ast import literal_eval
+from src.visualization.visualize import plot_pr_roc_curves_kfolds
 
 
 def set_directories(args):
@@ -13,24 +22,24 @@ def set_directories(args):
     else:
         proj_dir = Path().cwd()
 
-    interim_dir_name = args.interim_dir_name
+    if args.path_data_dir:
+        path_data_dir = Path(args.path_data_dir)
+    else:
+        path_data_dir = proj_dir / "data"
+
     final_dir_name = args.final_dir_name
     
     scratch_path = Path.home() / "scratch"
     if scratch_path.exists():
         print("Assume on HPC")
 
-        path_interim_dir = scratch_path / "feat-store/models" / interim_dir_name
         path_final_dir = scratch_path / "feat-store/models" / final_dir_name
-        Path(path_final_dir).mkdir(parents=True, exist_ok=True)
 
     else:
         print("Assume on local compute")
-        path_interim_dir = proj_dir / "models" / interim_dir_name
         path_final_dir = proj_dir / "models" / final_dir_name
-        Path(path_final_dir).mkdir(parents=True, exist_ok=True)
 
-    return proj_dir, path_interim_dir, path_final_dir
+    return proj_dir, path_data_dir, path_final_dir
 
 
 def filter_results_df(df, keep_top_n=None):
@@ -61,41 +70,142 @@ def filter_results_df(df, keep_top_n=None):
     ].sort_values(by=["prauc_avg", "rocauc_avg", "accuracy_avg"], ascending=False)
 
     if keep_top_n is not None:
-        return dfr[:keep_top_n]
+        return dfr[:keep_top_n].reset_index(drop=True)
     else:
-        return dfr
+        return dfr.reset_index(drop=True)
 
 
-def main(results_dir_path):
+def rebuild_params_clf(df, row_idx):
+    classifier_string = df.iloc[row_idx]['classifier']
+    if classifier_string == "rf":
+        prefix = 'RandomForestClassifier'
 
-    # get a list of file names
-    files = os.listdir(results_dir_path)
-    file_list = [
-        results_dir_path / filename for filename in files if filename.endswith(".csv")
-    ]
+    elif classifier_string == "xgb":
+        prefix = 'XGB'
 
-    # set up your pool
-    with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
+    elif classifier_string == "knn":
+        prefix = 'KNeighborsClassifier'
 
-        # have your pool map the file names to dataframes
-        df = pool.map(read_csv, file_list)
+    elif classifier_string == "lr":
+        prefix = 'LogisticRegression'
 
-        # reduce the list of dataframes to a single dataframe
-        combined_df = pd.concat(df, ignore_index=True)
+    elif classifier_string == "sgd":
+        prefix = 'SGDClassifier'
 
-        return combined_df
+    elif classifier_string == "ridge":
+        prefix = 'RidgeClassifier'
+
+    elif classifier_string == "svm":
+        prefix = 'SVC'
+
+    elif classifier_string == "nb":
+        prefix = 'GaussianNB'
+
+    params_clf = {c.replace(f"{prefix}_",""): df.iloc[row_idx][c]  for c in df.iloc[row_idx].dropna().index if c.startswith(prefix)}
+
+    # convert any whole numbers in clf_cols to int
+    for k in params_clf.keys():
+        if isinstance(params_clf[k], float) and params_clf[k].is_integer():
+            params_clf[k] = int(params_clf[k])
+
+    return {k: [params_clf[k]] for k in params_clf.keys()} # put each value in a list
+
+def rebuild_general_params(df, row_idx, general_param_keys=None):
+    if general_param_keys is None:
+        general_param_keys = ['scaler_method', 'uo_method', 'imbalance_ratio', 'classifier']
+    return {k: [df.iloc[row_idx][k]] for k in general_param_keys}   
+
+
+def main(args):
+
+    proj_dir, path_data_dir, path_final_dir = set_directories(args)
+
+    df = pd.read_csv(path_final_dir / args.compiled_csv_name,)
+    df = filter_results_df(df)
+
+    if args.keep_top_n:
+        df = df[:args.keep_top_n]
+    
+    df.to_csv(path_final_dir / args.filtered_csv_name, index=False)
+
+    # save a certain number of PR-AUC and ROC-AUC curves
+    if args.dataset == "milling" and args.save_n_figures > 0:
+        assert df.iloc[0]["dataset"] == "milling", "dataset in results csv is not the milling dataset"
+
+        folder_processed_data_milling = path_data_dir / "processed/milling"
+
+        # load feature dataframe
+        df_feat = pd.read_csv(
+            folder_processed_data_milling / "milling_features.csv.gz", compression="gzip"
+        )  
+
+        df_feat = milling_add_y_label_anomaly(df_feat)
+
+        path_model_curves = path_final_dir / "model_curves"
+        Path(path_model_curves).mkdir(parents=True, exist_ok=True)
+        
+        for row_idx in range(args.save_n_figures):
+
+            params_clf = rebuild_params_clf(df, row_idx)
+            general_params = rebuild_general_params(df, row_idx)
+
+            meta_label_cols = ["cut_id", "cut_no", "case", "tool_class"]
+            stratification_grouping_col = "cut_no"
+            y_label_col = "y"
+            feat_selection = True
+            feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
+            sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
+            id = df.iloc[row_idx]["id"]
+
+            (
+                model_metrics_dict,
+                params_dict_clf_named,
+                params_dict_train_setup,
+                feat_col_list
+            ) = train_single_model(
+                df_feat,
+                sampler_seed,
+                meta_label_cols,
+                stratification_grouping_col,
+                y_label_col,
+                feat_selection,
+                feat_col_list,
+                general_params=general_params,
+                params_clf=params_clf,
+            )
+
+            plot_pr_roc_curves_kfolds(
+                model_metrics_dict["precisions_array"],
+                model_metrics_dict["recalls_array"],
+                model_metrics_dict["fpr_array"],
+                model_metrics_dict["tpr_array"],
+                model_metrics_dict["rocauc_array"],
+                model_metrics_dict["prauc_array"],
+                percent_anomalies_truth=0.073,
+                path_save_name=path_model_curves / f"curve_{id}.pdf",
+                save_plot=True,
+                dpi=300,
+            )
+
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Build data sets for analysis")
 
-    # parser.add_argument(
-    #     "--n_cores",
-    #     type=int,
-    #     default=1,
-    #     help="Number of cores to use for multiprocessing",
-    # )
+
+    parser.add_argument(
+        "--keep_top_n",
+        type=int,
+        help="Keep the top N models in the filtered results CSV.",
+    )
+
+    parser.add_argument(
+        "--save_n_figures",
+        type=int,
+        default=0,
+        help="Keep the top N models in the filtered results CSV.",
+    )
 
 
     parser.add_argument(
@@ -104,12 +214,33 @@ if __name__ == "__main__":
         help="Folder name containing compiled csv.",
     )
 
+    parser.add_argument(
+        "--path_data_dir",
+        dest="path_data_dir",
+        type=str,
+        help="Location of the data folder, containing the raw, interim, and processed folders",
+    )
+    
+    parser.add_argument(
+        "--dataset",
+        default="milling",
+        type=str,
+        help="Dataset used in training",
+    )
+
 
     parser.add_argument(
         "--compiled_csv_name",
         type=str,
         default="compiled_results.csv",
-        help="The combined csv name.",
+        help="The compiled csv name that has not yet been filtered.",
+    )
+
+    parser.add_argument(
+        "--filtered_csv_name",
+        type=str,
+        default="compiled_results_filtered.csv",
+        help="The name of the compiled and filtered csv.",
     )
 
 
@@ -130,8 +261,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    proj_dir, path_interim_dir, path_final_dir = set_directories(args)
-
-    df = main(path_interim_dir)
-
-    df.to_csv(path_final_dir / args.compiled_csv_name, index=False)
+    main(args)
