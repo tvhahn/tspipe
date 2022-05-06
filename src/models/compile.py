@@ -75,12 +75,14 @@ if __name__ == "__main__":
         help="Folder name containing compiled csv.",
     )
 
+
     parser.add_argument(
         "--compiled_csv_name",
         type=str,
         default="compiled_results.csv",
         help="The combined csv name.",
     )
+
 
     parser.add_argument(
         "-p",

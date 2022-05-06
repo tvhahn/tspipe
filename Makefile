@@ -73,6 +73,13 @@ else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
 
+compile: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/compile.py -p $(PROJECT_DIR) --n_cores 3 --interim_dir_name interim_results_milling --final_dir_name final_results_milling
+else # assume on HPC
+	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
+endif
+
 train_dummy: requirements
 	bash src/models/train_hpc_dummy.sh $(PROJECT_DIR) $(NOW_TIME)
 
