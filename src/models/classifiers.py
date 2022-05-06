@@ -157,7 +157,10 @@ def svm_classifier(sampler_seed, params):
 
     # add any constrains to the parameter dict
     if param_dict_raw["kernel"] != "poly":
-        del param_dict_raw["degree"]
+        try:
+            del param_dict_raw["degree"]
+        except:
+            pass
 
     clf = SVC(random_state=sampler_seed, **param_dict_raw)
 
