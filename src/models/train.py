@@ -291,7 +291,7 @@ def kfold_cv(
 
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
-    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False, feat_col_list=None
+    df, sampler_seed, general_params, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False, feat_col_list=None, params_clf=None
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -307,7 +307,10 @@ def train_single_model(
     )
 
     # get classifier and its parameters
-    clf_function, params_clf = get_classifier_and_params(classifier)
+    clf_function, params_clf_generated = get_classifier_and_params(classifier)
+
+    if params_clf is None:
+        params_clf = params_clf_generated
 
     # instantiate the model
     clf, param_dict_clf_raw, params_dict_clf_named = clf_function(
@@ -378,6 +381,7 @@ def random_search_runner(
             ) = train_single_model(
                 df,
                 sample_seed,
+                general_params,
                 meta_label_cols,
                 stratification_grouping_col,
                 y_label_col,
