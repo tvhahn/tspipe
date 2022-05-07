@@ -45,6 +45,8 @@ def main(results_dir_path):
         results_dir_path / filename for filename in files if filename.endswith(".csv")
     ]
 
+    print("compiling csv files")
+
     # set up your pool
     with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
 

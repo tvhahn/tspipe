@@ -75,14 +75,14 @@ endif
 
 compile: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/compile.py -p $(PROJECT_DIR) --n_cores 3 --interim_dir_name interim_results_milling --final_dir_name final_results_milling
+	$(PYTHON_INTERPRETER) src/models/compile.py -p $(PROJECT_DIR) --n_cores 6 --interim_dir_name interim_results_milling --final_dir_name final_results_milling
 else # assume on HPC
 	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
 endif
 
 filter: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/filter.py
+	$(PYTHON_INTERPRETER) src/models/filter.py -p $(PROJECT_DIR) --dataset milling --save_n_figures 2 --path_data_dir $(PROJECT_DIR)/data/ --final_dir_name final_results_milling
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif
