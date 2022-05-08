@@ -182,7 +182,7 @@ def main(args):
                 model_metrics_dict["rocauc_array"],
                 model_metrics_dict["prauc_array"],
                 percent_anomalies_truth=0.073,
-                path_save_name=path_model_curves / f"curve_{id}.pdf",
+                path_save_name=path_model_curves / f"curve_{id}.png",
                 save_plot=True,
                 dpi=300,
             )
