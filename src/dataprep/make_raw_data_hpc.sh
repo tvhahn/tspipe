@@ -13,4 +13,4 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/dataprep/make_dataset.py --path_data_folder $SCRATCH_DATA_DIR
+python $PROJECT_DIR/src/dataprep/make_dataset.py --path_data_dir $SCRATCH_DATA_DIR

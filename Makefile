@@ -43,7 +43,7 @@ endif
 ## Make Dataset
 data: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py --path_data_folder $(PROJECT_DIR)/data/
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --sub_folder_name stride64_len64
 else # assume on HPC
 	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
