@@ -1,7 +1,7 @@
 Time Series ML Pipeline
 ==============================
 
-Automating the feature engineering and classical ML pipelin for time series. Build the feature store of your dreams!
+Developing scalable ETL/ML pipeline for rapid testing of feature engineering and machine learning techniques. For use on time series data, and tested on common industrial datasets. Leverages HPC infrastructure.
 
 https://github.com/tvhahn/feat-store
 
