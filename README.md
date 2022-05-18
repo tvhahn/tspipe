@@ -3,8 +3,6 @@ Time Series ML Pipeline
 
 Developing scalable ETL/ML pipeline for rapid testing of feature engineering and classical machine learning techniques. For use on time series data, and tested on common industrial datasets. Leverages HPC infrastructure.
 
-https://github.com/tvhahn/feat-store
-
 ![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
 
 run tests: `python -m unittest discover -s tests`
