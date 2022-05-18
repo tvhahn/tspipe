@@ -1,4 +1,4 @@
-Time Series Feature Store
+Time Series ML Pipeline
 ==============================
 
 Automating the feature engineering and classical ML pipelin for time series. Build the feature store of your dreams!
