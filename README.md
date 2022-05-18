@@ -1,7 +1,7 @@
-feat_store
+Time Series Feature Store
 ==============================
 
-Exploring feature engineering.
+Automating the feature engineering and classical ML pipelin for time series. Build the feature store of your dreams!
 
 https://github.com/tvhahn/feat-store
 
@@ -67,5 +67,3 @@ Project Organization
 
 
 --------
-
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
