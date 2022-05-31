@@ -46,7 +46,7 @@ def main(args):
     ]
 
     # set up your pool
-    with Pool(processes=args.num_pool_processes) as pool:  # or whatever your hardware can support
+    with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
 
         # have your pool map the file names to dataframes
         df_list = pool.map(read_pickle, file_list)
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--num_pool_processes",
+        "--n_cores",
         type=int,
         default=2,
         help="Number of processes to use for multiprocessing",
