@@ -57,6 +57,14 @@ else # assume on HPC
 	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
+## Copy the raw cnc data to HPC scratch
+copy_cnc_raw: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	echo "On local compute."
+else # assume on HPC
+	bash src/data/copy_cnc_raw_to_scratch.sh
+endif
+
 
 
 ## Make Features
