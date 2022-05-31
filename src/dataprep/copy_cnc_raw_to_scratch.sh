@@ -1,11 +1,11 @@
 #!/bin/bash
-DIR="~/scratch/feat-store"
-if [ ! -d "$DIR" ]; then
+if [ ! -d ~/scratch/feat-store ]; then
     echo "feat-store folder in scratch does not exist"
-    mkdir ~/scratch/feat-store/data/raw
+    mkdir -p ~/scratch/feat-store
 fi
 
-cd
-cd
+mkdir -p ~/scratch/feat-store/data/raw/cnc
+cp ./data/raw/cnc/splits.zip ~/scratch/feat-store/data/raw/cnc/splits.zip
 
-cp -r ./data/raw/cnc ~/scratch/feat-store/data/raw
+# extract splits.zip
+unzip ~/scratch/feat-store/data/raw/cnc/splits.zip -d ~/scratch/feat-store/data/raw/cnc

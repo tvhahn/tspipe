@@ -62,7 +62,7 @@ copy_cnc_raw: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	echo "On local compute."
 else # assume on HPC
-	bash src/data/copy_cnc_raw_to_scratch.sh
+	bash src/dataprep/copy_cnc_raw_to_scratch.sh
 endif
 
 
