@@ -49,6 +49,16 @@ else # assume on HPC
 endif
 
 
+## Make raw data for CNC
+data_cnc: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset_cnc.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --sub_folder_name cnc_raw
+else # assume on HPC
+	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
+endif
+
+
+
 ## Make Features
 features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
