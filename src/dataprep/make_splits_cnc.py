@@ -508,8 +508,6 @@ def main(args):
     path_data_dir = Path(args.path_data_dir)
     print("path_data_dir:", path_data_dir)
 
-    
-
     if args.save_dir_name is None:
         save_dir = path_data_dir / "raw/cnc/splits"
     else:
@@ -519,12 +517,17 @@ def main(args):
 
     save_dir.mkdir(parents=True, exist_ok=True)
 
-
-    df_labels = pd.read_csv(path_data_dir / "processed/cnc/high_level_labels_MASTER_update2020-08-06_new-jan-may-data.csv")
+    df_labels = pd.read_csv(
+        path_data_dir
+        / "processed/cnc/high_level_labels_MASTER_update2020-08-06_new-jan-may-data.csv"
+    )
 
     file_list = [
         {
-            "file_path": Path(cut_dir) / file_name,
+            "file_path": path_data_dir
+            / "raw/cnc"
+            / "/".join(Path(cut_dir).parts[7:])
+            / file_name,
             "unix_date": unix_date,
             "save_dir": save_dir,
         }
@@ -535,7 +538,9 @@ def main(args):
 
     # set up your pool
     with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
-        r = list(tqdm.tqdm(pool.imap(load_cut_save_split, file_list), total=len(file_list)))
+        r = list(
+            tqdm.tqdm(pool.imap(load_cut_save_split, file_list), total=len(file_list))
+        )
 
         # pool.map(load_cut_save_split, file_list)
 
@@ -577,4 +582,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args)
-
