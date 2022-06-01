@@ -91,3 +91,6 @@ target/
 
 # Mypy cache
 .mypy_cache/
+
+#out files
+*.out

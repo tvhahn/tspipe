@@ -53,7 +53,7 @@ splits_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/dataprep/make_splits_cnc.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --save_dir_name data_splits --n_cores 6
 else # assume on HPC
-	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
+	sbatch src/dataprep/make_splits_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
 
