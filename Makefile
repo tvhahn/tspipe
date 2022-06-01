@@ -48,6 +48,14 @@ else # assume on HPC
 	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
 
+## Make raw data for CNC
+splits_cnc: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/dataprep/make_splits_cnc.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --save_dir_name data_splits --n_cores 6
+else # assume on HPC
+	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
+endif
+
 
 ## Make raw data for CNC
 data_cnc: requirements
@@ -56,6 +64,9 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 else # assume on HPC
 	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
 endif
+
+
+
 
 ## Copy the raw cnc data to HPC scratch
 copy_cnc_raw: requirements

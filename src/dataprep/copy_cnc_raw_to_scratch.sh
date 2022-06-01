@@ -4,8 +4,8 @@ if [ ! -d ~/scratch/feat-store ]; then
     mkdir -p ~/scratch/feat-store
 fi
 
-mkdir -p ~/scratch/feat-store/data/raw/cnc
-cp ./data/raw/cnc/splits.zip ~/scratch/feat-store/data/raw/cnc/splits.zip
+mkdir -p ~/scratch/feat-store/data/raw
+cp ./data/raw/cnc ~/scratch/feat-store/data/raw/cnc
 
 # extract splits.zip
-unzip ~/scratch/feat-store/data/raw/cnc/splits.zip -d ~/scratch/feat-store/data/raw/cnc
+# unzip ~/scratch/feat-store/data/raw/cnc/splits.zip -d ~/scratch/feat-store/data/raw/cnc
