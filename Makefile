@@ -100,8 +100,8 @@ train: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_milling \
-		--rand_search_iter 2 \
-		--feat_selection True
+		--rand_search_iter 15 \
+		--feat_selection False
 else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif

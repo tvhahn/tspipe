@@ -138,10 +138,12 @@ def main(args):
     )
     df = filter_results_df(df)
 
-    if args.keep_top_n:
-        df = df[: args.keep_top_n]
+    # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
+    sort_by = 'prauc_avg'
+    df = df.groupby(['classifier']).head(int(args.keep_top_n)).sort_values(by=sort_by, ascending=False)
 
     df.to_csv(path_final_dir / args.filtered_csv_name, index=False)
+
 
     # save a certain number of PR-AUC and ROC-AUC curves
     if args.dataset == "milling" and args.save_n_figures > 0:
@@ -213,6 +215,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--keep_top_n",
         type=int,
+        default=1,
         help="Keep the top N models in the filtered results CSV.",
     )
 
