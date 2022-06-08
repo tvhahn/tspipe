@@ -10,6 +10,24 @@ import pandas as pd
 from multiprocessing import Pool
 
 
+def set_directories(args):
+
+    if args.proj_dir:
+        proj_dir = Path(args.proj_dir)
+    else:
+        proj_dir = Path().cwd()
+
+    if args.path_data_dir:
+        path_data_dir = Path(args.path_data_dir)
+    else:
+        path_data_dir = proj_dir / "data"
+
+    path_splits_dir = path_data_dir / "raw" / "cnc" / args.split_dir_name
+    path_processed_raw_dir = path_data_dir / "raw" / "cnc" / args.save_dir_name
+    path_processed_raw_dir.mkdir(parents=True, exist_ok=True)
+
+
+    return proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir
 
 
 def read_pickle(filename):
@@ -32,15 +50,12 @@ def main(args):
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
 
-    path_data_dir = Path(args.path_data_dir)
-    print("path_data_dir:", path_data_dir)
-
-    path_raw_cnc_dir = path_data_dir / "raw/cnc" 
+    proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir = set_directories(args)
 
     # get a list of file names
-    files = os.listdir(path_raw_cnc_dir)
+    files = os.listdir(path_splits_dir)
     file_list = [
-        Path(path_raw_cnc_dir) / filename
+        Path(path_splits_dir) / filename
         for filename in files
         if filename.endswith(".pickle")
     ]
@@ -73,7 +88,6 @@ if __name__ == "__main__":
         help="Location of project folder",
     )
 
-
     parser.add_argument(
         "--path_data_dir",
         type=str,
@@ -82,9 +96,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--sub_folder_name",
+        "--save_dir_name",
         type=str,
-        help="Name of the subfolder that will contain the extracted csv file",
+        default="data_raw_processed",
+        help="Name of the subfolder that will contain the final raw csv file",
+    )
+
+    parser.add_argument(
+        "--split_dir_name",
+        type=str,
+        default="data_splits",
+        help="Folder name containing all individual split pickle files.",
     )
 
     parser.add_argument(
@@ -96,14 +118,8 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
-    path_data_dir = Path(args.path_data_dir)
 
-    if args.sub_folder_name is None:
-        processed_cnc_dir = path_data_dir / "raw/cnc"
-    else:
-        processed_cnc_dir = path_data_dir / "raw/cnc" / args.sub_folder_name
-
-    processed_cnc_dir.mkdir(parents=True, exist_ok=True)
+    proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir = set_directories(args)
 
     df = main(args)
 
@@ -112,11 +128,11 @@ if __name__ == "__main__":
     # save the dataframe
     print("Saving dataframe...")
     df.to_csv(
-        processed_cnc_dir / "cnc_raw.csv.gz",
+        path_processed_raw_dir / "cnc_raw.csv.gz",
         compression="gzip",
         index=False,
     )
 
     shutil.copy(
-        Path(args.proj_dir) / "src/dataprep/make_dataset_cnc.py",
-        processed_cnc_dir / "make_dataset_cnc.py",)
+        Path(proj_dir) / "src/dataprep/make_dataset_cnc.py",
+        path_processed_raw_dir / "make_dataset_cnc.py",)

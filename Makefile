@@ -60,7 +60,11 @@ endif
 ## Make raw data for CNC
 data_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/dataprep/make_dataset_cnc.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --sub_folder_name cnc_raw
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset_cnc.py \
+		-p $(PROJECT_DIR) \
+		--path_data_dir $(PROJECT_DIR)/data/ \
+		--split_dir_name data_splits \
+		--save_dir_name data_raw_processed
 else # assume on HPC
 	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
 endif
