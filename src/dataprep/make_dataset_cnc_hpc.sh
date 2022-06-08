@@ -15,4 +15,4 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py --path_data_dir $SCRATCH_DATA_DIR/data/ --sub_folder_name data_raw_prepped
+python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py -p $PROJECT_DIR --path_data_dir $SCRATCH_DATA_DIR/data/ --split_dir_name data_splits --save_dir_name data_raw_processed
