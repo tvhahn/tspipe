@@ -63,7 +63,7 @@ def kfold_cv(
     stratification_grouping_col=None,
     y_label_col="y",
     n_splits=5,
-    feat_selection=False,
+    feat_selection="False",
     feat_col_list=None,
 ):
 
@@ -125,7 +125,7 @@ def kfold_cv(
 
 
             # do feature selection if specified
-            if feat_selection and i==0 and feat_col_list is None:
+            if feat_selection=="True" and i==0 and feat_col_list is None:
                 from tsfresh import select_features # import in loop because it is a heavy package
                 print("Performing feature selection")
 
@@ -144,7 +144,7 @@ def kfold_cv(
                 print("max x_train", np.max(x_train))
                 print("min x_test", np.min(x_test))
                 print("max x_test", np.max(x_test))
-            elif feat_selection and feat_col_list is not None:
+            elif feat_selection=="True" and feat_col_list is not None:
                 x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
                 x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
                 print("min x_train", np.min(x_train))
@@ -206,7 +206,7 @@ def kfold_cv(
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-                        # do feature selection if specified
+            # do feature selection if specified
             if feat_selection and i==0 and feat_col_list is None:
                 from tsfresh import select_features # import in loop because it is a heavy package
                 print("Performing feature selection")
@@ -291,7 +291,7 @@ def kfold_cv(
 
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
-    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection=False, feat_col_list=None, general_params=None, params_clf=None
+    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection="False", feat_col_list=None, general_params=None, params_clf=None
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -572,8 +572,8 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--feat_selection",
-        default=False,
-        action="store_true",
+        type=str,
+        default="False",
         help="Conduct feature selection on first iteration",
     )
 

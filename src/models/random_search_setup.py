@@ -27,13 +27,17 @@ import random
 ###############################################################################
 
 general_params = {
-    "scaler_method": ["standard", "minmax"],
+    "scaler_method": [
+        # "standard", 
+        # "minmax",
+        None
+    ],
     "uo_method": [
-        "random_over",
-        "random_under",
-        "random_under_bootstrap",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "random_under",
+        # "random_under_bootstrap",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
