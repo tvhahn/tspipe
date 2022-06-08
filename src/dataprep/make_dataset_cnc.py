@@ -62,7 +62,7 @@ def main(args):
     ]
 
     # from tqdm creator: https://stackoverflow.com/a/59905309
-    df_list = process_map(read_pickle, file_list, max_workers=args.n_cores)
+    df_list = process_map(read_pickle, file_list, max_workers=args.n_cores, chunksize=100)
 
     return df_list
 
