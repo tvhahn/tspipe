@@ -8,41 +8,43 @@ from multiprocessing import Pool
 
 def set_directories(args):
 
+    scratch_path = Path.home() / "scratch"
+
     if args.proj_dir:
         proj_dir = Path(args.proj_dir)
     else:
         proj_dir = Path().cwd()
 
-    interim_dir_name = args.interim_dir_name
-    final_dir_name = args.final_dir_name
-    
-    scratch_path = Path.home() / "scratch"
-    if scratch_path.exists():
-        print("Assume on HPC")
-
-        path_interim_dir = scratch_path / "feat-store/models" / interim_dir_name
-        path_final_dir = scratch_path / "feat-store/models" / final_dir_name
-        Path(path_final_dir).mkdir(parents=True, exist_ok=True)
-
+    if args.path_model_dir:
+        path_model_dir = Path(args.path_model_dir)
     else:
-        print("Assume on local compute")
-        path_interim_dir = proj_dir / "models" / interim_dir_name
-        path_final_dir = proj_dir / "models" / final_dir_name
-        Path(path_final_dir).mkdir(parents=True, exist_ok=True)
+        if scratch_path.exists():
+            print("Assume on HPC")
+            path_model_dir = scratch_path / "feat-store" / "models"
+        else:
+            print("Assume on local compute")
+            path_model_dir = proj_dir / "models"
+    
+    path_interim_dir = path_model_dir / args.interim_dir_name
+    path_final_dir = path_model_dir / args.final_dir_name
+    Path(path_final_dir).mkdir(parents=True, exist_ok=True)
 
-    return proj_dir, path_interim_dir, path_final_dir
+    return proj_dir, path_model_dir, path_interim_dir, path_final_dir
+
 
 
 def read_csv(filename):
     "converts a filename to a pandas dataframe"
     return pd.read_csv(filename)
 
-def main(results_dir_path):
+def main(args):
+
+    proj_dir, path_model_dir, path_interim_dir, path_final_dir = set_directories(args)
 
     # get a list of file names
-    files = os.listdir(results_dir_path)
+    files = os.listdir(path_interim_dir)
     file_list = [
-        results_dir_path / filename for filename in files if filename.endswith(".csv")
+        path_interim_dir / filename for filename in files if filename.endswith(".csv")
     ]
 
     print("compiling csv files")
@@ -57,6 +59,7 @@ def main(results_dir_path):
         combined_df = pd.concat(df, ignore_index=True)
 
         return combined_df
+ 
 
 
 if __name__ == "__main__":
@@ -70,13 +73,18 @@ if __name__ == "__main__":
         help="Number of cores to use for multiprocessing",
     )
 
-
     parser.add_argument(
         "--final_dir_name",
         type=str,
         help="Folder name containing compiled csv.",
     )
 
+    parser.add_argument(
+        "--path_model_dir",
+        dest="path_model_dir",
+        type=str,
+        help="Folder containing the trained model results",
+    )
 
     parser.add_argument(
         "--compiled_csv_name",
@@ -84,7 +92,6 @@ if __name__ == "__main__":
         default="compiled_results.csv",
         help="The combined csv name.",
     )
-
 
     parser.add_argument(
         "-p",
@@ -94,7 +101,6 @@ if __name__ == "__main__":
         help="Location of project folder",
     )
 
-
     parser.add_argument(
         "--interim_dir_name",
         type=str,
@@ -103,8 +109,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    proj_dir, path_interim_dir, path_final_dir = set_directories(args)
+    proj_dir, path_model_dir, path_interim_dir, path_final_dir = set_directories(args)
 
-    df = main(path_interim_dir)
+    df = main(args)
 
     df.to_csv(path_final_dir / args.compiled_csv_name, index=False)

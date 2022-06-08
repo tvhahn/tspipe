@@ -81,7 +81,8 @@ endif
 ## Make Features
 features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/features/build_features.py --path_data_folder $(PROJECT_DIR)/data/
+	$(PYTHON_INTERPRETER) src/features/build_features.py \
+		--path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
 	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif
@@ -90,21 +91,30 @@ endif
 ## Select Features, Scale, and return Data Splits
 splits: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/features/select_feat_and_scale.py --path_data_folder $(PROJECT_DIR)/data/
+	$(PYTHON_INTERPRETER) src/features/select_feat_and_scale.py \
+		--path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
 	sbatch src/features/scripts/split_and_save_hpc.sh $(PROJECT_DIR)
 endif
 
 train: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/train.py --save_dir_name interim_results_milling --rand_search_iter 2 --feat_selection
+	$(PYTHON_INTERPRETER) src/models/train.py \
+		--save_dir_name interim_results_milling \
+		--rand_search_iter 2 \
+		--feat_selection
 else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
 
 compile: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/models/compile.py -p $(PROJECT_DIR) --n_cores 6 --interim_dir_name interim_results_milling --final_dir_name final_results_milling
+	$(PYTHON_INTERPRETER) src/models/compile.py \
+		-p $(PROJECT_DIR) \
+		--n_cores 6 \
+		--path_model_dir $(PROJECT_DIR)/models \
+		--interim_dir_name interim_results_milling \
+		--final_dir_name final_results_milling
 else # assume on HPC
 	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
 endif
