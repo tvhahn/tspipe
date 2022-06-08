@@ -16,6 +16,7 @@ from datetime import datetime
 import pickle
 from scipy import stats
 import tqdm
+from tqdm.contrib.concurrent import process_map
 
 
 def rename_cols_df(df):

@@ -8,6 +8,7 @@ import pickle
 import os
 import pandas as pd
 from multiprocessing import Pool
+from tqdm.contrib.concurrent import process_map
 
 
 def set_directories(args):
@@ -60,17 +61,10 @@ def main(args):
         if filename.endswith(".pickle")
     ]
 
-    # set up your pool
-    with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
+    # from tqdm creator: https://stackoverflow.com/a/59905309
+    df_list = process_map(read_pickle, file_list, max_workers=args.n_cores)
 
-        # have your pool map the file names to dataframes
-        df_list = pool.map(read_pickle, file_list)
-
-        # reduce the list of dataframes to a single dataframe
-        combined_df = pd.concat(df_list, ignore_index=True)
-
-        return combined_df
-
+    return df_list
 
 
 if __name__ == "__main__":
@@ -121,7 +115,9 @@ if __name__ == "__main__":
 
     proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir = set_directories(args)
 
-    df = main(args)
+    df_list = main(args)
+
+    df = pd.concat(df_list, ignore_index=True)
 
     print("Shape of final df:", df.shape)
 
