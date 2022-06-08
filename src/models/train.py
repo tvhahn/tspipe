@@ -14,8 +14,10 @@ from src.models.utils import (
     under_over_sampler,
     scale_data,
     calculate_scores,
+    collate_scores_binary_classification,
     get_classifier_and_params,
     get_model_metrics_df,
+    feat_selection_binary_classification
 )
 from src.models.random_search_setup import general_params
 from src.models.classifiers import (
@@ -52,6 +54,9 @@ from src.models.random_search_setup import (
 
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
 
+# turn off debuging for numba
+# from https://stackoverflow.com/a/69019168
+# logging.getLogger('numba').setLevel(logging.WARNING)
 
 def kfold_cv(
     df,
@@ -67,17 +72,7 @@ def kfold_cv(
     feat_col_list=None,
 ):
 
-    n_thresholds_list = []
-    precisions_list = []
-    recalls_list = []
-    precision_score_list = []
-    recall_score_list = []
-    fpr_list = []
-    tpr_list = []
-    prauc_list = []
-    rocauc_list = []
-    f1_list = []
-    accuracy_list = []
+    scores_list = []
 
     # perform stratified k-fold cross validation using the grouping of the y-label and another column
     if (
@@ -89,11 +84,12 @@ def kfold_cv(
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
         # use clone to do a deep copy of model without copying attached data
         # https://scikit-learn.org/stable/modules/generated/sklearn.base.clone.html
-        
 
-        for i, (train_index, test_index) in enumerate(skfolds.split(
-            df_strat[[stratification_grouping_col]], df_strat[[y_label_col]]
-        )):
+        for i, (train_index, test_index) in enumerate(
+            skfolds.split(
+                df_strat[[stratification_grouping_col]], df_strat[[y_label_col]]
+            )
+        ):
             print(i)
 
             clone_clf = clone(clf)
@@ -114,46 +110,41 @@ def kfold_cv(
 
             # test
             df_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
-            y_test = df_test[y_label_col].values.astype(int)            
+            y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
             x_test_cols = df_test.columns
             x_test = df_test.values
-            
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-
-            # do feature selection if specified
-            if feat_selection=="True" and i==0 and feat_col_list is None:
-                from tsfresh import select_features # import in loop because it is a heavy package
-                print("Performing feature selection")
-
-                x_train = select_features(
-                    pd.DataFrame(x_train, columns=x_train_cols),
+            if feat_selection == "True" and i == 0:
+                x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    x_train,
                     y_train,
-                    n_jobs=5,
-                    chunksize=10, ml_task="classification", multiclass=False)
-                
-                feat_col_list = list(x_train.columns)
-
-                x_train = x_train.values
-                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-
-                print("min x_train", np.min(x_train))
-                print("max x_train", np.max(x_train))
-                print("min x_test", np.min(x_test))
-                print("max x_test", np.max(x_test))
-            elif feat_selection=="True" and feat_col_list is not None:
-                x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
-                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-                print("min x_train", np.min(x_train))
-                print("max x_train", np.max(x_train))
-                print("min x_test", np.min(x_test))
-                print("max x_test", np.max(x_test))
+                    x_train_cols,
+                    x_test,
+                    y_test,
+                    x_test_cols,
+                    feat_col_list=None,
+                )
+            elif feat_selection == "True" and feat_col_list is not None:
+                x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    x_train,
+                    y_train,
+                    x_train_cols,
+                    x_test,
+                    y_test,
+                    x_test_cols,
+                    feat_col_list=feat_col_list,
+                )
             else:
-                pass  # no feature selection
+                pass
 
+            # can use this to save the feature column names
+            # in the results csv when no feature selection is performed
+            # if feat_col_list is None:
+            #     feat_col_list = list(x_train_cols)
 
             # under-over-sample the data
             x_train, y_train = under_over_sampler(
@@ -166,28 +157,16 @@ def kfold_cv(
 
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
-            ind_score_dict = calculate_scores(
-                clone_clf, 
-                x_test, 
-                y_test)
-
-            n_thresholds_list.append(ind_score_dict["n_thresholds"])
-            precisions_list.append(ind_score_dict["precisions"])
-            recalls_list.append(ind_score_dict["recalls"])
-            precision_score_list.append(ind_score_dict["precision_result"])
-            recall_score_list.append(ind_score_dict["recall_result"])
-            fpr_list.append(ind_score_dict["fpr"])
-            tpr_list.append(ind_score_dict["tpr"])
-            prauc_list.append(ind_score_dict["prauc_result"])
-            rocauc_list.append(ind_score_dict["rocauc_result"])
-            f1_list.append(ind_score_dict["f1_result"])
-            accuracy_list.append(ind_score_dict["accuracy_result"])
+            ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
+            scores_list.append(ind_score_dict)
 
     # perform stratified k-fold cross if only using the y-label for stratification
     else:
         skfolds = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-        for i, (train_index, test_index) in enumerate(skfolds.split(df, df[[y_label_col]])):
+        for i, (train_index, test_index) in enumerate(
+            skfolds.split(df, df[[y_label_col]])
+        ):
             clone_clf = clone(clf)
 
             df_train = df.iloc[train_index]
@@ -206,35 +185,33 @@ def kfold_cv(
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-            # do feature selection if specified
-            if feat_selection and i==0 and feat_col_list is None:
-                from tsfresh import select_features # import in loop because it is a heavy package
-                print("Performing feature selection")
-
-                x_train = select_features(
-                    pd.DataFrame(x_train, columns=x_train_cols),
+            if feat_selection == "True" and i == 0:
+                x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    x_train,
                     y_train,
-                    n_jobs=5,
-                    chunksize=10, ml_task="classification", multiclass=False)
-                
-                feat_col_list = list(x_train.columns)
-
-                x_train = x_train.values
-                print("min x_train", np.min(x_train))
-                print("max x_train", np.max(x_train))
-                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-                print("min x_test", np.min(x_test))
-                print("max x_test", np.max(x_test))
-            elif feat_selection and feat_col_list is not None:
-                x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
-                x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-                print("min x_train", np.min(x_train))
-                print("max x_train", np.max(x_train))
-                print("min x_test", np.min(x_test))
-                print("max x_test", np.max(x_test))
-
+                    x_train_cols,
+                    x_test,
+                    y_test,
+                    x_test_cols,
+                    feat_col_list=None,
+                )
+            elif feat_selection == "True" and feat_col_list is not None:
+                x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    x_train,
+                    y_train,
+                    x_train_cols,
+                    x_test,
+                    y_test,
+                    x_test_cols,
+                    feat_col_list=feat_col_list,
+                )
             else:
-                pass  # no feature selection
+                pass
+
+            # can use this to save the feature column names
+            # in the results csv when no feature selection is performed
+            # if feat_col_list is None:
+            #     feat_col_list = list(x_train_cols)
 
             # under-over-sample the data
             x_train, y_train = under_over_sampler(
@@ -247,51 +224,23 @@ def kfold_cv(
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
+            scores_list.append(ind_score_dict)
 
-            n_thresholds_list.append(ind_score_dict["n_thresholds"])
-            precisions_list.append(ind_score_dict["precisions"])
-            recalls_list.append(ind_score_dict["recalls"])
-            precision_score_list.append(ind_score_dict["precision_result"])
-            recall_score_list.append(ind_score_dict["recall_result"])
-            fpr_list.append(ind_score_dict["fpr"])
-            tpr_list.append(ind_score_dict["tpr"])
-            prauc_list.append(ind_score_dict["prauc_result"])
-            rocauc_list.append(ind_score_dict["rocauc_result"])
-            f1_list.append(ind_score_dict["f1_result"])
-            accuracy_list.append(ind_score_dict["accuracy_result"])
-
-    n_thresholds_array = np.array(n_thresholds_list, dtype=int)
-    precisions_array = np.array(precisions_list, dtype=object)
-    recalls_array = np.array(recalls_list, dtype=object)
-    precision_score_array = np.array(precision_score_list, dtype=object)
-    recall_score_array = np.array(recall_score_list, dtype=object)
-    fpr_array = np.array(fpr_list, dtype=object)
-    tpr_array = np.array(tpr_list, dtype=object)
-    prauc_array = np.array(prauc_list, dtype=object)
-    rocauc_array = np.array(rocauc_list, dtype=object)
-    f1_score_array = np.array(f1_list, dtype=object)
-    accuracy_array = np.array(accuracy_list, dtype=object)
-
-    # create a dictionary of the result arrays
-    trained_result_dict = {
-        "precisions_array": precisions_array,
-        "recalls_array": recalls_array,
-        "precision_score_array": precision_score_array,
-        "recall_score_array": recall_score_array,
-        "fpr_array": fpr_array,
-        "tpr_array": tpr_array,
-        "prauc_array": prauc_array,
-        "rocauc_array": rocauc_array,
-        "f1_score_array": f1_score_array,
-        "n_thresholds_array": n_thresholds_array,
-        "accuracy_array": accuracy_array,
-    }
-
+    trained_result_dict = collate_scores_binary_classification(scores_list)
     return trained_result_dict, feat_col_list
+
 
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
-    df, sampler_seed, meta_label_cols, stratification_grouping_col=None, y_label_col="y", feat_selection="False", feat_col_list=None, general_params=None, params_clf=None
+    df,
+    sampler_seed,
+    meta_label_cols,
+    stratification_grouping_col=None,
+    y_label_col="y",
+    feat_selection="False",
+    feat_col_list=None,
+    general_params=None,
+    params_clf=None,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -329,13 +278,18 @@ def train_single_model(
         y_label_col,
         n_splits=5,
         feat_selection=feat_selection,
-        feat_col_list=feat_col_list
+        feat_col_list=feat_col_list,
     )
 
     # added additional parameters to the training setup dictionary
     params_dict_train_setup["sampler_seed"] = sampler_seed
 
-    return model_metrics_dict, params_dict_clf_named, params_dict_train_setup, feat_col_list
+    return (
+        model_metrics_dict,
+        params_dict_clf_named,
+        params_dict_train_setup,
+        feat_col_list,
+    )
 
 
 def random_search_runner(
@@ -349,8 +303,8 @@ def random_search_runner(
     dataset_name=None,
     y_label_col="y",
     save_freq=1,
-    debug=False,
-    feat_col_list=None
+    debug=True,
+    feat_col_list=None,
 ):
 
     results_list = []
@@ -377,7 +331,7 @@ def random_search_runner(
                 model_metrics_dict,
                 params_dict_clf_named,
                 params_dict_train_setup,
-                feat_col_list
+                feat_col_list,
             ) = train_single_model(
                 df,
                 sample_seed,
@@ -400,10 +354,10 @@ def random_search_runner(
                 now = datetime.now()
                 now_str = now.strftime("%Y-%m-%d-%H%M-%S")
 
-            df_t['date_time'] = now_str
-            df_t['dataset'] = dataset_name
+            df_t["date_time"] = now_str
+            df_t["dataset"] = dataset_name
             classifier_used = params_dict_train_setup["classifier"]
-            df_t['id'] = f"{sample_seed}_{classifier_used}_{now_str}_{dataset_name}"
+            df_t["id"] = f"{sample_seed}_{classifier_used}_{now_str}_{dataset_name}"
 
             # classifier params
             df_c = pd.DataFrame.from_dict(params_dict_clf_named, orient="index").T
@@ -411,9 +365,7 @@ def random_search_runner(
             # model metric results
             df_m = get_model_metrics_df(model_metrics_dict)
 
-            results_list.append(
-                pd.concat([df_t, df_m, df_c], axis=1)
-            )  
+            results_list.append(pd.concat([df_t, df_m, df_c], axis=1))
 
             if i % save_freq == 0:
                 df_results = pd.concat(results_list)
@@ -431,6 +383,7 @@ def random_search_runner(
                 logging.exception(f"##### Exception in random_search_runner:\n{e}\n\n")
             pass
 
+
 def set_directories(args):
 
     if args.proj_dir:
@@ -445,10 +398,9 @@ def set_directories(args):
 
     save_dir_name = args.save_dir_name
 
-
     # check if "scratch" path exists in the home directory
     # if it does, assume we are on HPC
-    
+
     scratch_path = Path.home() / "scratch"
     if scratch_path.exists():
         print("Assume on HPC")
@@ -499,7 +451,7 @@ def main(args):
     META_LABEL_COLS = ["cut_id", "cut_no", "case", "tool_class"]
 
     LOG_FILENAME = path_save_dir / "logging_example.out"
-    logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
+    logging.basicConfig(filename=LOG_FILENAME, level=logging.ERROR)
 
     random_search_runner(
         df,
@@ -533,7 +485,6 @@ if __name__ == "__main__":
         default=2,
         help="Number number of randem search iterations",
     )
-
 
     parser.add_argument(
         "-p",
@@ -576,8 +527,6 @@ if __name__ == "__main__":
         default="False",
         help="Conduct feature selection on first iteration",
     )
-
-
 
     args = parser.parse_args()
 

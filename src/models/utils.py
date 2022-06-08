@@ -157,8 +157,85 @@ def calculate_scores(clf, x_test, y_test,):
                 "precisions": precisions, "recalls": recalls, "pr_thresholds": pr_thresholds,
                 "fpr": fpr, "tpr": tpr, "roc_thresholds": roc_thresholds, "y_scores": y_scores, "accuracy_result": accuracy_result}
 
-
     return scores
+
+
+def feat_selection_binary_classification(
+    x_train, y_train, x_train_cols, x_test, y_test, x_test_cols, feat_col_list=None
+):
+    if feat_col_list is None:
+        from tsfresh import (
+            select_features,
+        )  # import in loop because it is a heavy package
+
+        print("Performing feature selection")
+
+        x_train = select_features(
+            pd.DataFrame(x_train, columns=x_train_cols),
+            y_train,
+            n_jobs=5,
+            chunksize=10,
+            ml_task="classification",
+            multiclass=False,
+        )
+
+        feat_col_list = list(x_train.columns)
+
+        x_train = x_train.values
+        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+        
+    else:
+        x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
+        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+
+    return x_train, x_test, feat_col_list
+
+
+def collate_scores_binary_classification(scores_list):
+    """
+    Collate the scores from the k-fold cross-validation
+    """
+
+    n_thresholds_list = []
+    precisions_list = []
+    recalls_list = []
+    precision_score_list = []
+    recall_score_list = []
+    fpr_list = []
+    tpr_list = []
+    prauc_list = []
+    rocauc_list = []
+    f1_list = []
+    accuracy_list = []
+
+    for ind_score_dict in scores_list:
+            n_thresholds_list.append(ind_score_dict["n_thresholds"])
+            precisions_list.append(ind_score_dict["precisions"])
+            recalls_list.append(ind_score_dict["recalls"])
+            precision_score_list.append(ind_score_dict["precision_result"])
+            recall_score_list.append(ind_score_dict["recall_result"])
+            fpr_list.append(ind_score_dict["fpr"])
+            tpr_list.append(ind_score_dict["tpr"])
+            prauc_list.append(ind_score_dict["prauc_result"])
+            rocauc_list.append(ind_score_dict["rocauc_result"])
+            f1_list.append(ind_score_dict["f1_result"])
+            accuracy_list.append(ind_score_dict["accuracy_result"])
+
+    result_dict = {
+        "precisions_array": np.array(precisions_list, dtype=object),
+        "recalls_array": np.array(recalls_list, dtype=object),
+        "precision_score_array": np.array(precision_score_list, dtype=object),
+        "recall_score_array": np.array(recall_score_list, dtype=object),
+        "fpr_array": np.array(fpr_list, dtype=object),
+        "tpr_array": np.array(tpr_list, dtype=object),
+        "prauc_array": np.array(prauc_list, dtype=object),
+        "rocauc_array": np.array(rocauc_list, dtype=object),
+        "f1_score_array": np.array(f1_list, dtype=object),
+        "n_thresholds_array": np.array(n_thresholds_list, dtype=int),
+        "accuracy_array": np.array(accuracy_list, dtype=object),
+    }
+
+    return result_dict
 
 
 def scale_data(x_train, x_test, scaler_method=None):
