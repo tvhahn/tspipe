@@ -99,9 +99,9 @@ if __name__ == "__main__":
     path_data_dir = Path(args.path_data_dir)
 
     if args.sub_folder_name is None:
-        processed_cnc_dir = path_data_dir / "processed/cnc"
+        processed_cnc_dir = path_data_dir / "raw/cnc"
     else:
-        processed_cnc_dir = path_data_dir / "processed/cnc" / args.sub_folder_name
+        processed_cnc_dir = path_data_dir / "raw/cnc" / args.sub_folder_name
 
     processed_cnc_dir.mkdir(parents=True, exist_ok=True)
 

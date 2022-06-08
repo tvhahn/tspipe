@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=00:45:00 # 10 minutes
+#SBATCH --time=00:15:00 # 10 minutes
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=16G
@@ -15,4 +15,4 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py --path_data_dir $PROJECT_DIR/data/ --sub_folder_name cnc_raw
+python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py --path_data_dir $SCRATCH_DATA_DIR/data/ --sub_folder_name data_raw_prepped
