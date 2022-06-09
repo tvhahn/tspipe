@@ -94,3 +94,7 @@ target/
 
 #out files
 *.out
+
+
+# exclude the following files from source control by default
+notebooks/scratch/cnc_data_with_labels.csv
