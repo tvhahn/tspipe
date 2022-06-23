@@ -64,7 +64,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--path_data_dir $(PROJECT_DIR)/data/ \
 		--split_dir_name data_splits \
-		--save_dir_name data_raw_processed
+		--save_dir_name data_raw_processed \
+		--tool_no 54
 else # assume on HPC
 	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
 endif

@@ -7,6 +7,8 @@ import shutil
 import pickle
 import os
 import pandas as pd
+import numpy as np
+import re
 from multiprocessing import Pool
 from tqdm.contrib.concurrent import process_map
 
@@ -31,18 +33,17 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir
 
 
-def read_pickle(filename):
+
+def read_pickle(filename, col_selection=["current_sub"], rename_cols={"current_sub": "current"}):
     'converts a filename to a pandas dataframe'
-
-    col_selection = ["tool_no", "current_main", "current_sub"]
-
     df = pickle.load(open(filename, 'rb'))
     id = filename.stem
     df["id"] = id
-    df['timestamp'] = id.split("_")[0]
-    df['index_no'] = id.split("_")[-1]
-    
-    return df[["id", "timestamp", "index_no"] + col_selection]
+    df["time"] = np.arange(0, len(df)) / 1000.0
+    df = df[["id", "time"] + col_selection]
+
+    # rename col_selection to with rename_cols dict
+    return df.rename(columns=rename_cols)
 
 def main(args):
     """Runs data processing scripts to turn raw data from (../raw) into
@@ -54,11 +55,12 @@ def main(args):
     proj_dir, path_data_dir, path_splits_dir, path_processed_raw_dir = set_directories(args)
 
     # get a list of file names
+    pattern_match = re.compile(f"\w_{args.tool_no}_")
     files = os.listdir(path_splits_dir)
     file_list = [
         Path(path_splits_dir) / filename
         for filename in files
-        if filename.endswith(".pickle")
+        if filename.endswith(".pickle") and re.search(pattern_match, filename) is not None
     ]
 
     # from tqdm creator: https://stackoverflow.com/a/59905309
@@ -110,6 +112,13 @@ if __name__ == "__main__":
         help="Number of processes to use for multiprocessing",
     )
 
+    parser.add_argument(
+        "--tool_no",
+        type=int,
+        default=54,
+        help="Tool number to save to the dataframe",
+    )
+
 
     args = parser.parse_args()
 
@@ -124,10 +133,10 @@ if __name__ == "__main__":
     # save the dataframe
     print("Saving dataframe...")
     df.to_csv(
-        path_processed_raw_dir / "cnc_raw.csv.gz",
-        compression="gzip",
+        path_processed_raw_dir / f"cnc_raw_{args.tool_no}.csv",
         index=False,
-    )
+        )
+
 
     shutil.copy(
         Path(proj_dir) / "src/dataprep/make_dataset_cnc.py",
