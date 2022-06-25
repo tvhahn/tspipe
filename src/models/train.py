@@ -416,15 +416,15 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_save_dir
 
 
-def main(args):
+def train_milling_models(args):
 
     # set directories
     proj_dir, path_data_dir, path_save_dir = set_directories(args)
 
-    folder_raw_data_milling = path_data_dir / "raw/milling"
-    folder_interim_data_milling = path_data_dir / "interim/milling"
-    folder_processed_data_milling = path_data_dir / "processed/milling"
-    folder_models = proj_dir / "models"
+
+
+    processed_data_milling_dir = path_data_dir / "processed/milling"
+
 
     RAND_SEARCH_ITER = args.rand_search_iter
 
@@ -432,8 +432,13 @@ def main(args):
     # SAMPLER_SEED = random.randint(0, 2 ** 16)
 
     # load feature dataframe
+    if args.feat_file_name:
+        feat_file_name = args.feat_file_name
+    else:
+        feat_file_name = "milling_features.csv.gz"
+
     df = pd.read_csv(
-        folder_processed_data_milling / "milling_features.csv.gz", compression="gzip"
+        processed_data_milling_dir / feat_file_name, compression="gzip"
     )
 
     # add y label
@@ -462,10 +467,21 @@ def main(args):
         path_save_dir,
         feat_selection=args.feat_selection,
         dataset_name="milling",
-        y_label_col="y",
+        y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
     )
+
+
+def main(args):
+
+    if args.dataset == "milling":
+        train_milling_models(args)
+    else:
+        print("no dataset for training specified")
+    # elif args.dataset == "cnc":
+    #     train_cnc_models(args)
+
 
 
 if __name__ == "__main__":
@@ -526,6 +542,12 @@ if __name__ == "__main__":
         type=str,
         default="False",
         help="Conduct feature selection on first iteration",
+    )
+
+    parser.add_argument(
+        "--feat_file_name",
+        type=str,
+        help="Name of the feature file",
     )
 
     args = parser.parse_args()
