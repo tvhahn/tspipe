@@ -64,7 +64,8 @@ def kfold_cv(
     oversamp_method,
     undersamp_method,
     scaler_method,
-    imbalance_ratio,
+    oversamp_ratio,
+    undersamp_ratio,
     meta_label_cols,
     stratification_grouping_col=None,
     y_label_col="y",
@@ -149,12 +150,12 @@ def kfold_cv(
 
             # over-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=oversamp_method, ratio=imbalance_ratio
+                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
             )
 
             # under-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=undersamp_method, ratio=imbalance_ratio
+                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
             )
 
             # train model
@@ -221,12 +222,12 @@ def kfold_cv(
 
             # over-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=oversamp_method, ratio=imbalance_ratio
+                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
             )
 
             # under-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=undersamp_method, ratio=imbalance_ratio
+                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
             )
 
             # train model
@@ -261,10 +262,11 @@ def train_single_model(
     oversamp_method = params_dict_train_setup["oversamp_method"]
     undersamp_method = params_dict_train_setup["undersamp_method"]
     scaler_method = params_dict_train_setup["scaler_method"]
-    imbalance_ratio = params_dict_train_setup["imbalance_ratio"]
+    oversamp_ratio = params_dict_train_setup["oversamp_ratio"]
+    undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
     print(
-        f"classifier: {classifier}, oversamp_method: {oversamp_method}, undersamp_method: {undersamp_method}, imbalance_ratio: {imbalance_ratio}"
+        f"classifier: {classifier}, oversamp_method: {oversamp_method}, undersamp_method: {undersamp_method}"
     )
 
     # get classifier and its parameters
@@ -285,7 +287,8 @@ def train_single_model(
         oversamp_method,
         undersamp_method,
         scaler_method,
-        imbalance_ratio,
+        oversamp_ratio,
+        undersamp_ratio,
         meta_label_cols,
         stratification_grouping_col,
         y_label_col,

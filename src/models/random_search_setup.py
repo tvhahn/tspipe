@@ -44,7 +44,8 @@ general_params = {
         # "random_under_bootstrap",
         None,
     ],
-    "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
+    "oversamp_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
+    "undersamp_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
     "classifier": [
         "rf",
         "xgb",
