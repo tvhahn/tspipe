@@ -61,7 +61,8 @@ from src.visualization.visualize import plot_pr_roc_curves_kfolds
 def kfold_cv(
     df,
     clf,
-    uo_method,
+    oversamp_method,
+    undersamp_method,
     scaler_method,
     imbalance_ratio,
     meta_label_cols,
@@ -146,9 +147,14 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-            # under-over-sample the data
+            # over-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=uo_method, ratio=imbalance_ratio
+                x_train, y_train, method=oversamp_method, ratio=imbalance_ratio
+            )
+
+            # under-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=undersamp_method, ratio=imbalance_ratio
             )
 
             # train model
@@ -213,9 +219,14 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-            # under-over-sample the data
+            # over-sample the data
             x_train, y_train = under_over_sampler(
-                x_train, y_train, method=uo_method, ratio=imbalance_ratio
+                x_train, y_train, method=oversamp_method, ratio=imbalance_ratio
+            )
+
+            # under-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=undersamp_method, ratio=imbalance_ratio
             )
 
             # train model
@@ -247,12 +258,13 @@ def train_single_model(
         ParameterSampler(general_params, n_iter=1, random_state=sampler_seed)
     )[0]
 
-    uo_method = params_dict_train_setup["uo_method"]
+    oversamp_method = params_dict_train_setup["oversamp_method"]
+    undersamp_method = params_dict_train_setup["undersamp_method"]
     scaler_method = params_dict_train_setup["scaler_method"]
     imbalance_ratio = params_dict_train_setup["imbalance_ratio"]
     classifier = params_dict_train_setup["classifier"]
     print(
-        f"classifier: {classifier}, uo_method: {uo_method}, imbalance_ratio: {imbalance_ratio}"
+        f"classifier: {classifier}, oversamp_method: {oversamp_method}, undersamp_method: {undersamp_method}, imbalance_ratio: {imbalance_ratio}"
     )
 
     # get classifier and its parameters
@@ -270,7 +282,8 @@ def train_single_model(
     model_metrics_dict, feat_col_list = kfold_cv(
         df,
         clf,
-        uo_method,
+        oversamp_method,
+        undersamp_method,
         scaler_method,
         imbalance_ratio,
         meta_label_cols,
@@ -424,6 +437,7 @@ def train_milling_models(args):
 
 
     processed_data_milling_dir = path_data_dir / "processed/milling"
+    print(processed_data_milling_dir)
 
 
     RAND_SEARCH_ITER = args.rand_search_iter

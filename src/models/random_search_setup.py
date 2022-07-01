@@ -10,6 +10,7 @@ from scipy.stats import randint as sp_randint
 from scipy.stats import uniform
 import numpy as np
 import random
+
 # from src.models.classifiers import (
 #     rf_classifier,
 #     xgb_classifier,
@@ -28,16 +29,19 @@ import random
 
 general_params = {
     "scaler_method": [
-        # "standard", 
+        # "standard",
         # "minmax",
         None
     ],
-    "uo_method": [
+    "oversamp_method": [
         # "random_over",
-        # "random_under",
-        # "random_under_bootstrap",
         # "smote",
         # "adasyn",
+        None,
+    ],
+    "undersamp_method": [
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "imbalance_ratio": [0.1, 0.3, 0.5, 0.7, 0.8, 1.0],
@@ -132,7 +136,9 @@ ridge_params = {
 svm_params = {
     "kernel": ["linear", "poly", "rbf", "sigmoid"],
     "degree": sp_randint(2, 5),
-    "C":  np.round(np.arange(0.01, 3.0, 0.02), 2), # uniform(loc=0, scale=2), # [0.01, 0.1, 0.5, 0.7, 1.0, 1.3, 2.0, 5.0],
+    "C": np.round(
+        np.arange(0.01, 3.0, 0.02), 2
+    ),  # uniform(loc=0, scale=2), # [0.01, 0.1, 0.5, 0.7, 1.0, 1.3, 2.0, 5.0],
     "max_iter": [25000],
     "verbose": [False],
 }
