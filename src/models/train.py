@@ -117,6 +117,16 @@ def kfold_cv(
             x_test_cols = df_test.columns
             x_test = df_test.values
 
+            # over-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
+            )
+
+            # under-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
+            )
+
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
@@ -148,15 +158,7 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-            # over-sample the data
-            x_train, y_train = under_over_sampler(
-                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
-            )
 
-            # under-sample the data
-            x_train, y_train = under_over_sampler(
-                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
-            )
 
             # train model
             print("x_train shape:", x_train.shape)
@@ -189,6 +191,16 @@ def kfold_cv(
             x_test_cols = df_test.columns
             x_test = df_test.values
 
+            # over-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
+            )
+
+            # under-sample the data
+            x_train, y_train = under_over_sampler(
+                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
+            )
+
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
@@ -220,15 +232,7 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-            # over-sample the data
-            x_train, y_train = under_over_sampler(
-                x_train, y_train, method=oversamp_method, ratio=oversamp_ratio
-            )
 
-            # under-sample the data
-            x_train, y_train = under_over_sampler(
-                x_train, y_train, method=undersamp_method, ratio=undersamp_ratio
-            )
 
             # train model
             clone_clf.fit(x_train, y_train)
