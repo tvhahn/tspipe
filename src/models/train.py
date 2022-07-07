@@ -269,8 +269,22 @@ def train_single_model(
     oversamp_ratio = params_dict_train_setup["oversamp_ratio"]
     undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
+
+    # add any qualifiers to the parameters. e.g. if "smote_enn", then do not use undersampling
+    if oversamp_method in ["smote_enn", "smote_tomek"]:
+        undersamp_method = None
+        params_dict_train_setup["undersamp_method"] = None
+
+    if oversamp_method == None:
+        oversamp_ratio = None
+        params_dict_train_setup["oversamp_ratio"] = None
+
+    if undersamp_method == None:
+        undersamp_ratio = None
+        params_dict_train_setup["undersamp_ratio"] = None
+
     print(
-        f"classifier: {classifier}, oversamp_method: {oversamp_method}, undersamp_method: {undersamp_method}"
+        f"classifier: {classifier}, oversamp_method: {oversamp_method}, oversamp_ratio: {oversamp_ratio} undersamp_method: {undersamp_method} undersamp_ratio: {undersamp_ratio}"
     )
 
     # get classifier and its parameters
