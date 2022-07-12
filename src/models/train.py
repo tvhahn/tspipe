@@ -1,3 +1,4 @@
+from tabnanny import verbose
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import ParameterSampler
@@ -7,6 +8,7 @@ import argparse
 import logging
 import shutil
 from datetime import datetime
+from ast import literal_eval
 from sklearn.base import clone
 from sklearn.model_selection import StratifiedKFold
 from src.models.utils import (
@@ -17,7 +19,7 @@ from src.models.utils import (
     collate_scores_binary_classification,
     get_classifier_and_params,
     get_model_metrics_df,
-    feat_selection_binary_classification
+    feat_selection_binary_classification,
 )
 from src.models.random_search_setup import general_params
 from src.models.classifiers import (
@@ -58,6 +60,7 @@ from src.visualization.visualize import plot_pr_roc_curves_kfolds
 # from https://stackoverflow.com/a/69019168
 # logging.getLogger('numba').setLevel(logging.WARNING)
 
+
 def kfold_cv(
     df,
     clf,
@@ -72,6 +75,7 @@ def kfold_cv(
     n_splits=5,
     feat_selection="False",
     feat_col_list=None,
+    early_stopping_rounds=None,
 ):
 
     scores_list = []
@@ -129,10 +133,10 @@ def kfold_cv(
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
-            print("type(feat_selection):", type(feat_selection))
-            print("feat_selection:", feat_selection)
-            print("type(feat_col_list):", type(feat_col_list))
-            print("feat_col_list:", feat_col_list)
+            # print("type(feat_selection):", type(feat_selection))
+            # print("feat_selection:", feat_selection)
+            # print("type(feat_col_list):", type(feat_col_list))
+            # print("feat_col_list:", feat_col_list)
 
             if feat_selection == "True" and i == 0:
                 print("performing feature selection")
@@ -165,11 +169,19 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-
-
             # train model
             print("x_train shape:", x_train.shape)
-            clone_clf.fit(x_train, y_train)
+
+            if early_stopping_rounds is not None:
+                clone_clf.fit(
+                    x_train,
+                    y_train,
+                    early_stopping_rounds=early_stopping_rounds,
+                    eval_set=[(x_train, y_train), (x_test, y_test)],
+                    verbose=True,
+                )
+            else:
+                clone_clf.fit(x_train, y_train)
 
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
@@ -239,10 +251,15 @@ def kfold_cv(
             # if feat_col_list is None:
             #     feat_col_list = list(x_train_cols)
 
-
-
-            # train model
-            clone_clf.fit(x_train, y_train)
+            if early_stopping_rounds is not None:
+                clone_clf.fit(
+                    x_train,
+                    y_train,
+                    early_stopping_rounds=early_stopping_rounds,
+                    eval_set=[(x_train, y_train), (x_test, y_test)],
+                )
+            else:
+                clone_clf.fit(x_train, y_train)
 
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
@@ -276,6 +293,14 @@ def train_single_model(
     oversamp_ratio = params_dict_train_setup["oversamp_ratio"]
     undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
+
+    # if classifier is "xgb" and the 
+    if classifier == "xgb" and isinstance(params_dict_train_setup["early_stopping_rounds"], (int, float)):
+        early_stopping_rounds = int(params_dict_train_setup["early_stopping_rounds"])
+        print("early_stopping_rounds:", early_stopping_rounds)
+        print("type(early_stopping_rounds)", type(early_stopping_rounds))
+    else:
+        early_stopping_rounds = None
 
     # add any qualifiers to the parameters. e.g. if "smote_enn", then do not use undersampling
     if oversamp_method in ["smote_enn", "smote_tomek"]:
@@ -320,6 +345,7 @@ def train_single_model(
         n_splits=5,
         feat_selection=feat_selection,
         feat_col_list=feat_col_list,
+        early_stopping_rounds=early_stopping_rounds,
     )
 
     # added additional parameters to the training setup dictionary
@@ -413,8 +439,6 @@ def random_search_runner(
 
             results_list.append(pd.concat([df_t, df_m, df_c], axis=1))
 
-            
-
             if i % save_freq == 0:
                 df_results = pd.concat(results_list)
 
@@ -469,11 +493,8 @@ def train_milling_models(args):
     # set directories
     proj_dir, path_data_dir, path_save_dir = set_directories(args)
 
-
-
     processed_data_milling_dir = path_data_dir / "processed/milling"
     print(processed_data_milling_dir)
-
 
     RAND_SEARCH_ITER = args.rand_search_iter
 
@@ -486,9 +507,7 @@ def train_milling_models(args):
     else:
         feat_file_name = "milling_features.csv.gz"
 
-    df = pd.read_csv(
-        processed_data_milling_dir / feat_file_name, compression="gzip"
-    )
+    df = pd.read_csv(processed_data_milling_dir / feat_file_name, compression="gzip")
 
     # add y label
     df = milling_add_y_label_anomaly(df)
@@ -531,7 +550,6 @@ def main(args):
         print("no dataset for training specified")
     # elif args.dataset == "cnc":
     #     train_cnc_models(args)
-
 
 
 if __name__ == "__main__":

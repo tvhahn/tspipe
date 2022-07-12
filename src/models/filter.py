@@ -127,6 +127,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "oversamp_ratio",
             "undersamp_ratio",
             "classifier",
+            "early_stopping_rounds",
         ]
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 

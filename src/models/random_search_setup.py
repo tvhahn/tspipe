@@ -51,15 +51,16 @@ general_params = {
     ],
     "oversamp_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0],
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    "early_stopping_rounds":[None, 10],
     "classifier": [
-        "rf",
+        # "rf",
         "xgb",
-        "knn",
-        "lr",
-        "sgd",
-        "ridge",
-        "svm",
-        "nb",
+        # "knn",
+        # "svm",
+        # "lr",
+        # "sgd",
+        # "ridge",
+        # "nb",
     ],
 }
 
@@ -82,10 +83,11 @@ rf_params = {
 # xgboost parameters
 # https://xgboost.readthedocs.io/en/latest/python/python_api.html#module-xgboost.sklearn
 xgb_params = {
-    "max_depth": sp_randint(2, 64),
+    "max_depth": sp_randint(1, 64),
     "eta": [0.1, 0.3, 0.7],
     "objective": ["binary:logistic"],
     "eval_metric": ["error", "aucpr"],
+    # "early_stopping_rounds": [None, 10, 20, 50, 100],
     "seed": sp_randint(1, 2 ** 16),
     "scale_pos_weight": sp_randint(1, 100),
     "lambda": [0.0, 0.5, 1, 1.5, 3],

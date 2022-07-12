@@ -131,7 +131,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/filter.py \
 		-p $(PROJECT_DIR) \
 		--dataset milling \
-		--save_n_figures 2 \
+		--save_n_figures 1 \
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
 		--final_dir_name final_results_milling
