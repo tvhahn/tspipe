@@ -171,9 +171,9 @@ def main(args):
             params_clf = rebuild_params_clf(df, row_idx)
             general_params = rebuild_general_params(df, row_idx)
 
-            meta_label_cols = ["cut_id", "cut_no", "case", "tool_class"]
-            stratification_grouping_col = "cut_no"
-            y_label_col = "y"
+            meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
+            stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
+            y_label_col = df.iloc[row_idx]["y_label_col"]
             feat_selection = True
             feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
             sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
@@ -252,7 +252,7 @@ if __name__ == "__main__":
         "--dataset",
         default="milling",
         type=str,
-        help="Dataset used in training",
+        help="Dataset used in training. Options are 'milling', 'cnc', 'airbus'",
     )
 
     parser.add_argument(
@@ -282,6 +282,13 @@ if __name__ == "__main__":
         type=str,
         default="interim",
         help="Folder name containing all the interim result csv's that will be compiled into one.",
+    )
+
+    parser.add_argument(
+        "--save_models",
+        type=str,
+        default="False",
+        help="Save the models, and scaler, to disk.",
     )
 
     args = parser.parse_args()

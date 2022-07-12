@@ -199,8 +199,6 @@ def feat_selection_binary_classification(
             select_features,
         )  # import in loop because it is a heavy package
 
-        print("Performing feature selection")
-
         x_train = select_features(
             pd.DataFrame(x_train, columns=x_train_cols),
             y_train,

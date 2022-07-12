@@ -129,8 +129,13 @@ def kfold_cv(
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
+            print("type(feat_selection):", type(feat_selection))
+            print("feat_selection:", feat_selection)
+            print("type(feat_col_list):", type(feat_col_list))
+            print("feat_col_list:", feat_col_list)
 
             if feat_selection == "True" and i == 0:
+                print("performing feature selection")
                 x_train, x_test, feat_col_list = feat_selection_binary_classification(
                     x_train,
                     y_train,
@@ -141,6 +146,7 @@ def kfold_cv(
                     feat_col_list=None,
                 )
             elif feat_selection == "True" and feat_col_list is not None:
+                print("using already selected features")
                 x_train, x_test, feat_col_list = feat_selection_binary_classification(
                     x_train,
                     y_train,
@@ -151,6 +157,7 @@ def kfold_cv(
                     feat_col_list=feat_col_list,
                 )
             else:
+                print("not using feature selection")
                 pass
 
             # can use this to save the feature column names
@@ -333,6 +340,7 @@ def random_search_runner(
     stratification_grouping_col,
     proj_dir,
     path_save_dir,
+    feat_file_name,
     feat_selection,
     dataset_name=None,
     y_label_col="y",
@@ -381,6 +389,10 @@ def random_search_runner(
             # train setup params
             df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
             df_t["feat_col_list"] = str(feat_col_list)
+            df_t["meta_label_cols"] = str(meta_label_cols)
+            df_t["stratification_grouping_col"] = str(stratification_grouping_col)
+            df_t["y_label_col"] = str(y_label_col)
+            df_t["feat_file_name"] = str(feat_file_name)
 
             if args.date_time:
                 now_str = str(args.date_time)
@@ -400,6 +412,8 @@ def random_search_runner(
             df_m = get_model_metrics_df(model_metrics_dict)
 
             results_list.append(pd.concat([df_t, df_m, df_c], axis=1))
+
+            
 
             if i % save_freq == 0:
                 df_results = pd.concat(results_list)
@@ -500,6 +514,7 @@ def train_milling_models(args):
         STRATIFICATION_GROUPING_COL,
         proj_dir,
         path_save_dir,
+        feat_file_name,
         feat_selection=args.feat_selection,
         dataset_name="milling",
         y_label_col=Y_LABEL_COL,
