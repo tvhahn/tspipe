@@ -132,6 +132,51 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
+def train_and_plot_model_results(df, df_feat, save_n_figures, path_model_curves):
+    for row_idx in range(save_n_figures):
+
+        params_clf = rebuild_params_clf(df, row_idx)
+        general_params = rebuild_general_params(df, row_idx)
+
+        meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
+        stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
+        y_label_col = df.iloc[row_idx]["y_label_col"]
+        feat_selection = True
+        feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
+        sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
+        id = df.iloc[row_idx]["id"]
+
+        (
+            model_metrics_dict,
+            params_dict_clf_named,
+            params_dict_train_setup,
+            feat_col_list,
+        ) = train_single_model(
+            df_feat,
+            sampler_seed,
+            meta_label_cols,
+            stratification_grouping_col,
+            y_label_col,
+            feat_selection,
+            feat_col_list,
+            general_params=general_params,
+            params_clf=params_clf,
+        )
+
+        plot_pr_roc_curves_kfolds(
+            model_metrics_dict["precisions_array"],
+            model_metrics_dict["recalls_array"],
+            model_metrics_dict["fpr_array"],
+            model_metrics_dict["tpr_array"],
+            model_metrics_dict["rocauc_array"],
+            model_metrics_dict["prauc_array"],
+            percent_anomalies_truth=0.073,
+            path_save_name=path_model_curves / f"curve_{id}.png",
+            save_plot=True,
+            dpi=300,
+        )
+
+
 def main(args):
 
     proj_dir, path_data_dir, path_model_dir, path_interim_dir, path_final_dir = set_directories(args)
@@ -167,48 +212,8 @@ def main(args):
         path_model_curves = path_final_dir / "model_curves"
         Path(path_model_curves).mkdir(parents=True, exist_ok=True)
 
-        for row_idx in range(args.save_n_figures):
+        train_and_plot_model_results(df, df_feat, args.save_n_figures, path_model_curves)
 
-            params_clf = rebuild_params_clf(df, row_idx)
-            general_params = rebuild_general_params(df, row_idx)
-
-            meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
-            stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
-            y_label_col = df.iloc[row_idx]["y_label_col"]
-            feat_selection = True
-            feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
-            sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
-            id = df.iloc[row_idx]["id"]
-
-            (
-                model_metrics_dict,
-                params_dict_clf_named,
-                params_dict_train_setup,
-                feat_col_list,
-            ) = train_single_model(
-                df_feat,
-                sampler_seed,
-                meta_label_cols,
-                stratification_grouping_col,
-                y_label_col,
-                feat_selection,
-                feat_col_list,
-                general_params=general_params,
-                params_clf=params_clf,
-            )
-
-            plot_pr_roc_curves_kfolds(
-                model_metrics_dict["precisions_array"],
-                model_metrics_dict["recalls_array"],
-                model_metrics_dict["fpr_array"],
-                model_metrics_dict["tpr_array"],
-                model_metrics_dict["rocauc_array"],
-                model_metrics_dict["prauc_array"],
-                percent_anomalies_truth=0.073,
-                path_save_name=path_model_curves / f"curve_{id}.png",
-                save_plot=True,
-                dpi=300,
-            )
 
 
 if __name__ == "__main__":

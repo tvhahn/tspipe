@@ -54,13 +54,13 @@ general_params = {
     "early_stopping_rounds":[None, 10],
     "classifier": [
         # "rf",
-        "xgb",
+        # "xgb",
         # "knn",
         # "svm",
         # "lr",
         # "sgd",
         # "ridge",
-        # "nb",
+        "nb",
     ],
 }
 
