@@ -135,7 +135,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--dataset milling \
 		--feat_file_name milling_features.csv.gz \
 		--final_dir_name final_results_milling \
-		--save_n_figures 1
+		--save_n_figures 6
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif

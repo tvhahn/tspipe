@@ -128,6 +128,7 @@ def order_columns_on_results_df(df):
         "feat_file_name",
         "id",
         "meta_label_cols",
+        "feat_col_list",
         "stratification_grouping_col",
         "y_label_col",
         "scaler_method",
