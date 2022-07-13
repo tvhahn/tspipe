@@ -38,7 +38,7 @@ def set_directories(args):
         else:
             print("Assume on local compute")
             path_model_dir = proj_dir / "models"
-    
+
     path_interim_dir = path_model_dir / args.interim_dir_name
     path_final_dir = path_model_dir / args.final_dir_name
 
@@ -132,7 +132,10 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
-def train_and_plot_model_results(df, df_feat, save_n_figures, path_model_curves):
+def plot_generic(df, df_feat, save_n_figures, path_model_curves):
+
+    n_rows = df.shape[0]
+
     for row_idx in range(save_n_figures):
 
         params_clf = rebuild_params_clf(df, row_idx)
@@ -141,7 +144,7 @@ def train_and_plot_model_results(df, df_feat, save_n_figures, path_model_curves)
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
-        feat_selection = True
+        feat_selection = True  
         feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
@@ -176,44 +179,73 @@ def train_and_plot_model_results(df, df_feat, save_n_figures, path_model_curves)
             dpi=300,
         )
 
+        if row_idx == n_rows -1:
+            print("No more results to save")
+            break
+
+
+def milling_plot_results(
+    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
+):
+
+    # load feature dataframe
+    df_feat = pd.read_csv(
+        path_dataset_processed_dir / feat_file_name,
+        compression="gzip",
+    )
+
+    df_feat = milling_add_y_label_anomaly(df_feat)
+
+    plot_generic(df, df_feat, save_n_figures, path_model_curves)
+
 
 def main(args):
 
-    proj_dir, path_data_dir, path_model_dir, path_interim_dir, path_final_dir = set_directories(args)
+    (
+        proj_dir,
+        path_data_dir,
+        path_model_dir,
+        path_interim_dir,
+        path_final_dir,
+    ) = set_directories(args)
 
     df = pd.read_csv(
         path_final_dir / args.compiled_csv_name,
     )
+
     df = filter_results_df(df)
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    sort_by = 'prauc_avg'
-    df = df.groupby(['classifier']).head(int(args.keep_top_n)).sort_values(by=sort_by, ascending=False)
+    sort_by = "prauc_avg"
+    df = (
+        df.groupby(["classifier"])
+        .head(int(args.keep_top_n))
+        .sort_values(by=sort_by, ascending=False)
+    )
 
     df.to_csv(path_final_dir / args.filtered_csv_name, index=False)
 
+    if args.save_n_figures > 0:
+        path_model_curves = path_final_dir / "model_curves"
+        Path(path_model_curves).mkdir(parents=True, exist_ok=True)
 
-    # save a certain number of PR-AUC and ROC-AUC curves
+    ########################################################################
+    #### MILLING DATASET ####
+    ########################################################################
     if args.dataset == "milling" and args.save_n_figures > 0:
         assert (
             df.iloc[0]["dataset"] == "milling"
         ), "dataset in results csv is not the milling dataset"
 
-        folder_processed_data_milling = path_data_dir / "processed/milling"
+        path_milling_processed_dir = path_data_dir / "processed" / "milling"
 
-        # load feature dataframe
-        df_feat = pd.read_csv(
-            folder_processed_data_milling / "milling_features.csv.gz",
-            compression="gzip",
+        milling_plot_results(
+            df,
+            args.save_n_figures,
+            path_milling_processed_dir,
+            feat_file_name="milling_features.csv.gz",
+            path_model_curves=path_model_curves,
         )
-
-        df_feat = milling_add_y_label_anomaly(df_feat)
-
-        path_model_curves = path_final_dir / "model_curves"
-        Path(path_model_curves).mkdir(parents=True, exist_ok=True)
-
-        train_and_plot_model_results(df, df_feat, args.save_n_figures, path_model_curves)
-
 
 
 if __name__ == "__main__":
