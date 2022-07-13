@@ -130,11 +130,12 @@ filter: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/filter.py \
 		-p $(PROJECT_DIR) \
-		--dataset milling \
-		--save_n_figures 1 \
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
-		--final_dir_name final_results_milling
+		--dataset milling \
+		--feat_file_name milling_features.csv.gz \
+		--final_dir_name final_results_milling \
+		--save_n_figures 1
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif

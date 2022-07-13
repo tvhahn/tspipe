@@ -121,48 +121,48 @@ def rebuild_params_clf(df, row_idx):
 def order_columns_on_results_df(df):
 
     primary_cols = [
-            "classifier",
-            "sampler_seed",
-            "date_time",
-            "dataset",
-            "feat_file_name",
-            "id",
-            "meta_label_cols",
-            "stratification_grouping_col",
-            "y_label_col",
-            "scaler_method",
-            "oversamp_method",
-            "oversamp_ratio",
-            "undersamp_method",
-            "undersamp_ratio",
-            "early_stopping_rounds",
-            "prauc_min",
-            "prauc_max",
-            "prauc_avg",
-            "prauc_std",
-            "rocauc_min",
-            "rocauc_max",
-            "rocauc_avg",
-            "rocauc_std",
-            "accuracy_min",
-            "accuracy_max",
-            "accuracy_avg",
-            "accuracy_std",
-            "precision_score_min",
-            "precision_score_max",
-            "precision_score_avg",
-            "precision_score_std",
-            "recall_score_min",
-            "recall_score_max",
-            "recall_score_avg",
-            "recall_score_std",
-            "f1_score_min",
-            "f1_score_max",
-            "f1_score_avg",
-            "f1_score_std",
-            "n_thresholds_min",
-            "n_thresholds_max",
-        ]
+        "classifier",
+        "sampler_seed",
+        "date_time",
+        "dataset",
+        "feat_file_name",
+        "id",
+        "meta_label_cols",
+        "stratification_grouping_col",
+        "y_label_col",
+        "scaler_method",
+        "oversamp_method",
+        "oversamp_ratio",
+        "undersamp_method",
+        "undersamp_ratio",
+        "early_stopping_rounds",
+        "prauc_min",
+        "prauc_max",
+        "prauc_avg",
+        "prauc_std",
+        "rocauc_min",
+        "rocauc_max",
+        "rocauc_avg",
+        "rocauc_std",
+        "accuracy_min",
+        "accuracy_max",
+        "accuracy_avg",
+        "accuracy_std",
+        "precision_score_min",
+        "precision_score_max",
+        "precision_score_avg",
+        "precision_score_std",
+        "recall_score_min",
+        "recall_score_max",
+        "recall_score_avg",
+        "recall_score_std",
+        "f1_score_min",
+        "f1_score_max",
+        "f1_score_avg",
+        "f1_score_std",
+        "n_thresholds_min",
+        "n_thresholds_max",
+    ]
 
     # get secondary columns, which are all the remaining columns from the df
     secondary_cols = [col for col in df.columns if col not in primary_cols]
@@ -197,7 +197,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
-        feat_selection = True  
+        feat_selection = True
         feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
@@ -232,7 +232,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
             dpi=300,
         )
 
-        if row_idx == n_rows -1:
+        if row_idx == n_rows - 1:
             print("No more results to save")
             break
 
@@ -297,7 +297,7 @@ def main(args):
             df,
             args.save_n_figures,
             path_milling_processed_dir,
-            feat_file_name="milling_features.csv.gz",
+            feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
         )
 
@@ -345,6 +345,12 @@ if __name__ == "__main__":
         default="milling",
         type=str,
         help="Dataset used in training. Options are 'milling', 'cnc', 'airbus'",
+    )
+
+    parser.add_argument(
+        "--feat_file_name",
+        type=str,
+        help="Name of the feature file to use. Should be found in path_data_dir/processed/{dataset}/feat_file_name",
     )
 
     parser.add_argument(
