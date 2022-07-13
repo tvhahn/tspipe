@@ -118,6 +118,59 @@ def rebuild_params_clf(df, row_idx):
     return {k: [params_clf[k]] for k in params_clf.keys()}  # put each value in a list
 
 
+def order_columns_on_results_df(df):
+
+    primary_cols = [
+            "classifier",
+            "sampler_seed",
+            "date_time",
+            "dataset",
+            "feat_file_name",
+            "id",
+            "meta_label_cols",
+            "stratification_grouping_col",
+            "y_label_col",
+            "scaler_method",
+            "oversamp_method",
+            "oversamp_ratio",
+            "undersamp_method",
+            "undersamp_ratio",
+            "early_stopping_rounds",
+            "prauc_min",
+            "prauc_max",
+            "prauc_avg",
+            "prauc_std",
+            "rocauc_min",
+            "rocauc_max",
+            "rocauc_avg",
+            "rocauc_std",
+            "accuracy_min",
+            "accuracy_max",
+            "accuracy_avg",
+            "accuracy_std",
+            "precision_score_min",
+            "precision_score_max",
+            "precision_score_avg",
+            "precision_score_std",
+            "recall_score_min",
+            "recall_score_max",
+            "recall_score_avg",
+            "recall_score_std",
+            "f1_score_min",
+            "f1_score_max",
+            "f1_score_avg",
+            "f1_score_std",
+            "n_thresholds_min",
+            "n_thresholds_max",
+        ]
+
+    # get secondary columns, which are all the remaining columns from the df
+    secondary_cols = [col for col in df.columns if col not in primary_cols]
+
+    # return the df with the primary columns first, then the secondary columns
+    return df[primary_cols + secondary_cols]
+
+
 def rebuild_general_params(df, row_idx, general_param_keys=None):
     if general_param_keys is None:
         general_param_keys = [
@@ -214,6 +267,7 @@ def main(args):
     )
 
     df = filter_results_df(df)
+    df = order_columns_on_results_df(df)
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
     sort_by = "prauc_avg"
