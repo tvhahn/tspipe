@@ -43,7 +43,10 @@ endif
 ## Make Dataset
 data: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --sub_folder_name stride64_len64
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py \
+	-p $(PROJECT_DIR) \
+	--path_data_dir $(PROJECT_DIR)/data/ \
+	--sub_folder_name stride64_len64
 else # assume on HPC
 	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
@@ -51,7 +54,11 @@ endif
 ## Make raw data for CNC
 splits_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/dataprep/make_splits_cnc.py -p $(PROJECT_DIR) --path_data_dir $(PROJECT_DIR)/data/ --save_dir_name data_splits --n_cores 6
+	$(PYTHON_INTERPRETER) src/dataprep/make_splits_cnc.py \
+	-p $(PROJECT_DIR) \
+	--path_data_dir $(PROJECT_DIR)/data/ \
+	--save_dir_name data_splits \
+	--n_cores 6
 else # assume on HPC
 	sbatch src/dataprep/make_splits_cnc_hpc.sh $(PROJECT_DIR)
 endif
@@ -64,7 +71,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--path_data_dir $(PROJECT_DIR)/data/ \
 		--split_dir_name data_splits \
-		--save_dir_name data_raw_processed \
+		--raw_dir_name data_raw_processed \
 		--tool_no 54
 else # assume on HPC
 	sbatch src/dataprep/make_dataset_cnc_hpc.sh $(PROJECT_DIR)
@@ -86,6 +93,21 @@ features: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py \
 		--path_data_folder $(PROJECT_DIR)/data/
+else # assume on HPC
+	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
+endif
+
+
+## Make Features
+features_cnc: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/features/build_features_cnc.py \
+		-p $(PROJECT_DIR) \
+		--path_data_dir $(PROJECT_DIR)/data/ \
+		--raw_dir_name data_raw_processed \
+		--raw_file_name cnc_raw_54.csv \
+		--processed_dir_name cnc_features \
+		--feat_file_name cnc_features_54.csv
 else # assume on HPC
 	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif

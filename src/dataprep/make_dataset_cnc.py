@@ -26,7 +26,7 @@ def set_directories(args):
         path_data_dir = proj_dir / "data"
 
     path_splits_dir = path_data_dir / "raw" / "cnc" / args.split_dir_name
-    path_processed_raw_dir = path_data_dir / "raw" / "cnc" / args.save_dir_name
+    path_processed_raw_dir = path_data_dir / "raw" / "cnc" / args.raw_dir_name
     path_processed_raw_dir.mkdir(parents=True, exist_ok=True)
 
 
@@ -92,11 +92,21 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--save_dir_name",
+        "--raw_dir_name",
         type=str,
         default="data_raw_processed",
         help="Name of the subfolder that will contain the final raw csv file",
     )
+
+
+    # parser.add_argument(
+    #     "--cut_ids_file_name",
+    #     type=str,
+    #     default="unique_cuts.csv",
+    #     help="Name of the csv that contains the list of all the unique cut ids",
+    # )
+
+
 
     parser.add_argument(
         "--split_dir_name",
@@ -136,6 +146,14 @@ if __name__ == "__main__":
         path_processed_raw_dir / f"cnc_raw_{args.tool_no}.csv",
         index=False,
         )
+
+    # get all the unique ids from the df and save as cut_ids_file_name
+    # cut_ids = df["id"].unique()
+    # print("Saving cut ids...")
+    # pd.DataFrame(cut_ids).to_csv(
+    #     path_processed_raw_dir / f"cnc_raw_{args.tool_no}_unique_ids.csv",
+    #     index=False,
+    #     )
 
 
     shutil.copy(
