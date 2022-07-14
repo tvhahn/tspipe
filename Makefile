@@ -127,7 +127,7 @@ train: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_milling \
-		--rand_search_iter 100 \
+		--rand_search_iter 10 \
 		--feat_selection False \
 		--dataset milling \
 		--feat_file_name milling_features.csv.gz

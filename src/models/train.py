@@ -295,7 +295,12 @@ def train_single_model(
     classifier = params_dict_train_setup["classifier"]
 
     # if classifier is "xgb" and the 
-    if classifier == "xgb" and isinstance(params_dict_train_setup["early_stopping_rounds"], (int, float)):
+    if (
+        classifier == "xgb"
+        and "early_stopping_rounds" in params_dict_train_setup.keys()
+        and isinstance(params_dict_train_setup["early_stopping_rounds"], (int, float))
+        and params_dict_train_setup["early_stopping_rounds"] >= 0
+    ):
         early_stopping_rounds = int(params_dict_train_setup["early_stopping_rounds"])
         print("early_stopping_rounds:", early_stopping_rounds)
         print("type(early_stopping_rounds)", type(early_stopping_rounds))
