@@ -165,6 +165,9 @@ def order_columns_on_results_df(df):
         "n_thresholds_max",
     ]
 
+    # remove any columns names from primary_cols that are not in df
+    primary_cols = [col for col in primary_cols if col in df.columns]
+
     # get secondary columns, which are all the remaining columns from the df
     secondary_cols = [col for col in df.columns if col not in primary_cols]
 
@@ -183,6 +186,10 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "classifier",
             "early_stopping_rounds",
         ]
+
+    # remove any keys from general_param_keys that are not in df
+    general_param_keys = [col for col in general_param_keys if col in df.columns]
+    
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
