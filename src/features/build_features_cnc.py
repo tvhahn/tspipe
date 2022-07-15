@@ -27,7 +27,7 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_raw_dir, path_processed_dir
 
     
-def cnc_features(df, n_chunks, chunk_index, feature_dictionary=comprehensive_features):
+def cnc_features(df, n_chunks, chunk_index, n_jobs, feature_dictionary=comprehensive_features):
     """Extracts features from the raw milling dataframe.
 
     Parameters
@@ -64,6 +64,7 @@ def cnc_features(df, n_chunks, chunk_index, feature_dictionary=comprehensive_fea
             column_sort="time",
             default_fc_parameters=feature_dictionary,
             disable_progressbar=False,
+            n_jobs=n_jobs,
         )
 
     else:
@@ -74,6 +75,7 @@ def cnc_features(df, n_chunks, chunk_index, feature_dictionary=comprehensive_fea
             column_sort="time",
             default_fc_parameters=feature_dictionary,
             disable_progressbar=False,
+            n_jobs=n_jobs,
         )
 
     # return the dataframe with the features and the labels
@@ -116,7 +118,7 @@ def main(args):
 
 
 
-    df_feat = cnc_features(df, n_chunks, chunk_index, feat_dict)
+    df_feat = cnc_features(df, n_chunks, chunk_index, n_jobs=args.n_cores, feature_dictionary=feat_dict)
 
     # assert "tool_class" in df_feat.columns, "tool_class column does not exist"
     # assert "cut_id" in df_feat.columns, "tool_class column does not exist"
@@ -175,6 +177,10 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--n_chunks", type=int, default=1, help="Number of chunks to split dataframe into"
+    )
+
+    parser.add_argument(
+        "--n_cores", type=int, default=2, help="Number of cores to use"
     )
 
     parser.add_argument(

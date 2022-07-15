@@ -69,12 +69,12 @@ custom_1_features.update({
     # "autocorrelation": [{"lag": lag} for lag in range(10)],
     # "agg_autocorrelation": [{"f_agg": s, "maxlag": 40} for s in ["mean", "median", "var"]],
     # "partial_autocorrelation": [{"lag": lag} for lag in range(10)],
-    "number_cwt_peaks": [{"n": n} for n in [1, 5]],
-    "number_peaks": [{"n": n} for n in [1, 3, 5, 10, 50]],
-    "binned_entropy": [{"max_bins": max_bins} for max_bins in [10]],
-    "index_mass_quantile": [{"q": q} for q in [.1, .2, .3, .4, .6, .7, .8, .9]],
-    "cwt_coefficients": [{"widths": width, "coeff": coeff, "w": w} for
-                            width in [(2, 5, 10, 20)] for coeff in range(15) for w in (2, 5, 10, 20)],
+    # "number_cwt_peaks": [{"n": n} for n in [1, 5]],
+    # "number_peaks": [{"n": n} for n in [1, 3, 5, 10, 50]],
+    # "binned_entropy": [{"max_bins": max_bins} for max_bins in [10]],
+    # "index_mass_quantile": [{"q": q} for q in [.1, .2, .3, .4, .6, .7, .8, .9]],
+    # "cwt_coefficients": [{"widths": width, "coeff": coeff, "w": w} for
+    #                         width in [(2, 5, 10, 20)] for coeff in range(15) for w in (2, 5, 10, 20)],
     "spkt_welch_density": [{"coeff": coeff} for coeff in [2, 5, 8]],
     "ar_coefficient": [{"coeff": coeff, "k": k} for coeff in range(10 + 1) for k in [10]],
     # "change_quantiles": [{"ql": ql, "qh": qh, "isabs": b, "f_agg": f}
