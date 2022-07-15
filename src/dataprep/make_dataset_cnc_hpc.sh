@@ -19,6 +19,6 @@ python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py \
     -p $PROJECT_DIR \
     --path_data_dir $SCRATCH_DATA_DIR \
     --split_dir_name data_splits \
-    --save_dir_name data_raw_processed \
+    --raw_dir_name data_raw_processed \
     --n_cores 32 \
     --tool_no 54
