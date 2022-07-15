@@ -13,6 +13,7 @@ from sklearn.base import clone
 from sklearn.model_selection import StratifiedKFold
 from src.models.utils import (
     milling_add_y_label_anomaly,
+    cnc_add_y_label_binary,
     under_over_sampler,
     scale_data,
     calculate_scores,
@@ -548,10 +549,72 @@ def train_milling_models(args):
     )
 
 
+def train_cnc_models(args):
+
+    # set directories
+    proj_dir, path_data_dir, path_save_dir = set_directories(args)
+
+    processed_data_cnc_dir = path_data_dir / "processed/cnc"
+    print(processed_data_cnc_dir)
+
+    RAND_SEARCH_ITER = args.rand_search_iter
+
+    # set a seed for the parameter sampler
+    # SAMPLER_SEED = random.randint(0, 2 ** 16)
+
+    # load feature dataframe
+    if args.feat_file_name:
+        feat_file_name = args.feat_file_name
+    else:
+        feat_file_name = "cnc_features_54.csv"
+
+    df = pd.read_csv(processed_data_cnc_dir / "cnc_features" / feat_file_name,)
+    df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
+    df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
+    df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
+
+    df_labels = pd.read_csv(processed_data_cnc_dir / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
+
+    # add y label
+    df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+
+    Y_LABEL_COL = "y"
+
+    # identify if there is another column you want to
+    # stratify on, besides the y label
+    # STRATIFICATION_GROUPING_COL = "case"
+    STRATIFICATION_GROUPING_COL = "case_tool_54"
+    # STRATIFICATION_GROUPING_COL = None
+
+    # list of the columns that are not features columns
+    # (not including the y-label column)
+    META_LABEL_COLS = ["id", "unix_date", "tool_no", "index_no"]
+
+    LOG_FILENAME = path_save_dir / "logging_example.out"
+    logging.basicConfig(filename=LOG_FILENAME, level=logging.ERROR)
+
+    random_search_runner(
+        df,
+        RAND_SEARCH_ITER,
+        META_LABEL_COLS,
+        STRATIFICATION_GROUPING_COL,
+        proj_dir,
+        path_save_dir,
+        feat_file_name,
+        feat_selection=args.feat_selection,
+        dataset_name="cnc",
+        y_label_col=Y_LABEL_COL,
+        save_freq=1,
+        debug=True,
+    )
+
+
 def main(args):
 
     if args.dataset == "milling":
         train_milling_models(args)
+    elif args.dataset == "cnc":
+        train_cnc_models(args)
     else:
         print("no dataset for training specified")
     # elif args.dataset == "cnc":

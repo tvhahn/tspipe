@@ -94,7 +94,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features.py \
 		--path_data_folder $(PROJECT_DIR)/data/
 else # assume on HPC
-	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)
+	bash src/features/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif
 
 
@@ -134,6 +134,21 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
+
+
+train_cnc: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/train.py \
+		--save_dir_name interim_results_cnc \
+		--rand_search_iter 10 \
+		--feat_selection False \
+		--dataset cnc \
+		--feat_file_name cnc_features_54.csv
+else # assume on HPC
+	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
+endif
+
+
 
 compile: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local

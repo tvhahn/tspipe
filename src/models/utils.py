@@ -345,3 +345,41 @@ def milling_add_y_label_anomaly(df_feat):
     df_feat = df_feat.reset_index(drop=True)  # reset index just in case
 
     return df_feat
+
+
+###############################################################################
+# CNC data functions
+###############################################################################
+def cnc_add_y_label_binary(df, df_labels, col_list_case=None):
+
+    df_labels["unix_date"] = df_labels["unix_date"].astype(int)
+
+    if col_list_case is not None:
+        df = df.merge(df_labels[["unix_date"] + col_list_case], on=["unix_date"])
+
+    # select all rows in df_labels where "failed_tools" is not empty
+    df_labels = df_labels[df_labels["failed_tools"].notna()].copy()
+
+    # convert each "failed_tools" string to a list
+    df_labels["failed_tools"] = df_labels["failed_tools"].apply(lambda x: x.split(" "))
+
+    df_labels = df_labels.explode('failed_tools')
+
+    # change dtype of "failed" column to int
+    df_labels = df_labels[["unix_date", "failed", "failed_tools"]]
+    df_labels["failed"] = df_labels["failed"].astype(int)
+
+    # drop any rows where "failed_tools" is not a numeric value
+    df_labels = df_labels[df_labels["failed_tools"].apply(lambda x: x.isnumeric())]
+    df_labels["failed_tools"] = df_labels["failed_tools"].astype(int)
+
+    df = pd.merge(df, df_labels[["unix_date", "failed", "failed_tools"]], left_on=["unix_date", "tool_no"], right_on=["unix_date", "failed_tools"], how="left").drop(columns=["failed_tools"])
+    df["failed"] = df["failed"].fillna(0).astype(int)
+
+    df["y"] = df["failed"].astype(int)
+    df = df.drop(columns=["failed"])
+
+    # drop any rows where "y" is > 1
+    df = df[df["y"] <= 1]
+
+    return df
