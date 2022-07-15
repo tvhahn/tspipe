@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --time=01:15:00 # 10 minutes
+#SBATCH --time=00:15:00 # 10 minutes
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=64G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=32G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
 #SBATCH --mail-user=18tcvh@queensu.ca   # Email to which notifications will be $
@@ -20,5 +20,5 @@ python $PROJECT_DIR/src/dataprep/make_dataset_cnc.py \
     --path_data_dir $SCRATCH_DATA_DIR \
     --split_dir_name data_splits \
     --raw_dir_name data_raw_processed \
-    --n_cores 32 \
+    --n_cores 16 \
     --tool_no 54
