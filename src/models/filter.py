@@ -10,7 +10,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from src.models.train import train_single_model
-from src.models.utils import milling_add_y_label_anomaly, get_model_metrics_df
+from src.models.utils import milling_add_y_label_anomaly, cnc_add_y_label_binary, get_model_metrics_df
 from ast import literal_eval
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
 
@@ -227,6 +227,11 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
             params_clf=params_clf,
         )
 
+        # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
+        df_feat_anom = df_feat[df_feat[y_label_col] == 1]
+        percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
+
+
         plot_pr_roc_curves_kfolds(
             model_metrics_dict["precisions_array"],
             model_metrics_dict["recalls_array"],
@@ -234,7 +239,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
             model_metrics_dict["tpr_array"],
             model_metrics_dict["rocauc_array"],
             model_metrics_dict["prauc_array"],
-            percent_anomalies_truth=0.073,
+            percent_anomalies_truth=percent_anom,
             path_save_name=path_model_curves / f"curve_{id}.png",
             save_plot=True,
             dpi=300,
@@ -256,6 +261,23 @@ def milling_plot_results(
     )
 
     df_feat = milling_add_y_label_anomaly(df_feat)
+
+    plot_generic(df, df_feat, save_n_figures, path_model_curves)
+
+
+def cnc_plot_results(
+    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
+):
+
+    df_feat = pd.read_csv(path_dataset_processed_dir / "cnc_features" / feat_file_name,)
+    df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
+    df_feat["tool_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-2]))
+    df_feat["index_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-1]))
+
+    df_labels = pd.read_csv(path_dataset_processed_dir / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
+
+    # add y label
+    df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves)
 
@@ -309,6 +331,18 @@ def main(args):
             path_model_curves=path_model_curves,
         )
 
+    elif args.dataset =="cnc" and args.save_n_figures > 0:
+        path_cnc_processed_dir = path_data_dir / "processed" / "cnc"
+
+        cnc_plot_results(
+            df,
+            args.save_n_figures,
+            path_cnc_processed_dir,
+            feat_file_name=args.feat_file_name,
+            path_model_curves=path_model_curves,
+        )
+    else:
+        pass
 
 if __name__ == "__main__":
 
