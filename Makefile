@@ -158,8 +158,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--n_cores 6 \
 		--path_model_dir $(PROJECT_DIR)/models \
-		--interim_dir_name interim_results_milling \
-		--final_dir_name final_results_milling
+		--interim_dir_name interim_results_cnc \
+		--final_dir_name final_results_cnc
 else # assume on HPC
 	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
 endif
@@ -171,9 +171,9 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
-		--dataset milling \
-		--feat_file_name milling_features.csv.gz \
-		--final_dir_name final_results_milling \
+		--dataset cnc \
+		--feat_file_name cnc_features_54.csv \
+		--final_dir_name final_results_cnc \
 		--save_n_figures 6
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
