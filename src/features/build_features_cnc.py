@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import argparse
 import logging
-from feat_param_dict import comprehensive_features, dummy_features
+from feat_param_dict import comprehensive_features, dummy_features, custom_1_features
 from src.features.utils import load_feat_json
 from tsfresh import extract_features
 
@@ -104,9 +104,17 @@ def main(args):
     if args.path_feat_json:
         feat_dict = load_feat_json(args.path_feat_json)
     else:
-        # feat_dict = comprehensive_features
-        print("Using dummy features")
-        feat_dict = dummy_features
+        if args.feat_dict_name == "comp":
+            feat_dict = comprehensive_features 
+        elif args.feat_dict_name == "dummy":
+            feat_dict = dummy_features
+        elif args.feat_dict_name == "custom_1":
+            feat_dict = custom_1_features
+        else:
+            print("Using default feat_dict (dummy_features)")
+            feat_dict = dummy_features
+
+
 
     df_feat = cnc_features(df, n_chunks, chunk_index, feat_dict)
 
@@ -156,6 +164,13 @@ if __name__ == "__main__":
         "--path_feat_json",
         type=str,
         help="Path to feat_dict.json file",
+    )
+
+    parser.add_argument(
+        "--feat_dict_name",
+        type=str,
+        default="dummy",
+        help="Name of feat_dict to use",
     )
 
     parser.add_argument(
