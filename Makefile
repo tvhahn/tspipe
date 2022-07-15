@@ -125,7 +125,7 @@ else # assume on HPC
 endif
 
 
-train: requirements
+train_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_milling \
@@ -152,7 +152,20 @@ endif
 
 
 
-compile: requirements
+compile_milling: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/compile.py \
+		-p $(PROJECT_DIR) \
+		--n_cores 6 \
+		--path_model_dir $(PROJECT_DIR)/models \
+		--interim_dir_name interim_results_milling \
+		--final_dir_name final_results_milling
+else # assume on HPC
+	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
+endif
+
+
+compile_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/compile.py \
 		-p $(PROJECT_DIR) \
@@ -165,7 +178,22 @@ else # assume on HPC
 endif
 
 
-filter: requirements
+filter_milling: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/models/filter.py \
+		-p $(PROJECT_DIR) \
+		--path_data_dir $(PROJECT_DIR)/data \
+		--path_model_dir $(PROJECT_DIR)/models \
+		--dataset milling \
+		--feat_file_name milling_features.csv.gz \
+		--final_dir_name final_results_milling \
+		--save_n_figures 6
+else # assume on HPC
+	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
+endif
+
+
+filter_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/filter.py \
 		-p $(PROJECT_DIR) \
@@ -178,9 +206,6 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif
-
-train_dummy: requirements
-	bash src/models/train_hpc_dummy.sh $(PROJECT_DIR) $(NOW_TIME)
 
 
 ## Delete all compiled Python files
