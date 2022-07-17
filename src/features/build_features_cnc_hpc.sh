@@ -19,6 +19,11 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 source ~/featstore/bin/activate
 
 python $PROJECT_DIR/src/features/build_features_cnc.py \
-    --path_data_folder $SCRATCH_DATA_DIR \
-    --n_chunks 100 \
+    --path_data_dir $SCRATCH_DATA_DIR \
+    --raw_dir_name data_raw_processed \
+    --raw_file_name cnc_raw_54.csv \
+    --processed_dir_name cnc_features \
+    --interim_dir_name cnc_features \
+    --n_chunks 10 \
+    --n_cores 4 \
     --chunk_index $SLURM_ARRAY_TASK_ID
