@@ -3,31 +3,9 @@ import pandas as pd
 import argparse
 import logging
 from feat_param_dict import comprehensive_features, dummy_features, custom_1_features
-from src.features.utils import load_feat_json
+from src.features.utils import load_feat_json, set_directories
 from tsfresh import extract_features
 
-
-def set_directories(args):
-
-    if args.proj_dir:
-        proj_dir = Path(args.proj_dir)
-    else:
-        proj_dir = Path().cwd()
-
-    if args.path_data_dir:
-        path_data_dir = Path(args.path_data_dir)
-    else:
-        path_data_dir = proj_dir / "data"
-
-    path_raw_dir = path_data_dir / "raw" / "cnc" / args.raw_dir_name
-
-    path_processed_dir = path_data_dir / "processed" / "cnc" / args.processed_dir_name
-    path_processed_dir.mkdir(parents=True, exist_ok=True)
-
-    path_interim_dir = path_data_dir / "interim" / "cnc" / args.interim_dir_name
-    path_interim_dir.mkdir(parents=True, exist_ok=True)
-
-    return proj_dir, path_data_dir, path_raw_dir, path_interim_dir, path_processed_dir
 
     
 def cnc_features(df, n_chunks, chunk_index, n_jobs, feature_dictionary=comprehensive_features):
@@ -190,6 +168,12 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--dataset",
+        type=str,
+        help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
+    )
+
+    parser.add_argument(
         "--raw_dir_name",
         type=str,
         default="data_raw_processed",
@@ -216,14 +200,14 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--interim_dir_name",
-        default="cnc_features",
+        default="features",
         type=str,
         help="Name of the save directory. Used to store features when processing in chunks. Located in data/interim/cnc",
     )
 
     parser.add_argument(
         "--processed_dir_name",
-        default="cnc_features",
+        default="features",
         type=str,
         help="Name of the save directory. Used to store features. Located in data/processed/cnc",
     )

@@ -4,36 +4,8 @@ from multiprocessing import Pool
 import os
 import logging
 import argparse
+from src.features.utils import set_directories
 
-###############################################################################
-# Set arguments
-###############################################################################
-
-parser = argparse.ArgumentParser(description="Build features")
-
-parser.add_argument(
-    "--path_data_folder",
-    type=str,
-    default="data/",
-    help="Path to data folder that contains raw/interim/processed data folders",
-)
-
-parser.add_argument(
-    "--num_pool_processes",
-    type=int,
-    default=2,
-    help="Number of processes to use for multiprocessing",
-)
-
-args = parser.parse_args()
-
-path_data_folder = Path(args.path_data_folder)
-num_pool_processes = int(args.num_pool_processes)
-
-
-###############################################################################
-# Functions
-###############################################################################
 
 def read_csv(filename):
     'converts a filename to a pandas dataframe'
@@ -56,7 +28,7 @@ def main(folder_interim_data):
     ]
 
     # set up your pool
-    with Pool(processes=num_pool_processes) as pool:  # or whatever your hardware can support
+    with Pool(processes=args.n_cores) as pool:  # or whatever your hardware can support
 
         # have your pool map the file names to dataframes
         df_list = pool.map(read_csv, file_list)
@@ -70,6 +42,63 @@ def main(folder_interim_data):
 if __name__ == "__main__":
     logger = logging.getLogger(__name__)
     logger.info("combine multiple feature dataframes (in CSV format) into one")
+
+
+    parser = argparse.ArgumentParser(description="Build features")
+
+    parser.add_argument(
+        "-p",
+        "--proj_dir",
+        dest="proj_dir",
+        type=str,
+        help="Location of project folder",
+    )
+
+
+    parser.add_argument(
+        "--path_data_dir",
+        type=str,
+        help="Path to data folder that contains raw/interim/processed data folders",
+    )
+
+    parser.add_argument(
+        "--num_pool_processes",
+        type=int,
+        default=2,
+        help="Number of processes to use for multiprocessing",
+    )
+
+    parser.add_argument(
+        "--dataset",
+        type=str,
+        help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
+    )
+
+    parser.add_argument(
+        "--feat_file_name",
+        type=str,
+        help="Name of the final feature file.",
+    )
+
+    parser.add_argument(
+        "--interim_dir_name",
+        default="features",
+        type=str,
+        help="Name of the save directory. Used to store features when processing in chunks. Located in data/interim/cnc",
+    )
+
+    parser.add_argument(
+        "--processed_dir_name",
+        default="features",
+        type=str,
+        help="Name of the save directory. Used to store features. Located in data/processed/cnc",
+    )
+
+    parser.add_argument(
+        "--n_cores", type=int, default=2, help="Number of cores to use"
+    )
+
+    args = parser.parse_args()
 
 
     ### Milling data ###

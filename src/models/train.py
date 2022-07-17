@@ -671,7 +671,7 @@ if __name__ == "__main__":
         "--dataset",
         default="milling",
         type=str,
-        help="Date and time that random search was executed.",
+        help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
     )
 
     parser.add_argument(

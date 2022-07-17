@@ -103,6 +103,7 @@ features_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/features/build_features_cnc.py \
 		-p $(PROJECT_DIR) \
+		--dataset cnc \
 		--path_data_dir $(PROJECT_DIR)/data/ \
 		--raw_dir_name data_raw_processed \
 		--raw_file_name cnc_raw_54.csv \

@@ -20,6 +20,7 @@ source ~/featstore/bin/activate
 
 python $PROJECT_DIR/src/features/build_features_cnc.py \
     --path_data_dir $SCRATCH_DATA_DIR \
+    --dataset cnc \
     --raw_dir_name data_raw_processed \
     --raw_file_name cnc_raw_54.csv \
     --processed_dir_name cnc_features \
