@@ -108,7 +108,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--raw_file_name cnc_raw_54.csv \
 		--processed_dir_name cnc_features \
 		--feat_file_name cnc_features_54.csv \
-		--feat_dict_name dummy \
+		--feat_dict_name custom_1 \
 		--n_cores 6
 else # assume on HPC
 	bash src/features/scripts/chain_build_feat_and_combine.sh $(PROJECT_DIR)

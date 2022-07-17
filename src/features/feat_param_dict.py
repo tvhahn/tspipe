@@ -76,7 +76,7 @@ custom_1_features.update({
     # "cwt_coefficients": [{"widths": width, "coeff": coeff, "w": w} for
     #                         width in [(2, 5, 10, 20)] for coeff in range(15) for w in (2, 5, 10, 20)],
     "spkt_welch_density": [{"coeff": coeff} for coeff in [2, 5, 8]],
-    "ar_coefficient": [{"coeff": coeff, "k": k} for coeff in range(10 + 1) for k in [10]],
+    # "ar_coefficient": [{"coeff": coeff, "k": k} for coeff in range(10 + 1) for k in [10]],
     # "change_quantiles": [{"ql": ql, "qh": qh, "isabs": b, "f_agg": f}
     #                         for ql in [0., .2, .4, .6, .8] for qh in [.2, .4, .6, .8, 1.]
     #                         for b in [False, True] for f in ["mean", "var"] if ql < qh],
@@ -85,7 +85,7 @@ custom_1_features.update({
     "fft_aggregated": [{"aggtype": s} for s in ["centroid", "variance", "skew", "kurtosis"]],
     # "value_count": [{"value": value} for value in [0, 1, -1]],
     # "range_count": [{"min": -1, "max": 1}, {"min": 1e12, "max": 0}, {"min": 0, "max": 1e12}],
-    "approximate_entropy": [{"m": 2, "r": r} for r in [.1, .3, .5, .7, .9]],
+    # "approximate_entropy": [{"m": 2, "r": r} for r in [.1, .3, .5, .7, .9]],
     "friedrich_coefficients": (lambda m: [{"coeff": coeff, "m": m, "r": 30} for coeff in range(m + 1)])(3),
     "max_langevin_fixed_point": [{"m": 3, "r": 30}],
     "linear_trend": [{"attr": "pvalue"}, {"attr": "rvalue"}, {"attr": "intercept"},
@@ -103,8 +103,8 @@ custom_1_features.update({
     # "count_above": [{"t": 0}],
     # "count_below": [{"t": 0}],
     # "lempel_ziv_complexity": [{"bins": x} for x in [2, 3, 5, 10, 100]],
-    "fourier_entropy":  [{"bins": x} for x in [2, 3, 5, 10, 100]],
-    "permutation_entropy":  [{"tau": 1, "dimension": x} for x in [3, 4, 5, 6, 7]],
+    # "fourier_entropy":  [{"bins": x} for x in [2, 3, 5, 10, 100]],
+    # "permutation_entropy":  [{"tau": 1, "dimension": x} for x in [3, 4, 5, 6, 7]],
     # "query_similarity_count": [{"query": None, "threshold": 0.0}],
     "matrix_profile": [{"threshold": 0.98, "feature": f} for f in ["min", "max", "mean", "median", "25", "75"]]
 })
