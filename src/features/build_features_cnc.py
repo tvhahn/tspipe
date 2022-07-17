@@ -131,8 +131,9 @@ def main(args):
 
     if scratch_path.exists():
         # save the dataframe oh HPC
+        file_name = str(args.feat_file_name).split(".")[0]
         df_feat.to_csv(
-            path_interim_dir / f"{args.feat_file_name}_{chunk_index}.csv",
+            path_interim_dir / f"{file_name}_{chunk_index}.csv",
             index=False,
         )
     else:

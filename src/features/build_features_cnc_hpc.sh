@@ -24,6 +24,7 @@ python $PROJECT_DIR/src/features/build_features_cnc.py \
     --raw_file_name cnc_raw_54.csv \
     --processed_dir_name cnc_features \
     --interim_dir_name cnc_features \
+    --feat_file_name cnc_features_54.csv \
     --n_chunks 10 \
     --n_cores 4 \
     --chunk_index $SLURM_ARRAY_TASK_ID
