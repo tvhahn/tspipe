@@ -24,7 +24,10 @@ def set_directories(args):
     path_processed_dir = path_data_dir / "processed" / "cnc" / args.processed_dir_name
     path_processed_dir.mkdir(parents=True, exist_ok=True)
 
-    return proj_dir, path_data_dir, path_raw_dir, path_processed_dir
+    path_interim_dir = path_data_dir / "interim" / "cnc" / args.interim_dir_name
+    path_interim_dir.mkdir(parents=True, exist_ok=True)
+
+    return proj_dir, path_data_dir, path_raw_dir, path_interim_dir, path_processed_dir
 
     
 def cnc_features(df, n_chunks, chunk_index, n_jobs, feature_dictionary=comprehensive_features):
@@ -90,7 +93,7 @@ def main(args):
     logger.info("making final features set from raw data")
 
 
-    proj_dir, path_data_dir, path_raw_dir, path_processed_dir = set_directories(args)
+    proj_dir, path_data_dir, path_raw_dir, path_interim_dir, path_processed_dir = set_directories(args)
 
 
 
@@ -124,10 +127,12 @@ def main(args):
     # assert "cut_id" in df_feat.columns, "tool_class column does not exist"
 
     scratch_path = Path.home() / "scratch"
+
+
     if scratch_path.exists():
         # save the dataframe oh HPC
         df_feat.to_csv(
-            path_processed_dir / f"cnc_{chunk_index}.csv",
+            path_interim_dir / f"{args.feat_file_name}_{chunk_index}.csv",
             index=False,
         )
     else:
@@ -207,6 +212,13 @@ if __name__ == "__main__":
     #     type=str,
     #     help="Name of the csv that contains the list of all the unique cut ids",
     # )
+
+    parser.add_argument(
+        "--interim_dir_name",
+        default="cnc_features",
+        type=str,
+        help="Name of the save directory. Used to store features when processing in chunks. Located in data/interim/cnc",
+    )
 
     parser.add_argument(
         "--processed_dir_name",
