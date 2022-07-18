@@ -76,6 +76,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--raw_dir_name",
+        type=str,
+        default="data_raw_processed",
+        help="Name of the subfolder that contains the final raw csv file",
+    )
+
+    parser.add_argument(
         "--interim_dir_name",
         default="features",
         type=str,
