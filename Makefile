@@ -89,10 +89,18 @@ endif
 
 
 ## Make Features
-features: requirements
+features_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/features/build_features.py \
-		--path_data_folder $(PROJECT_DIR)/data/
+	$(PYTHON_INTERPRETER) src/features/build_features_cnc.py \
+		-p $(PROJECT_DIR) \
+		--dataset milling \
+		--path_data_dir $(PROJECT_DIR)/data/ \
+		--raw_dir_name stride64_len64 \
+		--raw_file_name milling.csv.gz \
+		--processed_dir_name milling_features \
+		--feat_file_name milling_features.csv \
+		--feat_dict_name dummy \
+		--n_cores 6
 else # assume on HPC
 	bash src/features/chain_build_feat_and_combine.sh $(PROJECT_DIR)
 endif
