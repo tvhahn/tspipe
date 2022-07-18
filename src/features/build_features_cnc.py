@@ -278,7 +278,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--high_level_label_file_name",
         type=str,
-        help="Name of the high level label file. This file includes the meta data and labels for each unique id",
+        help="Name of the high level label file (used for the CNC dataset). This file includes the meta data and labels for each unique id",
     )
 
     parser.add_argument(
