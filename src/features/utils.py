@@ -47,7 +47,10 @@ def set_directories(args):
     else:
         path_data_dir = proj_dir / "data"
 
-    path_raw_dir = path_data_dir / "raw" / args.dataset / args.raw_dir_name
+    if args.raw_dir_name:
+        path_raw_dir = path_data_dir / "raw" / args.dataset / args.raw_dir_name
+    else:
+        path_raw_dir = path_data_dir / "raw" / args.dataset
 
     path_processed_dir = path_data_dir / "processed" / args.dataset / args.processed_dir_name
     path_processed_dir.mkdir(parents=True, exist_ok=True)
