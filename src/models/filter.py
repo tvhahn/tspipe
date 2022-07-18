@@ -128,6 +128,7 @@ def order_columns_on_results_df(df):
         "feat_file_name",
         "id",
         "meta_label_cols",
+        "feat_select_method",
         "feat_col_list",
         "stratification_grouping_col",
         "y_label_col",
@@ -185,6 +186,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "undersamp_ratio",
             "classifier",
             "early_stopping_rounds",
+            "feat_select_method",
         ]
 
     # remove any keys from general_param_keys that are not in df
@@ -221,7 +223,6 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
             meta_label_cols,
             stratification_grouping_col,
             y_label_col,
-            feat_selection,
             feat_col_list,
             general_params=general_params,
             params_clf=params_clf,

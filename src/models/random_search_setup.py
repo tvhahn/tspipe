@@ -52,6 +52,11 @@ general_params = {
     "oversamp_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0],
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
     "early_stopping_rounds":[None, 10],
+    "feat_select_method": [
+        # "tsfresh",
+        "random",
+        None,
+    ],
     "classifier": [
         # "rf",
         # "xgb",

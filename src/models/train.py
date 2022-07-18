@@ -1,4 +1,3 @@
-from tabnanny import verbose
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import ParameterSampler
@@ -7,6 +6,7 @@ import random
 import argparse
 import logging
 import shutil
+import random
 from datetime import datetime
 from ast import literal_eval
 from sklearn.base import clone
@@ -74,11 +74,11 @@ def kfold_cv(
     stratification_grouping_col=None,
     y_label_col="y",
     n_splits=5,
-    feat_selection="False",
+    feat_selection=None,
     feat_col_list=None,
     early_stopping_rounds=None,
 ):
-
+    print("feat_select_method: ", feat_selection)
     scores_list = []
 
     # perform stratified k-fold cross validation using the grouping of the y-label and another column
@@ -139,18 +139,35 @@ def kfold_cv(
             # print("type(feat_col_list):", type(feat_col_list))
             # print("feat_col_list:", feat_col_list)
 
-            if feat_selection == "True" and i == 0:
-                print("performing feature selection")
-                x_train, x_test, feat_col_list = feat_selection_binary_classification(
-                    x_train,
-                    y_train,
-                    x_train_cols,
-                    x_test,
-                    y_test,
-                    x_test_cols,
-                    feat_col_list=None,
-                )
-            elif feat_selection == "True" and feat_col_list is not None:
+            if feat_selection is not None and i == 0 and feat_col_list is None:
+                if feat_selection == "tsfresh":
+                    print("performing feature selection")
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=None,
+                    )
+                elif feat_selection == "random":
+
+                    num_feats = random.randint(5, len(x_train_cols))
+                    random_selected_feat = random.sample(list(x_train_cols), num_feats)
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=random_selected_feat,
+                    )
+                else:
+                    print("feature selection method not recognized")
+
+            elif feat_selection is not None and feat_col_list is not None:
                 print("using already selected features")
                 x_train, x_test, feat_col_list = feat_selection_binary_classification(
                     x_train,
@@ -224,17 +241,37 @@ def kfold_cv(
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-            if feat_selection == "True" and i == 0:
-                x_train, x_test, feat_col_list = feat_selection_binary_classification(
-                    x_train,
-                    y_train,
-                    x_train_cols,
-                    x_test,
-                    y_test,
-                    x_test_cols,
-                    feat_col_list=None,
-                )
-            elif feat_selection == "True" and feat_col_list is not None:
+            if feat_selection is not None and i == 0:
+                if feat_selection == "tsfresh":
+                    print("performing feature selection")
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=None,
+                    )
+                elif feat_selection == "random":
+
+                    num_feats = random.randint(5, len(x_train_cols))
+                    random_selected_feat = random.sample(list(x_train_cols), num_feats)
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=random_selected_feat,
+                    )
+                                    
+                else:
+                    print("feature selection method not recognized")
+
+            elif feat_selection is not None and feat_col_list is not None:
+                print("using already selected features")
                 x_train, x_test, feat_col_list = feat_selection_binary_classification(
                     x_train,
                     y_train,
@@ -245,6 +282,7 @@ def kfold_cv(
                     feat_col_list=feat_col_list,
                 )
             else:
+                print("not using feature selection")
                 pass
 
             # can use this to save the feature column names
@@ -278,7 +316,6 @@ def train_single_model(
     meta_label_cols,
     stratification_grouping_col=None,
     y_label_col="y",
-    feat_selection="False",
     feat_col_list=None,
     general_params=None,
     params_clf=None,
@@ -294,6 +331,8 @@ def train_single_model(
     oversamp_ratio = params_dict_train_setup["oversamp_ratio"]
     undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
+    feat_selection = params_dict_train_setup["feat_select_method"]
+
 
     # if classifier is "xgb" and the 
     if (
@@ -373,7 +412,6 @@ def random_search_runner(
     proj_dir,
     path_save_dir,
     feat_file_name,
-    feat_selection,
     dataset_name=None,
     y_label_col="y",
     save_freq=1,
@@ -412,7 +450,6 @@ def random_search_runner(
                 meta_label_cols,
                 stratification_grouping_col,
                 y_label_col,
-                feat_selection,
                 feat_col_list,
                 general_params=general_params,
                 params_clf=None,
@@ -541,7 +578,6 @@ def train_milling_models(args):
         proj_dir,
         path_save_dir,
         feat_file_name,
-        feat_selection=args.feat_selection,
         dataset_name="milling",
         y_label_col=Y_LABEL_COL,
         save_freq=1,
@@ -601,7 +637,6 @@ def train_cnc_models(args):
         proj_dir,
         path_save_dir,
         feat_file_name,
-        feat_selection=args.feat_selection,
         dataset_name="cnc",
         y_label_col=Y_LABEL_COL,
         save_freq=1,
@@ -674,12 +709,12 @@ if __name__ == "__main__":
         help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
     )
 
-    parser.add_argument(
-        "--feat_selection",
-        type=str,
-        default="False",
-        help="Conduct feature selection on first iteration",
-    )
+    # parser.add_argument(
+    #     "--feat_selection",
+    #     type=str,
+    #     default="False",
+    #     help="Conduct feature selection on first iteration",
+    # )
 
     parser.add_argument(
         "--feat_file_name",
