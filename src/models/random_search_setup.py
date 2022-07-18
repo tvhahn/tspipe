@@ -55,7 +55,7 @@ general_params = {
     "feat_select_method": [
         # "tsfresh",
         "random",
-        None,
+        # None,
     ],
     "classifier": [
         # "rf",

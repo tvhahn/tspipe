@@ -151,7 +151,7 @@ train_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_cnc \
-		--rand_search_iter 10 \
+		--rand_search_iter 20 \
 		--feat_selection False \
 		--dataset cnc \
 		--feat_file_name cnc_features_54.csv

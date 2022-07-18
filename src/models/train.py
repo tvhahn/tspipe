@@ -139,7 +139,7 @@ def kfold_cv(
             # print("type(feat_col_list):", type(feat_col_list))
             # print("feat_col_list:", feat_col_list)
 
-            if feat_selection is not None and i == 0 and feat_col_list is None:
+            if feat_selection is not None and i == 0:
                 if feat_selection == "tsfresh":
                     print("performing feature selection")
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
@@ -152,7 +152,6 @@ def kfold_cv(
                         feat_col_list=None,
                     )
                 elif feat_selection == "random":
-
                     num_feats = random.randint(5, len(x_train_cols))
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
@@ -462,6 +461,7 @@ def random_search_runner(
             df_t["stratification_grouping_col"] = str(stratification_grouping_col)
             df_t["y_label_col"] = str(y_label_col)
             df_t["feat_file_name"] = str(feat_file_name)
+            df_t["n_feats"] = len(feat_col_list)
 
             if args.date_time:
                 now_str = str(args.date_time)
