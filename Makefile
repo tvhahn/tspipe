@@ -120,7 +120,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--feat_dict_name dummy \
 		--n_cores 6
 else # assume on HPC
-	sbatch src/features/build_features_cnc_hpc.sh $(PROJECT_DIR)
+	bash src/features/chain_build_feat_and_combine_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
 

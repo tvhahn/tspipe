@@ -12,17 +12,19 @@ def read_csv(filename):
     return pd.read_csv(filename)
 
 
-def main(folder_interim_data):
+def main(args):
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
 
+    proj_dir, path_data_dir, path_raw_dir, path_interim_dir, path_processed_dir = set_directories(args)
+
     # get a list of file names
-    files = os.listdir(folder_interim_data)
+    files = os.listdir(path_interim_dir)
     file_list = [
-        Path(folder_interim_data) / filename
+        Path(path_interim_dir) / filename
         for filename in files
         if filename.endswith(".csv")
     ]
@@ -62,13 +64,6 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--num_pool_processes",
-        type=int,
-        default=2,
-        help="Number of processes to use for multiprocessing",
-    )
-
-    parser.add_argument(
         "--dataset",
         type=str,
         help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
@@ -101,12 +96,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    ### Milling data ###
-    folder_raw_data_milling = path_data_folder / "raw/milling"
-    folder_interim_data_milling = path_data_folder / "interim/milling"
-    folder_processed_data_milling = path_data_folder / "processed/milling"
 
-    df = main(folder_interim_data_milling)
+    df = main(args)
     print("Final df shape:", df.shape)
 
-    df.to_csv(folder_processed_data_milling / "milling_features.csv.gz", compression="gzip", index=False)
+    proj_dir, path_data_dir, path_raw_dir, path_interim_dir, path_processed_dir = set_directories(args)
+
+    df.to_csv(path_processed_dir / args.feat_file_name, index=False)
