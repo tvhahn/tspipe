@@ -151,10 +151,10 @@ train_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_cnc \
-		--rand_search_iter 20 \
-		--feat_selection False \
+		--processed_dir_name cnc_features_custom_1 \
+		--rand_search_iter 10 \
 		--dataset cnc \
-		--feat_file_name cnc_features_54.csv
+		--feat_file_name cnc_features_54_custom_1.csv
 else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
@@ -209,10 +209,12 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
+		--processed_dir_name cnc_features_custom_1 \
 		--dataset cnc \
-		--feat_file_name cnc_features_54.csv \
+		--feat_file_name cnc_features_54_custom_1.csv \
 		--final_dir_name final_results_cnc \
-		--save_n_figures 6
+		--keep_top_n 1 \
+		--save_n_figures 1
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif

@@ -34,14 +34,14 @@ general_params = {
         None
     ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "undersamp_method": [
@@ -53,9 +53,9 @@ general_params = {
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
     "early_stopping_rounds":[None, 10],
     "feat_select_method": [
-        # "tsfresh",
+        "tsfresh",
         # "random",
-        None,
+        # None,
     ],
     "classifier": [
         # "rf",

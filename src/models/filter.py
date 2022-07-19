@@ -41,8 +41,9 @@ def set_directories(args):
 
     path_interim_dir = path_model_dir / args.interim_dir_name
     path_final_dir = path_model_dir / args.final_dir_name
+    path_processed_dir = path_data_dir / "processed" / args.dataset / args.processed_dir_name
 
-    return proj_dir, path_data_dir, path_model_dir, path_interim_dir, path_final_dir
+    return proj_dir, path_data_dir, path_processed_dir, path_model_dir, path_interim_dir, path_final_dir
 
 
 def filter_results_df(df, keep_top_n=None):
@@ -271,15 +272,16 @@ def cnc_plot_results(
     df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
 ):
 
-    df_feat = pd.read_csv(path_dataset_processed_dir / "cnc_features" / feat_file_name,)
+    df_feat = pd.read_csv(path_dataset_processed_dir / feat_file_name,)
     df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
     df_feat["tool_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-2]))
     df_feat["index_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-1]))
 
-    df_labels = pd.read_csv(path_dataset_processed_dir / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
+    df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     # add y label
     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+    df_feat = df_feat.dropna(axis=0)
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves)
 
@@ -289,6 +291,7 @@ def main(args):
     (
         proj_dir,
         path_data_dir,
+        path_processed_dir,
         path_model_dir,
         path_interim_dir,
         path_final_dir,
@@ -328,18 +331,17 @@ def main(args):
         milling_plot_results(
             df,
             args.save_n_figures,
-            path_milling_processed_dir,
+            path_processed_dir,
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
         )
 
     elif args.dataset =="cnc" and args.save_n_figures > 0:
-        path_cnc_processed_dir = path_data_dir / "processed" / "cnc"
 
         cnc_plot_results(
             df,
             args.save_n_figures,
-            path_cnc_processed_dir,
+            path_processed_dir,
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
         )
@@ -417,6 +419,13 @@ if __name__ == "__main__":
         dest="proj_dir",
         type=str,
         help="Location of project folder",
+    )
+
+    parser.add_argument(
+        "--processed_dir_name",
+        default="features",
+        type=str,
+        help="Processed data directory name. Used to store features. Located in data/processed/cnc",
     )
 
     parser.add_argument(

@@ -539,13 +539,16 @@ def set_directories(args):
         path_save_dir = proj_dir / "models" / save_dir_name
         Path(path_save_dir / "setup_files").mkdir(parents=True, exist_ok=True)
 
-    return proj_dir, path_data_dir, path_save_dir
+    path_processed_dir = path_data_dir / "processed" / args.dataset / args.processed_dir_name
+    path_processed_dir.mkdir(parents=True, exist_ok=True)
+
+    return proj_dir, path_data_dir, path_save_dir, path_processed_dir
 
 
 def train_milling_models(args):
 
     # set directories
-    proj_dir, path_data_dir, path_save_dir = set_directories(args)
+    proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
 
     processed_data_milling_dir = path_data_dir / "processed/milling"
     print(processed_data_milling_dir)
@@ -599,10 +602,7 @@ def train_milling_models(args):
 def train_cnc_models(args):
 
     # set directories
-    proj_dir, path_data_dir, path_save_dir = set_directories(args)
-
-    processed_data_cnc_dir = path_data_dir / "processed/cnc"
-    print(processed_data_cnc_dir)
+    proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
 
     RAND_SEARCH_ITER = args.rand_search_iter
 
@@ -615,15 +615,16 @@ def train_cnc_models(args):
     else:
         feat_file_name = "cnc_features_54.csv"
 
-    df = pd.read_csv(processed_data_cnc_dir / "cnc_features" / feat_file_name,)
+    df = pd.read_csv(path_processed_dir / feat_file_name,)
     df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
     df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
     df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
 
-    df_labels = pd.read_csv(processed_data_cnc_dir / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
+    df_labels = pd.read_csv(path_data_dir / "processed/cnc" / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     # add y label
     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+    df = df.dropna(axis=0)
 
     Y_LABEL_COL = "y"
 
@@ -698,6 +699,13 @@ if __name__ == "__main__":
         dest="path_data_dir",
         type=str,
         help="Location of the data folder, containing the raw, interim, and processed folders",
+    )
+
+    parser.add_argument(
+        "--processed_dir_name",
+        default="features",
+        type=str,
+        help="Name of the save directory. Used to store features. Located in data/processed/cnc",
     )
 
     parser.add_argument(
