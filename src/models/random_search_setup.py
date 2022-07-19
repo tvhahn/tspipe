@@ -54,9 +54,9 @@ general_params = {
     "early_stopping_rounds":[None, 10, 50, 100],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
-        "random",
-        # None,
+        # "tsfresh_random",
+        # "random",
+        None,
     ],
     "max_feats": [
         None,
@@ -71,13 +71,13 @@ general_params = {
         500,
     ],
     "classifier": [
-        "rf",
-        "xgb",
-        "knn",
-        "svm",
-        "lr",
-        "sgd",
-        "ridge",
+        # "rf",
+        # "xgb",
+        # "knn",
+        # "svm",
+        # "lr",
+        # "sgd",
+        # "ridge",
         "nb",
     ],
 }

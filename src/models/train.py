@@ -215,7 +215,7 @@ def kfold_cv(
                 )
             else:
                 print("not using feature selection")
-                pass
+                feat_col_list = list(x_train_cols)
 
             # can use this to save the feature column names
             # in the results csv when no feature selection is performed
@@ -481,6 +481,7 @@ def random_search_runner(
     path_save_dir,
     feat_file_name,
     dataset_name=None,
+    dataprep_method=None,
     y_label_col="y",
     save_freq=1,
     debug=True,
@@ -527,10 +528,11 @@ def random_search_runner(
             df_t = pd.DataFrame.from_dict(params_dict_train_setup, orient="index").T
             df_t["feat_col_list"] = str(feat_col_list)
             df_t["meta_label_cols"] = str(meta_label_cols)
-            df_t["stratification_grouping_col"] = str(stratification_grouping_col)
-            df_t["y_label_col"] = str(y_label_col)
+            df_t["stratification_grouping_col"] = stratification_grouping_col
+            df_t["y_label_col"] = y_label_col
             df_t["feat_file_name"] = str(feat_file_name)
             df_t["n_feats"] = len(feat_col_list)
+            df_t["dataprep_method"] = dataprep_method
 
             # reset feat_col_list
             # can remove this when using "tsfresh" feature selection in order to reuse
