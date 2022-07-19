@@ -54,8 +54,8 @@ general_params = {
     "early_stopping_rounds":[None, 10],
     "feat_select_method": [
         # "tsfresh",
-        "random",
-        # None,
+        # "random",
+        None,
     ],
     "classifier": [
         # "rf",

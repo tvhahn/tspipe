@@ -139,9 +139,9 @@ def kfold_cv(
             # print("type(feat_col_list):", type(feat_col_list))
             # print("feat_col_list:", feat_col_list)
 
-            if feat_selection is not None and i == 0:
+            if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
-                    print("performing feature selection")
+                    print("performing tsfresh feature selection")
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
                         y_train,
@@ -152,7 +152,11 @@ def kfold_cv(
                         feat_col_list=None,
                     )
                 elif feat_selection == "random":
-                    num_feats = random.randint(5, len(x_train_cols))
+                    print("performing random feature selection")
+
+                    num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
+                    print("num_feats:", num_feats)
+                    # num_feats = random.randint(5, len(x_train_cols))
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -463,6 +467,11 @@ def random_search_runner(
             df_t["feat_file_name"] = str(feat_file_name)
             df_t["n_feats"] = len(feat_col_list)
 
+            # reset feat_col_list
+            # can remove this when using "tsfresh" feature selection in order to reuse
+            # the feature selection results
+            feat_col_list = None
+
             if args.date_time:
                 now_str = str(args.date_time)
             else:
@@ -489,6 +498,8 @@ def random_search_runner(
                     df_results.to_csv(path_save_dir / file_name_results, index=False)
                 else:
                     df_results.to_csv(file_name_results, index=False)
+
+        
 
         # except Exception as e and log the exception
         except Exception as e:
