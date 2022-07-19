@@ -58,6 +58,18 @@ general_params = {
         "random",
         # None,
     ],
+    "max_feats": [
+        None,
+        10,
+        20,
+        50,
+        75,
+        100,
+        200,
+        300,
+        400,
+        500,
+    ],
     "classifier": [
         "rf",
         "xgb",

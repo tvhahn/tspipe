@@ -130,6 +130,7 @@ def order_columns_on_results_df(df):
         "id",
         "meta_label_cols",
         "feat_select_method",
+        "max_feats",
         "n_feats",
         "feat_col_list",
         "stratification_grouping_col",
@@ -189,6 +190,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "classifier",
             "early_stopping_rounds",
             "feat_select_method",
+            "max_feats",
         ]
 
     # remove any keys from general_param_keys that are not in df
@@ -260,7 +262,6 @@ def milling_plot_results(
     # load feature dataframe
     df_feat = pd.read_csv(
         path_dataset_processed_dir / feat_file_name,
-        compression="gzip",
     )
 
     df_feat = milling_add_y_label_anomaly(df_feat)
@@ -325,8 +326,6 @@ def main(args):
         assert (
             df.iloc[0]["dataset"] == "milling"
         ), "dataset in results csv is not the milling dataset"
-
-        path_milling_processed_dir = path_data_dir / "processed" / "milling"
 
         milling_plot_results(
             df,

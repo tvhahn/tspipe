@@ -139,9 +139,10 @@ train_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_milling \
+		--processed_dir_name milling_features \
 		--rand_search_iter 10 \
 		--dataset milling \
-		--feat_file_name milling_features.csv.gz
+		--feat_file_name milling_features.csv
 else # assume on HPC
 	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
 endif
@@ -194,9 +195,10 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
 		--dataset milling \
-		--feat_file_name milling_features.csv.gz \
+		--processed_dir_name milling_features \
+		--feat_file_name milling_features.csv \
 		--final_dir_name final_results_milling \
-		--keep_top_n 6 \
+		--keep_top_n 1 \
 		--save_n_figures 6
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
@@ -209,8 +211,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		-p $(PROJECT_DIR) \
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
-		--processed_dir_name cnc_features_custom_1 \
 		--dataset cnc \
+		--processed_dir_name cnc_features_custom_1 \
 		--feat_file_name cnc_features_54_custom_1.csv \
 		--final_dir_name final_results_cnc \
 		--keep_top_n 1 \

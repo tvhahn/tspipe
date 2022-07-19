@@ -75,6 +75,7 @@ def kfold_cv(
     y_label_col="y",
     n_splits=5,
     feat_selection=None,
+    max_feats=None,
     feat_col_list=None,
     early_stopping_rounds=None,
 ):
@@ -166,6 +167,9 @@ def kfold_cv(
                     )
 
                     num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    if max_feats is not None and num_feats > max_feats:
+                        num_feats = max_feats
+
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -182,8 +186,9 @@ def kfold_cv(
                     print("performing random feature selection")
 
                     num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
-                    print("num_feats:", num_feats)
-                    # num_feats = random.randint(5, len(x_train_cols))
+                    if max_feats is not None and num_feats > max_feats:
+                        num_feats = max_feats
+    
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -296,6 +301,9 @@ def kfold_cv(
                     )
 
                     num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    if max_feats is not None and num_feats > max_feats:
+                        num_feats = max_feats
+
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -312,8 +320,9 @@ def kfold_cv(
                     print("performing random feature selection")
 
                     num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
-                    print("num_feats:", num_feats)
-                    # num_feats = random.randint(5, len(x_train_cols))
+                    if max_feats is not None and num_feats > max_feats:
+                        num_feats = max_feats
+
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -389,6 +398,7 @@ def train_single_model(
     undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
     feat_selection = params_dict_train_setup["feat_select_method"]
+    max_feats=params_dict_train_setup["max_feats"]
 
 
     # if classifier is "xgb" and the 
@@ -446,6 +456,7 @@ def train_single_model(
         y_label_col,
         n_splits=5,
         feat_selection=feat_selection,
+        max_feats=max_feats,
         feat_col_list=feat_col_list,
         early_stopping_rounds=early_stopping_rounds,
     )
@@ -604,21 +615,15 @@ def train_milling_models(args):
     # set directories
     proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
 
-    processed_data_milling_dir = path_data_dir / "processed/milling"
-    print(processed_data_milling_dir)
-
     RAND_SEARCH_ITER = args.rand_search_iter
-
-    # set a seed for the parameter sampler
-    # SAMPLER_SEED = random.randint(0, 2 ** 16)
 
     # load feature dataframe
     if args.feat_file_name:
         feat_file_name = args.feat_file_name
     else:
-        feat_file_name = "milling_features.csv.gz"
+        feat_file_name = "milling_features.csv"
 
-    df = pd.read_csv(processed_data_milling_dir / feat_file_name, compression="gzip")
+    df = pd.read_csv(path_processed_dir / feat_file_name)
 
     # add y label
     df = milling_add_y_label_anomaly(df)
@@ -659,9 +664,6 @@ def train_cnc_models(args):
     proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
 
     RAND_SEARCH_ITER = args.rand_search_iter
-
-    # set a seed for the parameter sampler
-    # SAMPLER_SEED = random.randint(0, 2 ** 16)
 
     # load feature dataframe
     if args.feat_file_name:
