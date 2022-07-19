@@ -23,8 +23,8 @@ python $PROJECT_DIR/src/features/build_features_cnc.py \
     --dataset cnc \
     --raw_dir_name data_raw_processed \
     --raw_file_name cnc_raw_54.csv \
-    --processed_dir_name cnc_features \
     --interim_dir_name cnc_features \
+    --processed_dir_name cnc_features \
     --feat_file_name cnc_features_54_test2.csv \
     --feat_dict_name dummy \
     --n_chunks 10 \
