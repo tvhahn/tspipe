@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 import argparse
 import logging
+import numpy as np
 from feat_param_dict import comprehensive_features, dummy_features, custom_1_features
 from src.features.utils import load_feat_json, set_directories
 from tsfresh import extract_features
@@ -70,8 +71,8 @@ def cnc_features(df, n_chunks, chunk_index, n_jobs, feature_dictionary=comprehen
 
     Parameters
     ----------
-    df_raw_milling : pandas.DataFrame
-        Raw milling dataframe. Includes the "tool_class" and "time" columns.
+    df : pandas.DataFrame
+        Raw time series dataframe.
 
     n_chunks : int
         Chunk index. Passed from the slurm script if on a HPC. Else, set to 0.
@@ -89,7 +90,7 @@ def cnc_features(df, n_chunks, chunk_index, n_jobs, feature_dictionary=comprehen
         id_list = list(df["id"].unique())
 
         # create a list of the cut_ids to be processed in each chunk
-        n_samples_per_chunk = int(len(id_list) / n_chunks)
+        n_samples_per_chunk = int(np.ceil(len(id_list) / n_chunks))
         id_list_chunks = [
             id_list[i : i + n_samples_per_chunk]
             for i in range(0, len(id_list), n_samples_per_chunk)
@@ -154,7 +155,8 @@ def main(args):
             print("Using default feat_dict (dummy_features)")
             feat_dict = dummy_features
 
-
+    n_chunks = int(args.n_chunks)  # number of chunks to split dataframe into
+    chunk_index = int(args.chunk_index) - 1
 
     if args.dataset == "cnc":
         df_feat = cnc_features(df, n_chunks, chunk_index, n_jobs=args.n_cores, feature_dictionary=feat_dict)
@@ -289,9 +291,5 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    # path_data_folder = Path(args.path_data_folder)
-    n_chunks = int(args.n_chunks)  # number of chunks to split dataframe into
-    chunk_index = int(args.chunk_index) - 1
 
     main(args)
