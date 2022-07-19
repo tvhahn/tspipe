@@ -183,7 +183,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--interim_dir_name interim_results_cnc \
 		--final_dir_name final_results_cnc
 else # assume on HPC
-	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
+	sbatch src/models/compile_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
 
