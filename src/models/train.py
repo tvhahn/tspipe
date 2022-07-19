@@ -113,6 +113,12 @@ def kfold_cv(
             y_train = df_train[y_label_col].values.astype(int)
             df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
             x_train_cols = df_train.columns
+
+            # save x_train_cols to csv file, for debugging
+            # Path("x_train_cols.csv").write_text(
+            #     "\n".join(x_train_cols)
+            # )
+
             x_train = df_train.values
 
             # test
@@ -134,10 +140,6 @@ def kfold_cv(
 
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
-            # print("type(feat_selection):", type(feat_selection))
-            # print("feat_selection:", feat_selection)
-            # print("type(feat_col_list):", type(feat_col_list))
-            # print("feat_col_list:", feat_col_list)
 
             if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
@@ -688,7 +690,7 @@ def train_cnc_models(args):
 
     # list of the columns that are not features columns
     # (not including the y-label column)
-    META_LABEL_COLS = ["id", "unix_date", "tool_no", "index_no"]
+    META_LABEL_COLS = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
 
     LOG_FILENAME = path_save_dir / "logging_example.out"
     logging.basicConfig(filename=LOG_FILENAME, level=logging.ERROR)
