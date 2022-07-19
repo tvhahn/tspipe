@@ -383,7 +383,7 @@ def train_single_model(
     stratification_grouping_col=None,
     y_label_col="y",
     feat_col_list=None,
-    general_params=None,
+    general_params=general_params,
     params_clf=None,
 ):
     # generate the list of parameters to sample over
