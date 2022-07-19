@@ -151,6 +151,31 @@ def kfold_cv(
                         x_test_cols,
                         feat_col_list=None,
                     )
+                elif feat_selection == "tsfresh_random":
+                    print("performing tsfresh and random feature selection")
+                    _, _, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=None,
+                    )
+
+                    num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    random_selected_feat = random.sample(list(feat_col_list), num_feats)
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=random_selected_feat,
+                    )
+
+
                 elif feat_selection == "random":
                     print("performing random feature selection")
 
@@ -244,9 +269,9 @@ def kfold_cv(
             # scale the data
             x_train, x_test = scale_data(x_train, x_test, scaler_method)
 
-            if feat_selection is not None and i == 0:
+            if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
-                    print("performing feature selection")
+                    print("performing tsfresh feature selection")
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
                         y_train,
@@ -256,9 +281,37 @@ def kfold_cv(
                         x_test_cols,
                         feat_col_list=None,
                     )
-                elif feat_selection == "random":
+                elif feat_selection == "tsfresh_random":
+                    print("performing tsfresh and random feature selection")
+                    _, _, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=None,
+                    )
 
-                    num_feats = random.randint(5, len(x_train_cols))
+                    num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    random_selected_feat = random.sample(list(feat_col_list), num_feats)
+                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                        x_train,
+                        y_train,
+                        x_train_cols,
+                        x_test,
+                        y_test,
+                        x_test_cols,
+                        feat_col_list=random_selected_feat,
+                    )
+
+
+                elif feat_selection == "random":
+                    print("performing random feature selection")
+
+                    num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
+                    print("num_feats:", num_feats)
+                    # num_feats = random.randint(5, len(x_train_cols))
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
                     x_train, x_test, feat_col_list = feat_selection_binary_classification(
                         x_train,
@@ -269,7 +322,6 @@ def kfold_cv(
                         x_test_cols,
                         feat_col_list=random_selected_feat,
                     )
-                                    
                 else:
                     print("feature selection method not recognized")
 
