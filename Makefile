@@ -156,7 +156,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--dataset cnc \
 		--feat_file_name cnc_features_54_custom_1.csv
 else # assume on HPC
-	sbatch src/models/train_hpc.sh $(PROJECT_DIR) $(NOW_TIME)
+	sbatch src/models/train_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
 
