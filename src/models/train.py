@@ -122,7 +122,7 @@ def kfold_cv(
             x_train = df_train.values
 
             # test
-            df_test = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            df_test = df[df[stratification_grouping_col].isin(test_strat_vals)]
             y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
             x_test_cols = df_test.columns
