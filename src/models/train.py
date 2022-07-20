@@ -375,6 +375,27 @@ def kfold_cv(
     return trained_result_dict, feat_col_list
 
 
+def prepare_data_method(df, dataset_name, dataprep_method):
+    """
+    This function takes in a dataframe and a dataprep method and returns a dataframe
+    with the data prepared according to the method.
+    """
+    if dataset_name == "cnc":
+        if dataprep_method == "cnc_standard":
+            return df, dataprep_method
+        elif dataprep_method == "cnc_index_transposed":
+            return df, dataprep_method
+        else:
+            dataprep_method = "cnc_standard"
+            return df, dataprep_method
+    if dataset_name == "milling":
+        if dataprep_method == "milling_standard":
+            return df, dataprep_method
+        else:
+            dataprep_method = "milling_standard"
+            return df, dataprep_method
+
+
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
     df,
@@ -385,6 +406,7 @@ def train_single_model(
     feat_col_list=None,
     general_params=general_params,
     params_clf=None,
+    dataset_name=None,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -399,6 +421,7 @@ def train_single_model(
     classifier = params_dict_train_setup["classifier"]
     feat_selection = params_dict_train_setup["feat_select_method"]
     max_feats=params_dict_train_setup["max_feats"]
+    dataprep_method = params_dict_train_setup["dataprep_method"]
 
 
     # if classifier is "xgb" and the 
@@ -443,6 +466,9 @@ def train_single_model(
     )
     print("\n", params_dict_clf_named)
 
+    df, dataprep_method = prepare_data_method(df, dataset_name, dataprep_method)
+    params_dict_train_setup["dataprep_method"] = dataprep_method
+
     model_metrics_dict, feat_col_list = kfold_cv(
         df,
         clf,
@@ -481,7 +507,6 @@ def random_search_runner(
     path_save_dir,
     feat_file_name,
     dataset_name=None,
-    dataprep_method=None,
     y_label_col="y",
     save_freq=1,
     debug=True,
@@ -522,6 +547,7 @@ def random_search_runner(
                 feat_col_list,
                 general_params=general_params,
                 params_clf=None,
+                dataset_name=dataset_name,
             )
 
             # train setup params
@@ -532,7 +558,6 @@ def random_search_runner(
             df_t["y_label_col"] = y_label_col
             df_t["feat_file_name"] = str(feat_file_name)
             df_t["n_feats"] = len(feat_col_list)
-            df_t["dataprep_method"] = dataprep_method
 
             # reset feat_col_list
             # can remove this when using "tsfresh" feature selection in order to reuse
@@ -654,7 +679,6 @@ def train_milling_models(args):
         path_save_dir,
         feat_file_name,
         dataset_name="milling",
-        dataprep_method=args.dataprep_method,
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
@@ -681,16 +705,18 @@ def train_cnc_models(args):
 
     df_labels = pd.read_csv(path_data_dir / "processed/cnc" / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
+    df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+    df = df.dropna(axis=0)
     # add y label
-    if args.dataprep_method == "method_1":
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
-    elif args.dataprep_method == "method_2":
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
-    else:
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
+    # if args.dataprep_method == "method_1":
+    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+    #     df = df.dropna(axis=0)
+    # elif args.dataprep_method == "method_2":
+    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+    #     df = df.dropna(axis=0)
+    # else:
+    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+    #     df = df.dropna(axis=0)
 
     Y_LABEL_COL = "y"
 
@@ -716,7 +742,6 @@ def train_cnc_models(args):
         path_save_dir,
         feat_file_name,
         dataset_name="cnc",
-        dataprep_method=args.dataprep_method,
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
@@ -738,13 +763,6 @@ def main(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Build data sets for analysis")
-
-    # parser.add_argument(
-    #     "--n_cores",
-    #     type=int,
-    #     default=1,
-    #     help="Number of cores to use for multiprocessing",
-    # )
 
     parser.add_argument(
         "--rand_search_iter",
@@ -794,20 +812,6 @@ if __name__ == "__main__":
         type=str,
         help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
     )
-
-    parser.add_argument(
-        "--dataprep_method",
-        default="method_1",
-        type=str,
-        help="Name of the dataprep method to use. Varies by data set, but generally, 'method_1' or 'method_2'",
-    )
-
-    # parser.add_argument(
-    #     "--feat_selection",
-    #     type=str,
-    #     default="False",
-    #     help="Conduct feature selection on first iteration",
-    # )
 
     parser.add_argument(
         "--feat_file_name",
