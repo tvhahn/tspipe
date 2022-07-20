@@ -82,8 +82,19 @@ general_params = {
     ],
     "dataprep_method": [
         "cnc_standard",
+        "cnc_standard_index_select",
         "cnc_index_transposed",
+        "cnc_index_select_transposed",
     ],
+    "cnc_indices_keep": [
+        list(range(0, 10)),
+        list(range(1, 10)),
+        list(range(1, 9)),
+        list(range(1, 8)),
+        list(range(2, 8)),
+        list(range(2, 9)),
+        list(range(2, 10)), 
+    ] # no cut indices past 9 that are valid
 }
 
 

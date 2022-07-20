@@ -375,30 +375,10 @@ def kfold_cv(
     return trained_result_dict, feat_col_list
 
 
-def prepare_data_method(df, dataset_name, dataprep_method):
-    """
-    This function takes in a dataframe and a dataprep method and returns a dataframe
-    with the data prepared according to the method.
-    """
-    if dataset_name == "cnc":
-        if dataprep_method == "cnc_standard":
-            return df, dataprep_method
-        elif dataprep_method == "cnc_index_transposed":
-            return df, dataprep_method
-        else:
-            dataprep_method = "cnc_standard"
-            return df, dataprep_method
-    if dataset_name == "milling":
-        if dataprep_method == "milling_standard":
-            return df, dataprep_method
-        else:
-            dataprep_method = "milling_standard"
-            return df, dataprep_method
-
-
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
     df,
+    path_data_dir,
     sampler_seed,
     meta_label_cols,
     stratification_grouping_col=None,
@@ -407,6 +387,7 @@ def train_single_model(
     general_params=general_params,
     params_clf=None,
     dataset_name=None,
+    df_labels=None,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -422,6 +403,16 @@ def train_single_model(
     feat_selection = params_dict_train_setup["feat_select_method"]
     max_feats=params_dict_train_setup["max_feats"]
     dataprep_method = params_dict_train_setup["dataprep_method"]
+
+    # prepare datasets
+    if dataset_name == "cnc":
+        cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
+        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(df, dataprep_method, meta_label_cols, path_data_dir, cnc_indices_keep=cnc_indices_keep)
+        params_dict_train_setup["dataprep_method"] = dataprep_method
+        params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
+    elif dataset_name == "milling":
+        df, dataprep_method = prepare_milling_data(df, dataprep_method)
+        del params_dict_train_setup["cnc_indices_keep"] # delete because not used for milling
 
 
     # if classifier is "xgb" and the 
@@ -466,8 +457,7 @@ def train_single_model(
     )
     print("\n", params_dict_clf_named)
 
-    df, dataprep_method = prepare_data_method(df, dataset_name, dataprep_method)
-    params_dict_train_setup["dataprep_method"] = dataprep_method
+
 
     model_metrics_dict, feat_col_list = kfold_cv(
         df,
@@ -495,6 +485,7 @@ def train_single_model(
         params_dict_clf_named,
         params_dict_train_setup,
         feat_col_list,
+        meta_label_cols,
     )
 
 
@@ -504,6 +495,7 @@ def random_search_runner(
     meta_label_cols,
     stratification_grouping_col,
     proj_dir,
+    path_data_dir,
     path_save_dir,
     feat_file_name,
     dataset_name=None,
@@ -511,6 +503,7 @@ def random_search_runner(
     save_freq=1,
     debug=True,
     feat_col_list=None,
+    df_labels=None,
 ):
 
     results_list = []
@@ -538,8 +531,10 @@ def random_search_runner(
                 params_dict_clf_named,
                 params_dict_train_setup,
                 feat_col_list,
+                meta_label_cols
             ) = train_single_model(
                 df,
+                path_data_dir,
                 sample_seed,
                 meta_label_cols,
                 stratification_grouping_col,
@@ -548,6 +543,7 @@ def random_search_runner(
                 general_params=general_params,
                 params_clf=None,
                 dataset_name=dataset_name,
+                df_labels=df_labels,
             )
 
             # train setup params
@@ -637,6 +633,61 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_save_dir, path_processed_dir
 
 
+def prepare_cnc_data(df, dataprep_method, meta_label_cols, path_data_dir, cnc_indices_keep=None):
+    """
+    This function takes in a dataframe and a dataprep method and returns a dataframe
+    with the data prepared according to the method.
+    """
+
+    if dataprep_method == "cnc_standard":
+        cnc_indices_keep = None
+        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    elif dataprep_method == "cnc_standard_index_select":
+        df = df[df["index_no"].isin(cnc_indices_keep)]
+        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    elif dataprep_method == "cnc_index_transposed":
+        feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
+
+        # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
+        df = df.pivot(index=['unix_date', 'tool_no', 'case_tool_54', 'y' ], columns='index_no', values=feat_list).reset_index()
+        df.columns = [f'{i}__{j}' if j != '' else f'{i}' for i, j  in df.columns.values] # https://stackoverflow.com/a/51735628
+        df = df.dropna(axis=1)
+        meta_label_cols = ['unix_date', 'tool_no', 'case_tool_54']
+        cnc_indices_keep = None
+        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    elif dataprep_method == "cnc_index_select_transposed":
+        df = df[df["index_no"].isin(cnc_indices_keep)]
+        feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
+        
+        # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
+        df = df.pivot(index=['unix_date', 'tool_no', 'case_tool_54', 'y' ], columns='index_no', values=feat_list).reset_index()
+        df.columns = [f'{i}__{j}' if j != '' else f'{i}' for i, j  in df.columns.values] # https://stackoverflow.com/a/51735628
+        df = df.dropna(axis=1)
+        meta_label_cols = ['unix_date', 'tool_no', 'case_tool_54']
+        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    else:
+        dataprep_method = "cnc_standard"
+        cnc_indices_keep = None
+        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+
+def prepare_milling_data(df, dataprep_method):
+    """
+    This function takes in a dataframe and a dataprep method and returns a dataframe
+    with the data prepared according to the method.
+    """
+
+    if dataprep_method == "milling_standard":
+        return df, dataprep_method
+    else:
+        dataprep_method = "milling_standard"
+        return df, dataprep_method
+
+
 def train_milling_models(args):
 
     # set directories
@@ -676,6 +727,7 @@ def train_milling_models(args):
         META_LABEL_COLS,
         STRATIFICATION_GROUPING_COL,
         proj_dir,
+        path_data_dir,
         path_save_dir,
         feat_file_name,
         dataset_name="milling",
@@ -739,12 +791,14 @@ def train_cnc_models(args):
         META_LABEL_COLS,
         STRATIFICATION_GROUPING_COL,
         proj_dir,
+        path_data_dir,
         path_save_dir,
         feat_file_name,
         dataset_name="cnc",
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
+        df_labels=df_labels,
     )
 
 
