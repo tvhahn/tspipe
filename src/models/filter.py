@@ -119,7 +119,7 @@ def rebuild_params_clf(df, row_idx):
     return {k: [params_clf[k]] for k in params_clf.keys()}  # put each value in a list
 
 
-def order_columns_on_results_df(df):
+def order_columns_on_results_df(df, dataset_name=None):
 
     primary_cols = [
         "classifier",
@@ -142,33 +142,84 @@ def order_columns_on_results_df(df):
         "undersamp_method",
         "undersamp_ratio",
         "early_stopping_rounds",
+        "prauc_avg",
         "prauc_min",
         "prauc_max",
-        "prauc_avg",
         "prauc_std",
+        "rocauc_avg",
         "rocauc_min",
         "rocauc_max",
-        "rocauc_avg",
         "rocauc_std",
+        "accuracy_avg",
         "accuracy_min",
         "accuracy_max",
-        "accuracy_avg",
         "accuracy_std",
+        "precision_score_avg",
         "precision_score_min",
         "precision_score_max",
-        "precision_score_avg",
         "precision_score_std",
+        "recall_score_avg",
         "recall_score_min",
         "recall_score_max",
-        "recall_score_avg",
         "recall_score_std",
+        "f1_score_avg",
         "f1_score_min",
         "f1_score_max",
-        "f1_score_avg",
         "f1_score_std",
         "n_thresholds_min",
         "n_thresholds_max",
     ]
+
+    if dataset_name == "cnc":
+        primary_cols = [
+            "classifier",
+            "sampler_seed",
+            "date_time",
+            "dataset",
+            "dataprep_method",
+            "feat_file_name",
+            "id",
+            "meta_label_cols",
+            "feat_select_method",
+            "max_feats",
+            "n_feats",
+            "cnc_indices_keep",
+            "feat_col_list",
+            "stratification_grouping_col",
+            "y_label_col",
+            "scaler_method",
+            "oversamp_method",
+            "oversamp_ratio",
+            "undersamp_method",
+            "undersamp_ratio",
+            "early_stopping_rounds",
+            "prauc_avg",
+            "prauc_min",
+            "prauc_max",
+            "prauc_std",
+            "rocauc_avg",
+            "rocauc_min",
+            "rocauc_max",
+            "rocauc_std",
+            "accuracy_avg",
+            "accuracy_min",
+            "accuracy_max",
+            "accuracy_std",
+            "precision_score_avg",
+            "precision_score_min",
+            "precision_score_max",
+            "precision_score_std",
+            "recall_score_avg",
+            "recall_score_min",
+            "recall_score_max",
+            "recall_score_std",
+            "f1_score_avg",
+            "f1_score_min",
+            "f1_score_max",
+            "f1_score_std",
+            "n_thresholds_min",
+            "n_thresholds_max",
+        ]
 
     # remove any columns names from primary_cols that are not in df
     primary_cols = [col for col in primary_cols if col in df.columns]
@@ -192,6 +243,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "early_stopping_rounds",
             "feat_select_method",
             "max_feats",
+            "dataprep_method",
         ]
 
     # remove any keys from general_param_keys that are not in df
@@ -200,7 +252,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
-def plot_generic(df, df_feat, save_n_figures, path_model_curves):
+def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
 
     n_rows = df.shape[0]
 
@@ -217,11 +269,26 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
 
+        if dataset_name == "cnc":
+            try:
+                general_params["cnc_indices_keep"] = [literal_eval(df.iloc[row_idx]["cnc_indices_keep"])]
+            except:
+                general_params["cnc_indices_keep"] = [None]
+
+        # print('######')
+        # print("general_params['cnc_indices_keep']", literal_eval(df.iloc[row_idx]["cnc_indices_keep"]))
+        # print("type(general_params['cnc_indices_keep'])", type(general_params["cnc_indices_keep"]))
+
+        # print('######')
+        # print("feat_col_list", literal_eval(df.iloc[row_idx]["feat_col_list"]))
+
+
         (
             model_metrics_dict,
             params_dict_clf_named,
             params_dict_train_setup,
             feat_col_list,
+            meta_label_cols
         ) = train_single_model(
             df_feat,
             sampler_seed,
@@ -231,6 +298,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves):
             feat_col_list,
             general_params=general_params,
             params_clf=params_clf,
+            dataset_name=dataset_name,
         )
 
         # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
@@ -275,7 +343,7 @@ def cnc_plot_results(
 ):
 
     # get the dataprep_method from the df
-    dataprep_method = df.iloc[0]["dataprep_method"]
+    # dataprep_method = df.iloc[0]["dataprep_method"]
 
     df_feat = pd.read_csv(path_dataset_processed_dir / feat_file_name,)
     df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
@@ -283,19 +351,22 @@ def cnc_plot_results(
     df_feat["index_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-1]))
 
     df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
+    df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+    df_feat = df_feat.dropna(axis=0)
 
-    # add y label
-    if dataprep_method == "method_1":
-        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-        df_feat = df_feat.dropna(axis=0)
-    elif dataprep_method == "method_2":
-        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-        df_feat = df_feat.dropna(axis=0)
-    else:
-        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-        df_feat = df_feat.dropna(axis=0)
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves)
+    # # add y label
+    # if dataprep_method == "method_1":
+    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+    #     df_feat = df_feat.dropna(axis=0)
+    # elif dataprep_method == "method_2":
+    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+    #     df_feat = df_feat.dropna(axis=0)
+    # else:
+    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+    #     df_feat = df_feat.dropna(axis=0)
+
+    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc")
 
 
 def main(args):
@@ -314,7 +385,7 @@ def main(args):
     )
 
     df = filter_results_df(df)
-    df = order_columns_on_results_df(df)
+    df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
     sort_by = "prauc_avg"

@@ -378,7 +378,6 @@ def kfold_cv(
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
     df,
-    path_data_dir,
     sampler_seed,
     meta_label_cols,
     stratification_grouping_col=None,
@@ -387,7 +386,6 @@ def train_single_model(
     general_params=general_params,
     params_clf=None,
     dataset_name=None,
-    df_labels=None,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -407,12 +405,15 @@ def train_single_model(
     # prepare datasets
     if dataset_name == "cnc":
         cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
-        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(df, dataprep_method, meta_label_cols, path_data_dir, cnc_indices_keep=cnc_indices_keep)
+        print("#######\n", cnc_indices_keep, "\n########")
+        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=cnc_indices_keep)
         params_dict_train_setup["dataprep_method"] = dataprep_method
         params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
     elif dataset_name == "milling":
         df, dataprep_method = prepare_milling_data(df, dataprep_method)
         del params_dict_train_setup["cnc_indices_keep"] # delete because not used for milling
+    else:
+        pass
 
 
     # if classifier is "xgb" and the 
@@ -534,7 +535,6 @@ def random_search_runner(
                 meta_label_cols
             ) = train_single_model(
                 df,
-                path_data_dir,
                 sample_seed,
                 meta_label_cols,
                 stratification_grouping_col,
@@ -543,7 +543,6 @@ def random_search_runner(
                 general_params=general_params,
                 params_clf=None,
                 dataset_name=dataset_name,
-                df_labels=df_labels,
             )
 
             # train setup params
@@ -633,7 +632,7 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_save_dir, path_processed_dir
 
 
-def prepare_cnc_data(df, dataprep_method, meta_label_cols, path_data_dir, cnc_indices_keep=None):
+def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None):
     """
     This function takes in a dataframe and a dataprep method and returns a dataframe
     with the data prepared according to the method.
