@@ -739,12 +739,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Build data sets for analysis")
 
-    parser.add_argument(
-        "--n_cores",
-        type=int,
-        default=1,
-        help="Number of cores to use for multiprocessing",
-    )
+    # parser.add_argument(
+    #     "--n_cores",
+    #     type=int,
+    #     default=1,
+    #     help="Number of cores to use for multiprocessing",
+    # )
 
     parser.add_argument(
         "--rand_search_iter",
