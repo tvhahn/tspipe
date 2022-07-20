@@ -264,7 +264,6 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
-        feat_selection = True
         feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
@@ -335,7 +334,7 @@ def milling_plot_results(
 
     df_feat = milling_add_y_label_anomaly(df_feat)
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves)
+    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="milling")
 
 
 def cnc_plot_results(
@@ -353,18 +352,6 @@ def cnc_plot_results(
     df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
     df_feat = df_feat.dropna(axis=0)
-
-
-    # # add y label
-    # if dataprep_method == "method_1":
-    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    #     df_feat = df_feat.dropna(axis=0)
-    # elif dataprep_method == "method_2":
-    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    #     df_feat = df_feat.dropna(axis=0)
-    # else:
-    #     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    #     df_feat = df_feat.dropna(axis=0)
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc")
 

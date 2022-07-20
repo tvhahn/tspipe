@@ -411,7 +411,9 @@ def train_single_model(
         params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
     elif dataset_name == "milling":
         df, dataprep_method = prepare_milling_data(df, dataprep_method)
-        del params_dict_train_setup["cnc_indices_keep"] # delete because not used for milling
+        if "cnc_indices_keep" in params_dict_train_setup:
+            del params_dict_train_setup["cnc_indices_keep"] # delete because not used for milling
+
     else:
         pass
 
@@ -650,6 +652,7 @@ def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None
         feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
 
         # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
+        # TO-DO: remove hard-coded index and meta_label_cols
         df = df.pivot(index=['unix_date', 'tool_no', 'case_tool_54', 'y' ], columns='index_no', values=feat_list).reset_index()
         df.columns = [f'{i}__{j}' if j != '' else f'{i}' for i, j  in df.columns.values] # https://stackoverflow.com/a/51735628
         df = df.dropna(axis=1)

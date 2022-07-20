@@ -199,7 +199,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--feat_file_name milling_features.csv \
 		--final_dir_name final_results_milling \
 		--keep_top_n 1 \
-		--save_n_figures 6
+		--save_n_figures 8
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif
@@ -215,7 +215,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--processed_dir_name cnc_features_custom_1 \
 		--feat_file_name cnc_features_54_custom_1.csv \
 		--final_dir_name final_results_cnc \
-		--keep_top_n 4 \
+		--keep_top_n 1 \
 		--save_n_figures 8
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
