@@ -34,19 +34,19 @@ general_params = {
         None
     ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0],
@@ -55,7 +55,7 @@ general_params = {
     "feat_select_method": [
         # "tsfresh",
         # "tsfresh_random",
-        # "random",
+        "random",
         None,
     ],
     "max_feats": [

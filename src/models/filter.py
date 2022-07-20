@@ -126,6 +126,7 @@ def order_columns_on_results_df(df):
         "sampler_seed",
         "date_time",
         "dataset",
+        "dataprep_method",
         "feat_file_name",
         "id",
         "meta_label_cols",
@@ -273,6 +274,9 @@ def cnc_plot_results(
     df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
 ):
 
+    # get the dataprep_method from the df
+    dataprep_method = df.iloc[0]["dataprep_method"]
+
     df_feat = pd.read_csv(path_dataset_processed_dir / feat_file_name,)
     df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
     df_feat["tool_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-2]))
@@ -281,8 +285,15 @@ def cnc_plot_results(
     df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     # add y label
-    df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    df_feat = df_feat.dropna(axis=0)
+    if args.dataprep_method == "method_1":
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
+    elif args.dataprep_method == "method_2":
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
+    else:
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves)
 

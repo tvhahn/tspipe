@@ -654,6 +654,7 @@ def train_milling_models(args):
         path_save_dir,
         feat_file_name,
         dataset_name="milling",
+        dataprep_method=args.dataprep_method,
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
@@ -681,8 +682,15 @@ def train_cnc_models(args):
     df_labels = pd.read_csv(path_data_dir / "processed/cnc" / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     # add y label
-    df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    df = df.dropna(axis=0)
+    if args.dataprep_method == "method_1":
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
+    elif args.dataprep_method == "method_2":
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
+    else:
+        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
+        df = df.dropna(axis=0)
 
     Y_LABEL_COL = "y"
 
@@ -708,6 +716,7 @@ def train_cnc_models(args):
         path_save_dir,
         feat_file_name,
         dataset_name="cnc",
+        dataprep_method=args.dataprep_method,
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
@@ -784,6 +793,13 @@ if __name__ == "__main__":
         default="milling",
         type=str,
         help="Name of the dataset to use for training. Either 'milling' or 'cnc'",
+    )
+
+    parser.add_argument(
+        "--dataprep_method",
+        default="method_1",
+        type=str,
+        help="Name of the dataprep method to use. Varies by data set, but generally, 'method_1' or 'method_2'",
     )
 
     # parser.add_argument(
