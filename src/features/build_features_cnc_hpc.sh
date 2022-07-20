@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time=00:10:00 # 10 min
-#SBATCH --array=1-10
+#SBATCH --array=1-50
 #SBATCH --cpus-per-task=4
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mem=8G
@@ -23,10 +23,10 @@ python $PROJECT_DIR/src/features/build_features_cnc.py \
     --dataset cnc \
     --raw_dir_name data_raw_processed \
     --raw_file_name cnc_raw_54.csv \
-    --interim_dir_name cnc_features \
-    --processed_dir_name cnc_features \
-    --feat_file_name cnc_features_54_test2.csv \
-    --feat_dict_name dummy \
-    --n_chunks 10 \
+    --interim_dir_name cnc_features_custom_1 \
+    --processed_dir_name cnc_features_custom_1 \
+    --feat_file_name cnc_features_54_custom_1.csv \
+    --feat_dict_name custom_1 \
+    --n_chunks 50 \
     --n_cores 4 \
     --chunk_index $SLURM_ARRAY_TASK_ID
