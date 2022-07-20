@@ -285,15 +285,15 @@ def cnc_plot_results(
     df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     # add y label
-    if args.dataprep_method == "method_1":
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
-    elif args.dataprep_method == "method_2":
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
+    if dataprep_method == "method_1":
+        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+        df_feat = df_feat.dropna(axis=0)
+    elif dataprep_method == "method_2":
+        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+        df_feat = df_feat.dropna(axis=0)
     else:
-        df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-        df = df.dropna(axis=0)
+        df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
+        df_feat = df_feat.dropna(axis=0)
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves)
 
@@ -451,6 +451,7 @@ if __name__ == "__main__":
         default="False",
         help="Save the models, and scaler, to disk.",
     )
+
 
     args = parser.parse_args()
 
