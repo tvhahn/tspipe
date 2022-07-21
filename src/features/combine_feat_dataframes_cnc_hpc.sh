@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --time=00:10:00 # 10 minutes
+#SBATCH --time=00:20:00 # 10 minutes
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=10
-#SBATCH --mem=4G
+#SBATCH --mem=16G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
 #SBATCH --mail-user=18tcvh@queensu.ca   # Email to which notifications will be $
@@ -18,7 +18,7 @@ source ~/featstore/bin/activate
 python $PROJECT_DIR/src/features/combine_feat_dataframes.py \
     --dataset cnc \
     --path_data_dir $SCRATCH_DATA_DIR \
-    --interim_dir_name cnc_features_custom_1 \
-    --processed_dir_name cnc_features_custom_1 \
-    --feat_file_name cnc_features_54_custom_1.csv \
+    --interim_dir_name cnc_features_comp \
+    --processed_dir_name cnc_features_comp \
+    --feat_file_name cnc_features_54_comp.csv \
     --n_cores 10
