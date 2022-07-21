@@ -145,7 +145,11 @@ def kfold_cv(
             if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
                     print("performing tsfresh feature selection")
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -166,12 +170,18 @@ def kfold_cv(
                         feat_col_list=None,
                     )
 
-                    num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    num_feats = np.random.randint(
+                        low=5, high=len(feat_col_list), size=1
+                    )[0]
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
 
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -181,16 +191,21 @@ def kfold_cv(
                         feat_col_list=random_selected_feat,
                     )
 
-
                 elif feat_selection == "random":
                     print("performing random feature selection")
 
-                    num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
+                    num_feats = np.random.randint(
+                        low=5, high=len(x_train_cols), size=1
+                    )[0]
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
-    
+
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -279,7 +294,11 @@ def kfold_cv(
             if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
                     print("performing tsfresh feature selection")
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -300,12 +319,18 @@ def kfold_cv(
                         feat_col_list=None,
                     )
 
-                    num_feats = np.random.randint(low=5, high=len(feat_col_list), size=1)[0]
+                    num_feats = np.random.randint(
+                        low=5, high=len(feat_col_list), size=1
+                    )[0]
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
 
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -315,16 +340,21 @@ def kfold_cv(
                         feat_col_list=random_selected_feat,
                     )
 
-
                 elif feat_selection == "random":
                     print("performing random feature selection")
 
-                    num_feats = np.random.randint(low=5, high=len(x_train_cols), size=1)[0]
+                    num_feats = np.random.randint(
+                        low=5, high=len(x_train_cols), size=1
+                    )[0]
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
 
                     random_selected_feat = random.sample(list(x_train_cols), num_feats)
-                    x_train, x_test, feat_col_list = feat_selection_binary_classification(
+                    (
+                        x_train,
+                        x_test,
+                        feat_col_list,
+                    ) = feat_selection_binary_classification(
                         x_train,
                         y_train,
                         x_train_cols,
@@ -399,26 +429,29 @@ def train_single_model(
     undersamp_ratio = params_dict_train_setup["undersamp_ratio"]
     classifier = params_dict_train_setup["classifier"]
     feat_selection = params_dict_train_setup["feat_select_method"]
-    max_feats=params_dict_train_setup["max_feats"]
+    max_feats = params_dict_train_setup["max_feats"]
     dataprep_method = params_dict_train_setup["dataprep_method"]
 
     # prepare datasets
     if dataset_name == "cnc":
         cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
         print("#######\n", cnc_indices_keep, "\n########")
-        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=cnc_indices_keep)
+        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(
+            df, dataprep_method, meta_label_cols, cnc_indices_keep=cnc_indices_keep
+        )
         params_dict_train_setup["dataprep_method"] = dataprep_method
         params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
     elif dataset_name == "milling":
         df, dataprep_method = prepare_milling_data(df, dataprep_method)
         if "cnc_indices_keep" in params_dict_train_setup:
-            del params_dict_train_setup["cnc_indices_keep"] # delete because not used for milling
+            del params_dict_train_setup[
+                "cnc_indices_keep"
+            ]  # delete because not used for milling
 
     else:
         pass
 
-
-    # if classifier is "xgb" and the 
+    # if classifier is "xgb" and the
     if (
         classifier == "xgb"
         and "early_stopping_rounds" in params_dict_train_setup.keys()
@@ -460,8 +493,6 @@ def train_single_model(
     )
     print("\n", params_dict_clf_named)
 
-
-
     model_metrics_dict, feat_col_list = kfold_cv(
         df,
         clf,
@@ -501,12 +532,12 @@ def random_search_runner(
     path_data_dir,
     path_save_dir,
     feat_file_name,
+    label_file_name,
     dataset_name=None,
     y_label_col="y",
     save_freq=1,
     debug=True,
     feat_col_list=None,
-    df_labels=None,
 ):
 
     results_list = []
@@ -534,7 +565,7 @@ def random_search_runner(
                 params_dict_clf_named,
                 params_dict_train_setup,
                 feat_col_list,
-                meta_label_cols
+                meta_label_cols,
             ) = train_single_model(
                 df,
                 sample_seed,
@@ -554,6 +585,7 @@ def random_search_runner(
             df_t["stratification_grouping_col"] = stratification_grouping_col
             df_t["y_label_col"] = y_label_col
             df_t["feat_file_name"] = str(feat_file_name)
+            df_t["label_file_name"] = str(label_file_name)
             df_t["n_feats"] = len(feat_col_list)
 
             # reset feat_col_list
@@ -587,8 +619,6 @@ def random_search_runner(
                     df_results.to_csv(path_save_dir / file_name_results, index=False)
                 else:
                     df_results.to_csv(file_name_results, index=False)
-
-        
 
         # except Exception as e and log the exception
         except Exception as e:
@@ -628,7 +658,9 @@ def set_directories(args):
         path_save_dir = proj_dir / "models" / save_dir_name
         Path(path_save_dir / "setup_files").mkdir(parents=True, exist_ok=True)
 
-    path_processed_dir = path_data_dir / "processed" / args.dataset / args.processed_dir_name
+    path_processed_dir = (
+        path_data_dir / "processed" / args.dataset / args.processed_dir_name
+    )
     path_processed_dir.mkdir(parents=True, exist_ok=True)
 
     return proj_dir, path_data_dir, path_save_dir, path_processed_dir
@@ -653,22 +685,34 @@ def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None
 
         # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
         # TO-DO: remove hard-coded index and meta_label_cols
-        df = df.pivot(index=['unix_date', 'tool_no', 'case_tool_54', 'y' ], columns='index_no', values=feat_list).reset_index()
-        df.columns = [f'{i}__{j}' if j != '' else f'{i}' for i, j  in df.columns.values] # https://stackoverflow.com/a/51735628
+        df = df.pivot(
+            index=["unix_date", "tool_no", "case_tool_54", "y"],
+            columns="index_no",
+            values=feat_list,
+        ).reset_index()
+        df.columns = [
+            f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values
+        ]  # https://stackoverflow.com/a/51735628
         df = df.dropna(axis=1)
-        meta_label_cols = ['unix_date', 'tool_no', 'case_tool_54']
+        meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
         cnc_indices_keep = None
         return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     elif dataprep_method == "cnc_index_select_transposed":
         df = df[df["index_no"].isin(cnc_indices_keep)]
         feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
-        
+
         # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
-        df = df.pivot(index=['unix_date', 'tool_no', 'case_tool_54', 'y' ], columns='index_no', values=feat_list).reset_index()
-        df.columns = [f'{i}__{j}' if j != '' else f'{i}' for i, j  in df.columns.values] # https://stackoverflow.com/a/51735628
+        df = df.pivot(
+            index=["unix_date", "tool_no", "case_tool_54", "y"],
+            columns="index_no",
+            values=feat_list,
+        ).reset_index()
+        df.columns = [
+            f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values
+        ]  # https://stackoverflow.com/a/51735628
         df = df.dropna(axis=1)
-        meta_label_cols = ['unix_date', 'tool_no', 'case_tool_54']
+        meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
         return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     else:
@@ -693,7 +737,7 @@ def prepare_milling_data(df, dataprep_method):
 def train_milling_models(args):
 
     # set directories
-    proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
+    proj_dir, path_data_dir, path_save_dir, path_processed_dir = set_directories(args)
 
     RAND_SEARCH_ITER = args.rand_search_iter
 
@@ -739,10 +783,31 @@ def train_milling_models(args):
     )
 
 
+def load_cnc_features(
+    path_data_dir, path_processed_dir, feat_file_name, label_file_name
+):
+    """
+    This function takes in a dataframe and returns a dataframe with the data prepared according to the method.
+    """
+    df = pd.read_csv(
+        path_processed_dir / feat_file_name,
+    )
+    df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
+    df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
+    df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
+
+    df_labels = pd.read_csv(path_data_dir / "processed/cnc" / label_file_name)
+
+    df = cnc_add_y_label_binary(df, df_labels, col_list_case=["case_tool_54"])
+    df = df.dropna(axis=1, how="all")  # drop any columns that are completely empty
+    df = df.dropna(axis=0)  # drop any rows that have NaN values in them
+    return df
+
+
 def train_cnc_models(args):
 
     # set directories
-    proj_dir, path_data_dir, path_save_dir, path_processed_dir  = set_directories(args)
+    proj_dir, path_data_dir, path_save_dir, path_processed_dir = set_directories(args)
 
     RAND_SEARCH_ITER = args.rand_search_iter
 
@@ -752,26 +817,16 @@ def train_cnc_models(args):
     else:
         feat_file_name = "cnc_features_54.csv"
 
-    df = pd.read_csv(path_processed_dir / feat_file_name,)
-    df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
-    df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
-    df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
+    if args.label_file_name:
+        label_file_name = args.label_file_name
+    else:
+        label_file_name = (
+            "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+        )
 
-    df_labels = pd.read_csv(path_data_dir / "processed/cnc" / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
-
-    df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    df = df.dropna(axis=1, how="all") # drop any columns that are completely empty
-    df = df.dropna(axis=0) # drop any rows that have NaN values in them
-    # add y label
-    # if args.dataprep_method == "method_1":
-    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    #     df = df.dropna(axis=0)
-    # elif args.dataprep_method == "method_2":
-    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    #     df = df.dropna(axis=0)
-    # else:
-    #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    #     df = df.dropna(axis=0)
+    df = load_cnc_features(
+        path_data_dir, path_processed_dir, feat_file_name, label_file_name
+    )
 
     Y_LABEL_COL = "y"
 
@@ -797,11 +852,11 @@ def train_cnc_models(args):
         path_data_dir,
         path_save_dir,
         feat_file_name,
+        label_file_name,
         dataset_name="cnc",
         y_label_col=Y_LABEL_COL,
         save_freq=1,
         debug=True,
-        df_labels=df_labels,
     )
 
 
@@ -874,6 +929,12 @@ if __name__ == "__main__":
         "--feat_file_name",
         type=str,
         help="Name of the feature file",
+    )
+
+    parser.add_argument(
+        "--label_file_name",
+        type=str,
+        help="Name of the label file. Used to create the y-label column on the feature dataframe.",
     )
 
     args = parser.parse_args()

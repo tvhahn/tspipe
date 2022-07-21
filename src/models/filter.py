@@ -9,7 +9,7 @@ import matplotlib
 # https://stackoverflow.com/a/4706614/9214620
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from src.models.train import train_single_model
+from src.models.train import train_single_model, load_cnc_features
 from src.models.utils import milling_add_y_label_anomaly, cnc_add_y_label_binary, get_model_metrics_df
 from ast import literal_eval
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
@@ -178,6 +178,7 @@ def order_columns_on_results_df(df, dataset_name=None):
             "dataset",
             "dataprep_method",
             "feat_file_name",
+            "label_file_name",
             "id",
             "meta_label_cols",
             "feat_select_method",
@@ -340,9 +341,8 @@ def milling_plot_results(
 def cnc_plot_results(
     df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
 ):
-
-    # get the dataprep_method from the df
-    # dataprep_method = df.iloc[0]["dataprep_method"]
+    # To-Do: in filter.py, add load_cnc_features to cnc_plot_results
+    # df_feat = load_cnc_features(path_data_dir, path_processed_dir, feat_file_name, label_file_name)
 
     df_feat = pd.read_csv(path_dataset_processed_dir / feat_file_name,)
     df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
@@ -351,7 +351,8 @@ def cnc_plot_results(
 
     df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    df_feat = df_feat.dropna(axis=0)
+    df_feat = df_feat.dropna(axis=1, how="all") # drop any columns that are completely empty
+    df_feat = df_feat.dropna(axis=0) # drop any rows that have NaN values in them
 
     plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc")
 
