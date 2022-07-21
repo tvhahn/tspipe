@@ -760,7 +760,8 @@ def train_cnc_models(args):
     df_labels = pd.read_csv(path_data_dir / "processed/cnc" / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
 
     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])
-    df = df.dropna(axis=0)
+    df = df.dropna(axis=1, how="all") # drop any columns that are completely empty
+    df = df.dropna(axis=0) # drop any rows that have NaN values in them
     # add y label
     # if args.dataprep_method == "method_1":
     #     df = cnc_add_y_label_binary(df, df_labels, col_list_case=['case_tool_54'])

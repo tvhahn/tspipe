@@ -152,10 +152,10 @@ train_cnc: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_cnc \
-		--processed_dir_name cnc_features_custom_1 \
+		--processed_dir_name cnc_features_comp \
 		--rand_search_iter 150 \
 		--dataset cnc \
-		--feat_file_name cnc_features_54_custom_1.csv
+		--feat_file_name cnc_features_54_comp.csv
 else # assume on HPC
 	sbatch src/models/train_cnc_hpc.sh $(PROJECT_DIR)
 endif

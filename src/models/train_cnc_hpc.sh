@@ -20,8 +20,8 @@ python $PROJECT_DIR/src/models/train.py \
     --path_data_dir $SCRATCH_DATA_DIR \
     --dataset cnc \
     --save_dir_name interim_results_cnc \
-    --processed_dir_name cnc_features_custom_1 \
-    --feat_file_name cnc_features_54_custom_1.csv \
+    --processed_dir_name cnc_features_comp \
+    --feat_file_name cnc_features_54_comp.csv \
     --rand_search_iter 5000
 
 
