@@ -81,6 +81,7 @@ target/
 
 # exclude models folder from source control by default
 /models/
+/reports/
 
 # Mac OS-specific storage files
 .DS_Store

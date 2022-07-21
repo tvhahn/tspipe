@@ -221,6 +221,17 @@ else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif
 
+## Make Features
+viz: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	$(PYTHON_INTERPRETER) src/visualization/visualize.py \
+		-p $(PROJECT_DIR) \
+		--dataset cnc \
+		--path_data_dir $(PROJECT_DIR)/data/ 
+else # assume on HPC
+	bash src/features/chain_build_feat_and_combine_cnc_hpc.sh $(PROJECT_DIR)
+endif
+
 
 ## Delete all compiled Python files
 clean:
