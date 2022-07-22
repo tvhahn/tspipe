@@ -275,13 +275,6 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
             except:
                 general_params["cnc_indices_keep"] = [None]
 
-        # print('######')
-        # print("general_params['cnc_indices_keep']", literal_eval(df.iloc[row_idx]["cnc_indices_keep"]))
-        # print("type(general_params['cnc_indices_keep'])", type(general_params["cnc_indices_keep"]))
-
-        # print('######')
-        # print("feat_col_list", literal_eval(df.iloc[row_idx]["feat_col_list"]))
-
 
         (
             model_metrics_dict,
@@ -374,6 +367,9 @@ def main(args):
 
     df = filter_results_df(df)
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
+
+    # any additional filtering
+    # df = df[df["n_feats"] <= 10]
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
     sort_by = ["prauc_min", "prauc_avg"]
