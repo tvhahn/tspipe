@@ -62,7 +62,6 @@ def main(args):
     print("Creating dataframe from raw data...")
     milldata = MillingPrepMethodA(
         root = folder_raw_data,
-        path_csv_labels = path_csv_labels,
         window_len=args.window_len,
         stride=args.stride,
         download = True,
