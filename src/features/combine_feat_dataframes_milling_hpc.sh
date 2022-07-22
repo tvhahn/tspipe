@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --time=00:10:00 # 10 minutes
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=2G
+#SBATCH --cpus-per-task=10
+#SBATCH --mem=16G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
 #SBATCH --mail-user=18tcvh@queensu.ca   # Email to which notifications will be $
@@ -16,5 +16,9 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 source ~/featstore/bin/activate
 
 python $PROJECT_DIR/src/features/combine_feat_dataframes.py \
-    --path_data_folder $SCRATCH_DATA_DIR \
-    --num_pool_processes 2
+    --dataset cnc \
+    --path_data_dir $SCRATCH_DATA_DIR \
+    --interim_dir_name milling_features_comp \
+    --processed_dir_name milling_features_comp \
+    --feat_file_name milling_features_comp.csv \
+    --n_cores 10

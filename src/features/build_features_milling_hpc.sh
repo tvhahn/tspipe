@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=00:10:00 # 10 min
-#SBATCH --array=1-10
-#SBATCH --cpus-per-task=4
+#SBATCH --array=1-2
+#SBATCH --cpus-per-task=8
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mem=8G
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
@@ -19,6 +19,14 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 source ~/featstore/bin/activate
 
 python $PROJECT_DIR/src/features/build_features.py \
-    --path_data_folder $SCRATCH_DATA_DIR \
-    --n_chunks 10 \
+    --path_data_dir $SCRATCH_DATA_DIR \
+    --dataset milling \
+    --raw_dir_name stride64_len64 \
+    --raw_file_name milling.csv.gz \
+    --interim_dir_name milling_features_comp \
+    --processed_dir_name milling_features_comp \
+    --feat_file_name milling_features_comp.csv \
+    --feat_dict_name comp \
+    --n_chunks 20 \
+    --n_cores 8 \
     --chunk_index $SLURM_ARRAY_TASK_ID
