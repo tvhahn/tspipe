@@ -532,7 +532,7 @@ def random_search_runner(
     path_data_dir,
     path_save_dir,
     feat_file_name,
-    label_file_name,
+    label_file_name=None,
     dataset_name=None,
     y_label_col="y",
     save_freq=1,
@@ -585,8 +585,12 @@ def random_search_runner(
             df_t["stratification_grouping_col"] = stratification_grouping_col
             df_t["y_label_col"] = y_label_col
             df_t["feat_file_name"] = str(feat_file_name)
-            df_t["label_file_name"] = str(label_file_name)
             df_t["n_feats"] = len(feat_col_list)
+
+            if label_file_name is not None:
+                df_t["label_file_name"] = str(label_file_name)
+            else:
+                df_t["label_file_name"] = None
 
             # reset feat_col_list
             # can remove this when using "tsfresh" feature selection in order to reuse
