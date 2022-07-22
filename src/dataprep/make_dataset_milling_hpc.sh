@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --time=00:15:00 # 10 minutes
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$

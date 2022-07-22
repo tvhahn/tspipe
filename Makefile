@@ -51,7 +51,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	--stride 64 \
 	--raw_dir_name stride64_len64
 else # assume on HPC
-	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
+	sbatch src/dataprep/make_dataset_milling_hpc.sh $(PROJECT_DIR)
 endif
 
 ## Make raw data for CNC
