@@ -46,11 +46,11 @@ def main(args):
     folder_raw_data = path_data_dir / "raw"
     folder_raw_data_milling = path_data_dir / "raw/milling" 
 
-    sub_folder_path = folder_raw_data_milling / args.sub_folder_name
+    sub_folder_path = folder_raw_data_milling / args.raw_dir_name
     Path(sub_folder_path).mkdir(parents=True, exist_ok=True)
 
     folder_processed_data_milling = path_data_dir / "processed/milling"
-    path_csv_labels = folder_processed_data_milling / "labels_with_tool_class.csv"
+    path_csv_labels = folder_processed_data_milling / "milling_labels_with_tool_class.csv"
 
     # extract mill.zip file in folder_raw_data_milling if it hasn't been extracted yet
     if not (folder_raw_data_milling / "mill.mat").exists():
@@ -58,15 +58,13 @@ def main(args):
         with zipfile.ZipFile(folder_raw_data_milling / 'mill.zip', 'r') as zip_ref:
             zip_ref.extractall(folder_raw_data_milling)
 
-    WINDOW_LEN = 64
-    STRIDE = 64
 
     print("Creating dataframe from raw data...")
     milldata = MillingPrepMethodA(
         root = folder_raw_data,
         path_csv_labels = path_csv_labels,
-        window_len=WINDOW_LEN,
-        stride=STRIDE,
+        window_len=args.window_len,
+        stride=args.stride,
         download = True,
     )
     
@@ -82,8 +80,8 @@ def main(args):
     )
 
     shutil.copy(
-        Path(args.proj_dir) / "src/dataprep/make_dataset.py",
-        sub_folder_path / "make_dataset.py",)
+        Path(args.proj_dir) / "src/dataprep/make_dataset_milling.py",
+        sub_folder_path / "make_dataset_milling.py",)
 
 
 if __name__ == "__main__":
@@ -110,10 +108,24 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--sub_folder_name",
+        "--raw_dir_name",
         type=str,
-        default="milling_1",
-        help="Name of the subfolder that will contain the extracted csv file",
+        default="data_raw_processed",
+        help="Name of the subfolder that will contain the final raw csv file",
+    )
+
+    parser.add_argument(
+        "--window_len",
+        type=int,
+        default=64,
+        help="Window length for the sample.",
+    )
+
+    parser.add_argument(
+        "--stride",
+        type=int,
+        default=64,
+        help="Stride between each sample.",
     )
 
 

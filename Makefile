@@ -42,12 +42,14 @@ else # assume on HPC
 endif
 
 ## Make Dataset
-data: requirements
+data_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/dataprep/make_dataset.py \
+	$(PYTHON_INTERPRETER) src/dataprep/make_dataset_milling.py \
 	-p $(PROJECT_DIR) \
 	--path_data_dir $(PROJECT_DIR)/data/ \
-	--sub_folder_name stride64_len64
+	--window_len 64 \
+	--stride 64 \
+	--raw_dir_name stride64_len64
 else # assume on HPC
 	sbatch src/dataprep/make_raw_data_hpc.sh $(PROJECT_DIR)
 endif
