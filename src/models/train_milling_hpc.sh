@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --time=00:5:00 # 30 min
-#SBATCH --array=1-20
-#SBATCH --cpus-per-task=1
+#SBATCH --time=2:10:00 # 30 min
+#SBATCH --array=1-10
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=4G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
@@ -16,5 +16,13 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 module load python/3.8
 source ~/featstore/bin/activate
 
-python $PROJECT_DIR/src/models/train.py --save_dir_name interim_results_milling --date_time $NOW_TIME --path_data_dir $SCRATCH_DATA_DIR --rand_search_iter 300 --feat_selection
+python $PROJECT_DIR/src/models/train.py \
+    --path_data_dir $SCRATCH_DATA_DIR \
+    --dataset milling \
+    --save_dir_name interim_results_milling \
+    --processed_dir_name milling_features \
+    --feat_file_name milling_features.csv \
+    --rand_search_iter 5000
+
+
 
