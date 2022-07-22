@@ -171,7 +171,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--interim_dir_name interim_results_milling \
 		--final_dir_name final_results_milling
 else # assume on HPC
-	sbatch src/models/compile_hpc.sh $(PROJECT_DIR)
+	sbatch src/models/compile_milling_hpc.sh $(PROJECT_DIR)
 endif
 
 
