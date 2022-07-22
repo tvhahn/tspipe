@@ -90,6 +90,15 @@ else # assume on HPC
 endif
 
 
+## Copy the raw cnc data to HPC scratch
+copy_milling_raw: requirements
+ifeq (True,$(HAS_CONDA)) # assume on local
+	echo "On local compute."
+else # assume on HPC
+	bash src/dataprep/copy_milling_raw_to_scratch.sh
+endif
+
+
 
 ## Make Features
 features_milling: requirements
