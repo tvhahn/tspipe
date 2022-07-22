@@ -223,8 +223,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
 		--dataset cnc \
-		--processed_dir_name cnc_features_custom_1 \
-		--feat_file_name cnc_features_54_custom_1.csv \
+		--processed_dir_name cnc_features_comp \
+		--feat_file_name cnc_features_54_comp.csv \
 		--final_dir_name final_results_cnc \
 		--keep_top_n 1 \
 		--save_n_figures 8
