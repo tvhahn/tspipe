@@ -263,6 +263,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         params_clf = rebuild_params_clf(df, row_idx)
         general_params = rebuild_general_params(df, row_idx)
 
+        # construct additional info used during the model training
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
