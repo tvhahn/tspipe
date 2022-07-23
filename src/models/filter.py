@@ -185,6 +185,7 @@ def order_columns_on_results_df(df, dataset_name=None):
             "max_feats",
             "n_feats",
             "cnc_indices_keep",
+            "cnc_cases_drop",
             "feat_col_list",
             "stratification_grouping_col",
             "y_label_col",
