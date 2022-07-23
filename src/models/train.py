@@ -434,19 +434,38 @@ def train_single_model(
 
     # prepare datasets
     if dataset_name == "cnc":
+
+        # cnc specific parameters
         cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
-        print("#######\n", cnc_indices_keep, "\n########")
-        df, dataprep_method, meta_label_cols, cnc_indices_keep = prepare_cnc_data(
-            df, dataprep_method, meta_label_cols, cnc_indices_keep=cnc_indices_keep
+        cnc_cases_drop = params_dict_train_setup["cnc_cases_drop"]
+
+        (
+            df,
+            dataprep_method,
+            meta_label_cols,
+            cnc_indices_keep,
+            cnc_cases_drop,
+        ) = prepare_cnc_data(
+            df,
+            dataprep_method,
+            meta_label_cols,
+            cnc_indices_keep=cnc_indices_keep,
+            cnc_cases_drop=cnc_cases_drop,
         )
+
+        # reassign any parameters that were changed by the above prepare_cnc_data function
         params_dict_train_setup["dataprep_method"] = dataprep_method
         params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
+        params_dict_train_setup["cnc_cases_drop"] = cnc_cases_drop  
+
     elif dataset_name == "milling":
         df, dataprep_method = prepare_milling_data(df, dataprep_method)
+
+        # delete any parameters from param dict that aren't relevant to dataset
         if "cnc_indices_keep" in params_dict_train_setup:
-            del params_dict_train_setup[
-                "cnc_indices_keep"
-            ]  # delete because not used for milling
+            del params_dict_train_setup["cnc_indices_keep"]
+        if "cnc_cases_drop" in params_dict_train_setup:
+            del params_dict_train_setup["cnc_cases_drop"]
 
     else:
         pass
@@ -670,7 +689,9 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_save_dir, path_processed_dir
 
 
-def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None):
+def prepare_cnc_data(
+    df, dataprep_method, meta_label_cols, cnc_indices_keep=None, cnc_cases_drop=None
+):
     """
     This function takes in a dataframe and a dataprep method and returns a dataframe
     with the data prepared according to the method.
@@ -678,11 +699,11 @@ def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None
 
     if dataprep_method == "cnc_standard":
         cnc_indices_keep = None
-        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     elif dataprep_method == "cnc_standard_index_select":
         df = df[df["index_no"].isin(cnc_indices_keep)]
-        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     elif dataprep_method == "cnc_index_transposed":
         feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
@@ -694,13 +715,14 @@ def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None
             columns="index_no",
             values=feat_list,
         ).reset_index()
-        df.columns = [
-            f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values
-        ]  # https://stackoverflow.com/a/51735628
+
+        # https://stackoverflow.com/a/51735628
+        df.columns = [f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values]
+
         df = df.dropna(axis=1)
         meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
         cnc_indices_keep = None
-        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     elif dataprep_method == "cnc_index_select_transposed":
         df = df[df["index_no"].isin(cnc_indices_keep)]
@@ -712,17 +734,28 @@ def prepare_cnc_data(df, dataprep_method, meta_label_cols, cnc_indices_keep=None
             columns="index_no",
             values=feat_list,
         ).reset_index()
-        df.columns = [
-            f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values
-        ]  # https://stackoverflow.com/a/51735628
+
+        df.columns = [f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values]
+
         df = df.dropna(axis=1)
         meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
-        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
 
     else:
         dataprep_method = "cnc_standard"
         cnc_indices_keep = None
-        return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    if cnc_cases_drop == True:
+        cnc_cases_drop = sorted(
+            random.sample(list(range(1, 36)), k=random.randint(1, 6))
+        )  # random drop up to 5 cases between cases 1-35
+        df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
+
+    # if a list of cnc_case_drop is provided, then use that list
+    elif isinstance(cnc_cases_drop, list):
+        df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
+
+    return df, dataprep_method, meta_label_cols, cnc_indices_keep, cnc_cases_drop
 
 
 def prepare_milling_data(df, dataprep_method):

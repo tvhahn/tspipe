@@ -34,19 +34,19 @@ general_params = {
         None
     ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0],
@@ -54,7 +54,7 @@ general_params = {
     "early_stopping_rounds":[None, 10, 50, 100],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
+        # "tsfresh_random",
         "random",
         # None,
     ],
@@ -62,29 +62,29 @@ general_params = {
         # None,
         10,
         # 20,
-        50,
+        # 50,
         # 75,
         # 100,
-        200,
+        # 200,
         # 300,
         # 400,
         # 500,
     ],
     "classifier": [
-        "rf",
-        "xgb",
-        "knn",
-        # "svm",
-        # "lr",
-        # "sgd",
-        # "ridge",
-        # "nb",
+        # "rf", # Random Forest
+        # "xgb", # XGBoost
+        # "knn", # K-Nearest Neighbors
+        # "svm", # Support Vector Machine
+        # "lr", # Logistic Regression
+        # "sgd", # Linear model with SGD
+        # "ridge", # Ridge Classifier
+        "nb", # Naive Bayes
     ],
     "dataprep_method": [
         "cnc_standard",
         "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),
@@ -94,7 +94,12 @@ general_params = {
         list(range(2, 8)),
         list(range(2, 9)),
         list(range(2, 10)), 
-    ] # no cut indices past 9 that are valid
+    ], # no cut indices past 9 that are valid
+    "cnc_cases_drop": [
+        None, # no drop
+        True, # randomly select cases to drop
+        # [1,2], # input a list of cases to drop
+    ],
 }
 
 
