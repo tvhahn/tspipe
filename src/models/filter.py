@@ -269,12 +269,16 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
 
+        # rebuild parameters that are specific to certain datasets
         if dataset_name == "cnc":
             try:
                 general_params["cnc_indices_keep"] = [literal_eval(df.iloc[row_idx]["cnc_indices_keep"])]
             except:
                 general_params["cnc_indices_keep"] = [None]
-
+            try:
+                general_params["cnc_cases_drop"] = [literal_eval(df.iloc[row_idx]["cnc_cases_drop"])]
+            except:
+                general_params["cnc_cases_drop"] = [None]
 
         (
             model_metrics_dict,
