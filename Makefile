@@ -114,7 +114,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--feat_dict_name dummy \
 		--n_cores 6
 else # assume on HPC
-	bash src/features/chain_build_feat_and_combine.sh $(PROJECT_DIR)
+	bash src/features/chain_build_feat_and_combine_milling_hpc.sh $(PROJECT_DIR)
 endif
 
 
