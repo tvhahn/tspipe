@@ -16,7 +16,7 @@ SCRATCH_DATA_DIR=~/scratch/feat-store/data
 source ~/featstore/bin/activate
 
 python $PROJECT_DIR/src/features/combine_feat_dataframes.py \
-    --dataset cnc \
+    --dataset milling \
     --path_data_dir $SCRATCH_DATA_DIR \
     --interim_dir_name milling_features_comp \
     --processed_dir_name milling_features_comp \
