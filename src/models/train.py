@@ -431,6 +431,7 @@ def train_single_model(
     feat_selection = params_dict_train_setup["feat_select_method"]
     max_feats = params_dict_train_setup["max_feats"]
     dataprep_method = params_dict_train_setup["dataprep_method"]
+    feat_col_list = params_dict_train_setup["feat_col_list"]
 
     # prepare datasets
     if dataset_name == "cnc":
@@ -438,6 +439,9 @@ def train_single_model(
         # cnc specific parameters
         cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
         cnc_cases_drop = params_dict_train_setup["cnc_cases_drop"]
+
+        print("############################################################")
+        print("cnc_cases_drop: ", cnc_cases_drop)
 
         (
             df,
@@ -452,6 +456,8 @@ def train_single_model(
             cnc_indices_keep=cnc_indices_keep,
             cnc_cases_drop=cnc_cases_drop,
         )
+
+
 
         # reassign any parameters that were changed by the above prepare_cnc_data function
         params_dict_train_setup["dataprep_method"] = dataprep_method
@@ -746,6 +752,7 @@ def prepare_cnc_data(
         cnc_indices_keep = None
 
     if cnc_cases_drop == True:
+        print("#!#!#!#!#!#1#!!#!#!#!#!#! DROP CASES")
         cnc_cases_drop = sorted(
             random.sample(list(range(1, 36)), k=random.randint(1, 6))
         )  # random drop up to 5 cases between cases 1-35
@@ -753,6 +760,7 @@ def prepare_cnc_data(
 
     # if a list of cnc_case_drop is provided, then use that list
     elif isinstance(cnc_cases_drop, list):
+        print("#!#!#!#!#!#1#!!#!#!#!#!#! DROP CASES")
         df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
 
     return df, dataprep_method, meta_label_cols, cnc_indices_keep, cnc_cases_drop

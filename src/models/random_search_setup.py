@@ -28,11 +28,7 @@ import random
 ###############################################################################
 
 general_params = {
-    "scaler_method": [
-        "standard",
-        "minmax",
-        None
-    ],
+    "scaler_method": ["standard", "minmax", None],
     "oversamp_method": [
         # "random_over",
         # "smote_enn",
@@ -51,7 +47,7 @@ general_params = {
     ],
     "oversamp_ratio": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95, 1.0],
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
-    "early_stopping_rounds":[None, 10, 50, 100],
+    "early_stopping_rounds": [None, 10, 50, 100],
     "feat_select_method": [
         # "tsfresh",
         # "tsfresh_random",
@@ -78,7 +74,22 @@ general_params = {
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        "nb", # Naive Bayes
+        "nb",  # Naive Bayes
+    ],
+    "feat_col_list": [
+        None,
+        # [
+        #     "current__cwt_coefficients__coeff_5__w_10__widths_(2, 5, 10, 20)",
+        #     'current__fft_coefficient__attr_"imag"__coeff_68',
+        #     "current__partial_autocorrelation__lag_6",
+        #     "current__ratio_beyond_r_sigma__r_1",
+        #     'current__fft_coefficient__attr_"real"__coeff_40',
+        #     'current__fft_coefficient__attr_"real"__coeff_20',
+        #     'current__fft_coefficient__attr_"angle"__coeff_55',
+        #     'current__fft_coefficient__attr_"imag"__coeff_3',
+        #     "current__ratio_beyond_r_sigma__r_10",
+        #     'current__fft_coefficient__attr_"real"__coeff_48',
+        # ],
     ],
     "dataprep_method": [
         "cnc_standard",
@@ -93,11 +104,11 @@ general_params = {
         list(range(1, 8)),
         list(range(2, 8)),
         list(range(2, 9)),
-        list(range(2, 10)), 
-    ], # no cut indices past 9 that are valid
+        list(range(2, 10)),
+    ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        None, # no drop
-        True, # randomly select cases to drop
+        None,  # no drop
+        # True,  # randomly select cases to drop
         # [1,2], # input a list of cases to drop
     ],
 }

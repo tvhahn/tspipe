@@ -246,6 +246,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
             "feat_select_method",
             "max_feats",
             "dataprep_method",
+            "feat_col_list",
         ]
 
     # remove any keys from general_param_keys that are not in df
@@ -267,9 +268,12 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
-        feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
         id = df.iloc[row_idx]["id"]
+
+        # update general_params the saved feat_col_list as in the df
+        feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
+        general_params["feat_col_list"] = [feat_col_list]
 
         # rebuild parameters that are specific to certain datasets
         if dataset_name == "cnc":
