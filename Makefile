@@ -229,7 +229,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--keep_top_n 1 \
 		--save_n_figures 8
 else # assume on HPC
-	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
+	sbatch src/models/filter_cnc_hpc.sh $(PROJECT_DIR)
 endif
 
 ## Make Features
