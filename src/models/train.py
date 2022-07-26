@@ -853,7 +853,14 @@ def load_cnc_features(
     path_data_dir, path_processed_dir, feat_file_name, label_file_name
 ):
     """
-    This function takes in a dataframe and returns a dataframe with the data prepared according to the method.
+    This function returns a dataframe with the appropriate meta-label columns and the label column (y).
+
+    Meta-label columns are:
+    - case_tool_54: the case number for tool 54
+    - unix_date: the unix date at the time of the cut
+    - tool_no: the tool number
+    - index_no: the index number of the cut
+
     """
     df = pd.read_csv(
         path_processed_dir / feat_file_name,

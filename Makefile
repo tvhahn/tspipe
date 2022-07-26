@@ -165,10 +165,9 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_cnc \
 		--processed_dir_name cnc_features_comp \
-		--rand_search_iter 1 \
+		--rand_search_iter 20 \
 		--dataset cnc \
-		--feat_file_name cnc_features_54_comp.csv \
-		--sample_seed 19930338		
+		--feat_file_name cnc_features_54_comp.csv
 else # assume on HPC
 	sbatch src/models/train_cnc_hpc.sh $(PROJECT_DIR)
 endif

@@ -34,19 +34,19 @@ general_params = {
         None
         ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [
@@ -63,7 +63,7 @@ general_params = {
         ],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
+        # "tsfresh_random",
         "random",
         # None,
     ],
@@ -80,23 +80,23 @@ general_params = {
         # 500,
     ],
     "classifier": [
-        "rf",  # Random Forest
+        # "rf",  # Random Forest
         # "xgb", # XGBoost
         # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,
     ],
     "dataprep_method": [
         "cnc_standard",
-        "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_standard_index_select",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),
