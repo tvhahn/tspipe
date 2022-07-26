@@ -30,38 +30,38 @@ import random
 general_params = {
     "scaler_method": [
         "standard", 
-        "minmax", 
-        None
+        # "minmax", 
+        # None
         ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
+        # "random_over",
+        # "smote_enn",
         "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
-        None,
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
+        # None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [
-        0.1, 
-        0.2, 
-        0.3, 
-        0.4, 
+        # 0.1, 
+        # 0.2, 
+        # 0.3, 
+        # 0.4, 
         0.5, 
-        0.6, 
-        0.7, 
-        0.8, 
-        0.85, 
-        0.9, 
-        0.95, 
-        1.0
+        # 0.6, 
+        # 0.7, 
+        # 0.8, 
+        # 0.85, 
+        # 0.9, 
+        # 0.95, 
+        # 1.0
     ],
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
     "early_stopping_rounds": [
@@ -73,7 +73,7 @@ general_params = {
     "feat_select_method": [
         # "tsfresh",
         "tsfresh_random",
-        "random",
+        # "random",
         # None,
     ],
     "max_feats": [
@@ -99,13 +99,14 @@ general_params = {
         # "nb",  # Naive Bayes
     ],
     "feat_col_list": [
-        None,
+        # None,
+        ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
     ],
     "dataprep_method": [
         "cnc_standard",
-        "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_standard_index_select",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),
