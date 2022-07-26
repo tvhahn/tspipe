@@ -312,11 +312,11 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
 
         i_argmin = np.argmin(model_metrics_dict['prauc_array'])
-        print("i_argmin: ", i_argmin)
-        print("prauc_array: ", model_metrics_dict['prauc_array'])
-        print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
-        for j in model_metrics_dict['unique_grouping']:
-            print(j["unique_test_group"])
+        # print("i_argmin: ", i_argmin)
+        # print("prauc_array: ", model_metrics_dict['prauc_array'])
+        # print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
+        # for j in model_metrics_dict['unique_grouping']:
+        #     print(j["unique_test_group"])
 
 
         plot_pr_roc_curves_kfolds(

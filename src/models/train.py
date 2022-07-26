@@ -65,6 +65,7 @@ from src.visualization.visualize import plot_pr_roc_curves_kfolds
 def kfold_cv(
     df,
     clf,
+    sampler_seed,
     oversamp_method,
     undersamp_method,
     scaler_method,
@@ -81,6 +82,9 @@ def kfold_cv(
 ):
     print("feat_select_method: ", feat_selection)
     scores_list = []
+
+    np.random.seed(sampler_seed) # fix random seeds
+    random.seed(sampler_seed)
 
     # perform stratified k-fold cross validation using the grouping of the y-label and another column
     if (
@@ -178,6 +182,8 @@ def kfold_cv(
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
 
+
+
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
                     (
                         x_train,
@@ -195,6 +201,9 @@ def kfold_cv(
 
                 elif feat_selection == "random":
                     print("performing random feature selection")
+
+                    # np.random.seed(sampler_seed) # fix random seeds
+                    # random.seed(sampler_seed)
 
                     num_feats = np.random.randint(
                         low=5, high=len(x_train_cols), size=1
@@ -527,6 +536,7 @@ def train_single_model(
     model_metrics_dict, feat_col_list = kfold_cv(
         df,
         clf,
+        sampler_seed,
         oversamp_method,
         undersamp_method,
         scaler_method,
@@ -574,7 +584,12 @@ def random_search_runner(
     results_list = []
     for i in range(rand_search_iter):
         # set random sample seed
-        sample_seed = random.randint(0, 2 ** 25)
+        if args.sample_seed:
+            sample_seed = args.sample_seed
+        else:
+            sample_seed = random.randint(0, 2 ** 25)
+
+
         # sample_seed = 13
 
         if i == 0:
@@ -940,6 +955,12 @@ if __name__ == "__main__":
         dest="proj_dir",
         type=str,
         help="Location of project folder",
+    )
+
+    parser.add_argument(
+        "--sample_seed",
+        type=int,
+        help="Fix the random seed for the sampler",
     )
 
     parser.add_argument(
