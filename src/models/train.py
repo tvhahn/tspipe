@@ -527,9 +527,14 @@ def train_single_model(
     if params_clf is None:
         params_clf = params_clf_generated
 
+    if args.sample_seed_clf:
+        sampler_seed_clf = args.sample_seed_clf
+    else:
+        sampler_seed_clf = sampler_seed
+
     # instantiate the model
     clf, param_dict_clf_raw, params_dict_clf_named = clf_function(
-        sampler_seed, params_clf
+        sampler_seed_clf, params_clf
     )
     print("\n", params_dict_clf_named)
 
@@ -970,6 +975,13 @@ if __name__ == "__main__":
         type=int,
         help="Fix the random seed for the sampler",
     )
+
+    parser.add_argument(
+        "--sample_seed_clf",
+        type=int,
+        help="Fix the random seed for ONLY the classifier sampler",
+    )
+
 
     parser.add_argument(
         "--path_data_dir",

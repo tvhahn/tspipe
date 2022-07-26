@@ -23,7 +23,7 @@ python $PROJECT_DIR/src/models/train.py \
     --processed_dir_name cnc_features_comp \
     --feat_file_name cnc_features_54_comp.csv \
     --rand_search_iter 5000 \
-    --sample_seed 5634130
+    --sample_seed_clf 5634130
 
 
 
