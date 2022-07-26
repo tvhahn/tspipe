@@ -726,11 +726,11 @@ def prepare_cnc_data(
 
     if dataprep_method == "cnc_standard":
         cnc_indices_keep = None
-        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
 
     elif dataprep_method == "cnc_standard_index_select":
         df = df[df["index_no"].isin(cnc_indices_keep)]
-        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
 
     elif dataprep_method == "cnc_index_transposed":
         feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
@@ -771,6 +771,7 @@ def prepare_cnc_data(
     else:
         dataprep_method = "cnc_standard"
         cnc_indices_keep = None
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
 
     if cnc_cases_drop == True:
         print("#!#!#!#!#!#1#!!#!#!#!#!#! DROP CASES")
