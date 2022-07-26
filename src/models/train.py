@@ -7,6 +7,7 @@ import argparse
 import logging
 import shutil
 import random
+import pickle
 from datetime import datetime
 from ast import literal_eval
 from sklearn.base import clone
@@ -146,7 +147,7 @@ def kfold_cv(
             )
 
             # scale the data
-            x_train, x_test = scale_data(x_train, x_test, scaler_method)
+            x_train, x_test, scaler = scale_data(x_train, x_test, scaler_method)
 
             if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
@@ -303,7 +304,7 @@ def kfold_cv(
             )
 
             # scale the data
-            x_train, x_test = scale_data(x_train, x_test, scaler_method)
+            x_train, x_test, scaler = scale_data(x_train, x_test, scaler_method)
 
             if feat_selection is not None and i == 0 and feat_col_list is None:
                 if feat_selection == "tsfresh":
@@ -417,24 +418,28 @@ def kfold_cv(
             scores_list.append(ind_score_dict)
 
     trained_result_dict = collate_scores_binary_classification(scores_list)
-    return trained_result_dict, feat_col_list
+    return trained_result_dict, feat_col_list, scaler, clone_clf
 
 
 # TO-DO: need to add the general_params dictionary to the functions.
 def train_single_model(
     df,
-    sampler_seed,
+    sample_seed,
+    sample_seed_clf,
     meta_label_cols,
     stratification_grouping_col=None,
     y_label_col="y",
     feat_col_list=None,
     general_params=general_params,
     params_clf=None,
+    save_model=False,
+    model_save_name=None,
+    model_save_path=None,
     dataset_name=None,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
-        ParameterSampler(general_params, n_iter=1, random_state=sampler_seed)
+        ParameterSampler(general_params, n_iter=1, random_state=sample_seed)
     )[0]
 
     oversamp_method = params_dict_train_setup["oversamp_method"]
@@ -471,8 +476,6 @@ def train_single_model(
             cnc_indices_keep=cnc_indices_keep,
             cnc_cases_drop=cnc_cases_drop,
         )
-
-
 
         # reassign any parameters that were changed by the above prepare_cnc_data function
         params_dict_train_setup["dataprep_method"] = dataprep_method
@@ -527,21 +530,16 @@ def train_single_model(
     if params_clf is None:
         params_clf = params_clf_generated
 
-    if args.sample_seed_clf:
-        sampler_seed_clf = args.sample_seed_clf
-    else:
-        sampler_seed_clf = sampler_seed
-
     # instantiate the model
     clf, param_dict_clf_raw, params_dict_clf_named = clf_function(
-        sampler_seed_clf, params_clf
+        sample_seed_clf, params_clf
     )
     print("\n", params_dict_clf_named)
 
-    model_metrics_dict, feat_col_list = kfold_cv(
+    model_metrics_dict, feat_col_list, scaler_fitted, clf_trained = kfold_cv(
         df,
         clf,
-        sampler_seed,
+        sample_seed,
         oversamp_method,
         undersamp_method,
         scaler_method,
@@ -558,7 +556,20 @@ def train_single_model(
     )
 
     # added additional parameters to the training setup dictionary
-    params_dict_train_setup["sampler_seed"] = sampler_seed
+    params_dict_train_setup["sampler_seed"] = sample_seed
+
+        # save the model if requested
+    if save_model:
+
+        scaler_save_name = "scaler_" + model_save_name
+        model_save_name = "model_" + model_save_name
+
+        # save the model and scaler with pickle
+        with open(model_save_path / model_save_name, "wb") as f:
+            pickle.dump(clf_trained, f)
+
+        with open(model_save_path / scaler_save_name, "wb") as f:
+            pickle.dump(scaler_fitted, f)
 
     return (
         model_metrics_dict,
@@ -594,8 +605,10 @@ def random_search_runner(
         else:
             sample_seed = random.randint(0, 2 ** 25)
 
-
-        # sample_seed = 13
+        if args.sample_seed_clf:
+            sample_seed_clf = args.sample_seed_clf
+        else:
+            sample_seed_clf = sample_seed
 
         if i == 0:
             file_name_results = f"results_{sample_seed}.csv"
@@ -620,6 +633,7 @@ def random_search_runner(
             ) = train_single_model(
                 df,
                 sample_seed,
+                sample_seed_clf,
                 meta_label_cols,
                 stratification_grouping_col,
                 y_label_col,

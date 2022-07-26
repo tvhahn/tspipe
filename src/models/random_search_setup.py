@@ -31,18 +31,18 @@ general_params = {
     "scaler_method": [
         "standard", 
         # "minmax", 
-        # None
+        None
         ],
     "oversamp_method": [
         # "random_over",
         # "smote_enn",
-        "smote_tomek",
+        # "smote_tomek",
         # "borderline_smote",
         # "kmeans_smote",
         # "svm_smote",
         # "smote",
         # "adasyn",
-        # None,
+        None,
     ],
     "undersamp_method": [
         # "random_under",
@@ -72,8 +72,8 @@ general_params = {
     ],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
-        # "random",
+        # "tsfresh_random",
+        "random",
         # None,
     ],
     "max_feats": [
@@ -89,18 +89,18 @@ general_params = {
         # 500,
     ],
     "classifier": [
-        "rf",  # Random Forest
+        # "rf",  # Random Forest
         # "xgb", # XGBoost
         # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
-        # None,
-        ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
+        None,
+        # ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
     ],
     "dataprep_method": [
         "cnc_standard",
@@ -118,46 +118,46 @@ general_params = {
         list(range(2, 10)),
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        # None,  # no drop
+        None,  # no drop
         # True,  # randomly select cases to drop
         # [1,2], # input a list of cases to drop
         # [9, 17, 21, 23, 25, 31, 35, 15],
-        [9],
-        [17],
-        [21],
-        [23],
-        [25],
-        [31],
-        [35],
-        [15],
-        [9, 17],
-        [9, 21],
-        [9, 23],
-        [9, 25],
-        [9, 31],
-        [9, 35],
-        [9, 15],
-        [17, 21],
-        [17, 23],
-        [17, 25],
-        [17, 31],
-        [17, 35],
-        [17, 15],
-        [21, 23],
-        [21, 25],
-        [21, 31],
-        [21, 35],
-        [21, 15],
-        [23, 25],
-        [23, 31],
-        [23, 35],
-        [23, 15],
-        [25, 31],
-        [25, 35],
-        [25, 15],
-        [31, 35],
-        [31, 15],
-        [35, 15],
+        # [9],
+        # [17],
+        # [21],
+        # [23],
+        # [25],
+        # [31],
+        # [35],
+        # [15],
+        # [9, 17],
+        # [9, 21],
+        # [9, 23],
+        # [9, 25],
+        # [9, 31],
+        # [9, 35],
+        # [9, 15],
+        # [17, 21],
+        # [17, 23],
+        # [17, 25],
+        # [17, 31],
+        # [17, 35],
+        # [17, 15],
+        # [21, 23],
+        # [21, 25],
+        # [21, 31],
+        # [21, 35],
+        # [21, 15],
+        # [23, 25],
+        # [23, 31],
+        # [23, 35],
+        # [23, 15],
+        # [25, 31],
+        # [25, 35],
+        # [25, 15],
+        # [31, 35],
+        # [31, 15],
+        # [35, 15],
     ],
 }
 

@@ -167,8 +167,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--processed_dir_name cnc_features_comp \
 		--rand_search_iter 20 \
 		--dataset cnc \
-		--feat_file_name cnc_features_54_comp.csv \
-		--sample_seed_clf 5634130
+		--feat_file_name cnc_features_54_comp.csv
 else # assume on HPC
 	sbatch src/models/train_cnc_hpc.sh $(PROJECT_DIR)
 endif

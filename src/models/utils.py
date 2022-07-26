@@ -285,8 +285,9 @@ def scale_data(x_train, x_test, scaler_method=None):
         x_test = scaler.transform(x_test)
     else:
         print("no scaling")
+        scaler = None
         pass
-    return x_train, x_test
+    return x_train, x_test, scaler
 
 
 def get_model_metrics_df(model_metrics_dict):

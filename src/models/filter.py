@@ -271,7 +271,8 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         meta_label_cols = literal_eval(df.iloc[row_idx]["meta_label_cols"])
         stratification_grouping_col = df.iloc[row_idx]["stratification_grouping_col"]
         y_label_col = df.iloc[row_idx]["y_label_col"]
-        sampler_seed = int(df.iloc[row_idx]["sampler_seed"])
+        sample_seed = int(df.iloc[row_idx]["sampler_seed"])
+        sample_seed_clf = sample_seed
         id = df.iloc[row_idx]["id"]
 
         # update general_params the saved feat_col_list as in the df
@@ -297,7 +298,8 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
             meta_label_cols
         ) = train_single_model(
             df_feat,
-            sampler_seed,
+            sample_seed,
+            sample_seed_clf,
             meta_label_cols,
             stratification_grouping_col,
             y_label_col,
@@ -482,6 +484,18 @@ if __name__ == "__main__":
         "--feat_file_name",
         type=str,
         help="Name of the feature file to use. Should be found in path_data_dir/processed/{dataset}/feat_file_name",
+    )
+
+    parser.add_argument(
+        "--sample_seed",
+        type=int,
+        help="Fix the random seed for the sampler",
+    )
+
+    parser.add_argument(
+        "--sample_seed_clf",
+        type=int,
+        help="Fix the random seed for ONLY the classifier sampler",
     )
 
     parser.add_argument(
