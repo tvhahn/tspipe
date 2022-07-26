@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import matplotlib
+import numpy as np
 
 # run matplotlib without display
 # https://stackoverflow.com/a/4706614/9214620
@@ -168,6 +169,7 @@ def order_columns_on_results_df(df, dataset_name=None):
         "f1_score_std",
         "n_thresholds_min",
         "n_thresholds_max",
+        "test_strat_group_worst_prauc",
     ]
 
     if dataset_name == "cnc":
@@ -221,6 +223,7 @@ def order_columns_on_results_df(df, dataset_name=None):
             "f1_score_std",
             "n_thresholds_min",
             "n_thresholds_max",
+            "test_strat_group_worst_prauc",
         ]
 
     # remove any columns names from primary_cols that are not in df
@@ -308,6 +311,13 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
         df_feat_anom = df_feat[df_feat[y_label_col] == 1]
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
 
+        i_argmin = np.argmin(model_metrics_dict['prauc_array'])
+        print("i_argmin: ", i_argmin)
+        print("prauc_array: ", model_metrics_dict['prauc_array'])
+        print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
+        for j in model_metrics_dict['unique_grouping']:
+            print(j["unique_test_group"])
+
 
         plot_pr_roc_curves_kfolds(
             model_metrics_dict["precisions_array"],
@@ -379,7 +389,7 @@ def main(args):
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
     # any additional filtering
-    # df = df[df["n_feats"] <= 10]
+    df = df[df["n_feats"] <= 10]
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
     sort_by = ["prauc_min", "prauc_avg"]

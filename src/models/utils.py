@@ -236,6 +236,7 @@ def collate_scores_binary_classification(scores_list):
     rocauc_list = []
     f1_list = []
     accuracy_list = []
+    unique_grouping_list = []
 
     for ind_score_dict in scores_list:
             n_thresholds_list.append(ind_score_dict["n_thresholds"])
@@ -249,6 +250,7 @@ def collate_scores_binary_classification(scores_list):
             rocauc_list.append(ind_score_dict["rocauc_result"])
             f1_list.append(ind_score_dict["f1_result"])
             accuracy_list.append(ind_score_dict["accuracy_result"])
+            unique_grouping_list.append(ind_score_dict["unique_grouping"])
 
     result_dict = {
         "precisions_array": np.array(precisions_list, dtype=object),
@@ -262,6 +264,7 @@ def collate_scores_binary_classification(scores_list):
         "f1_score_array": np.array(f1_list, dtype=object),
         "n_thresholds_array": np.array(n_thresholds_list, dtype=int),
         "accuracy_array": np.array(accuracy_list, dtype=object),
+        "unique_grouping": unique_grouping_list,
     }
 
     return result_dict
@@ -316,6 +319,18 @@ def get_model_metrics_df(model_metrics_dict):
         'n_thresholds_min': np.min(model_metrics_dict['n_thresholds_array']),
         'n_thresholds_max': np.max(model_metrics_dict['n_thresholds_array']),
     }
+
+    # get argmin of prauc_array
+    i_argmin = np.argmin(model_metrics_dict['prauc_array'])
+    print("i_argmin: ", i_argmin)
+    print("prauc_array: ", model_metrics_dict['prauc_array'])
+    print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
+    for j in model_metrics_dict['unique_grouping']:
+        print(j["unique_test_group"])
+    # print("unique_grouping: ", model_metrics_dict['unique_grouping'])
+
+    # selected_metrics_dict["train_group_worst"] = model_metrics_dict['unique_grouping'][i_argmin]["unique_train_group"]
+    selected_metrics_dict["test_strat_group_worst_prauc"] = model_metrics_dict['unique_grouping'][i_argmin]["unique_test_group"]
 
     df_m = pd.DataFrame.from_dict(selected_metrics_dict, orient="index").T
 

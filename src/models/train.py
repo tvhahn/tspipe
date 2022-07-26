@@ -111,6 +111,7 @@ def kfold_cv(
 
             # train
             df_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
+            unique_train_group = list(df_train[stratification_grouping_col].unique())
             y_train = df_train[y_label_col].values.astype(int)
             df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
             x_train_cols = df_train.columns
@@ -124,6 +125,7 @@ def kfold_cv(
 
             # test
             df_test = df[df[stratification_grouping_col].isin(test_strat_vals)]
+            unique_test_group = list(df_test[stratification_grouping_col].unique())
             y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
             x_test_cols = df_test.columns
@@ -254,6 +256,7 @@ def kfold_cv(
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
+            ind_score_dict["unique_grouping"] = {"unique_train_group": unique_train_group, "unique_test_group": unique_test_group}
             scores_list.append(ind_score_dict)
 
     # perform stratified k-fold cross if only using the y-label for stratification
@@ -270,11 +273,13 @@ def kfold_cv(
 
             y_train = df_train[y_label_col].values.astype(int)
             df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
+            unique_train_group = None # no unique grouping for this case
             x_train_cols = df_train.columns
             x_train = df_train.values
 
             y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
+            unique_test_group = None # no unique grouping for this case
             x_test_cols = df_test.columns
             x_test = df_test.values
 
@@ -399,6 +404,7 @@ def kfold_cv(
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
+            ind_score_dict["unique_grouping"] = {"unique_train_group": unique_train_group, "unique_test_group": unique_test_group}
             scores_list.append(ind_score_dict)
 
     trained_result_dict = collate_scores_binary_classification(scores_list)
@@ -801,8 +807,8 @@ def train_milling_models(args):
 
     # identify if there is another column you want to
     # stratify on, besides the y label
-    # STRATIFICATION_GROUPING_COL = "case"
-    STRATIFICATION_GROUPING_COL = "cut_no"
+    STRATIFICATION_GROUPING_COL = "case"
+    # STRATIFICATION_GROUPING_COL = "cut_no"
     # STRATIFICATION_GROUPING_COL = None
 
     # list of the columns that are not features columns
