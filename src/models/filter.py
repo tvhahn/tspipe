@@ -266,7 +266,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
-def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
+def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, check_feat_importance):
 
     n_rows = df.shape[0]
 
@@ -315,7 +315,14 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
             general_params=general_params,
             params_clf=params_clf,
             dataset_name=dataset_name,
+            check_feat_importance=check_feat_importance,
         )
+
+        # save the feature importance df to a csv if requested
+        if check_feat_importance:
+            model_metrics_dict["df_feat_imp"].to_csv(
+                f"{path_model_curves.parent}/{id}_feat_imp.csv", index=False
+            )
 
         # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
         df_feat_anom = df_feat[df_feat[y_label_col] == 1]
@@ -348,7 +355,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name):
 
 
 def milling_plot_results(
-    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
+    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False
 ):
 
     # load feature dataframe
@@ -358,11 +365,11 @@ def milling_plot_results(
 
     df_feat = milling_add_y_label_anomaly(df_feat)
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="milling")
+    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="milling", check_feat_importance=check_feat_importance)
 
 
 def cnc_plot_results(
-    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves
+    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False
 ):
     # To-Do: in filter.py, add load_cnc_features to cnc_plot_results
     # df_feat = load_cnc_features(path_data_dir, path_processed_dir, feat_file_name, label_file_name)
@@ -377,7 +384,7 @@ def cnc_plot_results(
     df_feat = df_feat.dropna(axis=1, how="all") # drop any columns that are completely empty
     df_feat = df_feat.dropna(axis=0) # drop any rows that have NaN values in them
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc")
+    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc", check_feat_importance=check_feat_importance)
 
 
 def main(args):
@@ -415,6 +422,11 @@ def main(args):
         path_model_curves = path_final_dir / "model_curves"
         Path(path_model_curves).mkdir(parents=True, exist_ok=True)
 
+    if args.check_feat_importance == "True":
+        check_feat_importance = True
+    else:
+        check_feat_importance = False
+
     ########################################################################
     #### MILLING DATASET ####
     ########################################################################
@@ -429,6 +441,7 @@ def main(args):
             path_processed_dir,
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
+            check_feat_importance=check_feat_importance,
         )
 
     elif args.dataset =="cnc" and args.save_n_figures > 0:
@@ -439,6 +452,7 @@ def main(args):
             path_processed_dir,
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
+            check_feat_importance=check_feat_importance,
         )
     else:
         pass
@@ -547,6 +561,13 @@ if __name__ == "__main__":
         type=str,
         default="False",
         help="Save the models, and scaler, to disk.",
+    )
+
+    parser.add_argument(
+        "--check_feat_importance",
+        type=str,
+        default="False",
+        help="Check the feature importance of the models.",
     )
 
 

@@ -12,6 +12,7 @@ from datetime import datetime
 from ast import literal_eval
 from sklearn.base import clone
 from sklearn.model_selection import StratifiedKFold
+from sklearn.inspection import permutation_importance
 from src.models.utils import (
     milling_add_y_label_anomaly,
     cnc_add_y_label_binary,
@@ -63,6 +64,29 @@ from src.visualization.visualize import plot_pr_roc_curves_kfolds
 # logging.getLogger('numba').setLevel(logging.WARNING)
 
 
+def permute_features_for_importance(
+    model, x_test, y_test, feat_col_list, k_fold_i, n_repeats=30
+):
+    scoring = ["accuracy", "f1", "average_precision", "balanced_accuracy"]
+
+    r_multi = permutation_importance(
+        model, x_test, y_test, n_repeats=n_repeats, random_state=0, scoring=scoring
+    )
+
+    col_list = ["metric", "measure", "k_fold_i"] + feat_col_list
+    r_list = []
+    for metric in r_multi:
+
+        r_list.extend(
+            [
+                [metric, "mean", k_fold_i] + list(r_multi[metric].importances_mean),
+                [metric, "std", k_fold_i] + list(r_multi[metric].importances_std),
+            ]
+        )
+
+    return pd.DataFrame(r_list, columns=col_list)
+
+
 def kfold_cv(
     df,
     clf,
@@ -80,11 +104,12 @@ def kfold_cv(
     max_feats=None,
     feat_col_list=None,
     early_stopping_rounds=None,
+    check_feat_importance=False,
 ):
     print("feat_select_method: ", feat_selection)
     scores_list = []
 
-    np.random.seed(sampler_seed) # fix random seeds
+    np.random.seed(sampler_seed)  # fix random seeds
     random.seed(sampler_seed)
 
     # perform stratified k-fold cross validation using the grouping of the y-label and another column
@@ -183,8 +208,6 @@ def kfold_cv(
                     if max_feats is not None and num_feats > max_feats:
                         num_feats = max_feats
 
-
-
                     random_selected_feat = random.sample(list(feat_col_list), num_feats)
                     (
                         x_train,
@@ -266,8 +289,20 @@ def kfold_cv(
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
-            ind_score_dict["unique_grouping"] = {"unique_train_group": unique_train_group, "unique_test_group": unique_test_group}
+            ind_score_dict["unique_grouping"] = {
+                "unique_train_group": unique_train_group,
+                "unique_test_group": unique_test_group,
+            }
             scores_list.append(ind_score_dict)
+
+            if check_feat_importance:
+                if i == 0:
+                    df_feat_imp_list = []
+                df_feat_imp_list.append(
+                    permute_features_for_importance(
+                        clone_clf, x_test, y_test, feat_col_list, k_fold_i=i
+                    )
+                )
 
     # perform stratified k-fold cross if only using the y-label for stratification
     else:
@@ -283,13 +318,13 @@ def kfold_cv(
 
             y_train = df_train[y_label_col].values.astype(int)
             df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
-            unique_train_group = None # no unique grouping for this case
+            unique_train_group = None  # no unique grouping for this case
             x_train_cols = df_train.columns
             x_train = df_train.values
 
             y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
-            unique_test_group = None # no unique grouping for this case
+            unique_test_group = None  # no unique grouping for this case
             x_test_cols = df_test.columns
             x_test = df_test.values
 
@@ -414,10 +449,26 @@ def kfold_cv(
             # calculate the scores for each individual model train in the cross validation
             # save as a dictionary: "ind_score_dict"
             ind_score_dict = calculate_scores(clone_clf, x_test, y_test)
-            ind_score_dict["unique_grouping"] = {"unique_train_group": unique_train_group, "unique_test_group": unique_test_group}
+            ind_score_dict["unique_grouping"] = {
+                "unique_train_group": unique_train_group,
+                "unique_test_group": unique_test_group,
+            }
             scores_list.append(ind_score_dict)
 
+            if check_feat_importance:
+                if i == 0:
+                    df_feat_imp_list = []
+                df_feat_imp_list.append(
+                    permute_features_for_importance(
+                        clone_clf, x_test, y_test, feat_col_list, k_fold_i=i
+                    )
+                )
+
     trained_result_dict = collate_scores_binary_classification(scores_list)
+
+    if check_feat_importance:
+        trained_result_dict["df_feat_imp"] = pd.concat(df_feat_imp_list)
+
     return trained_result_dict, feat_col_list, scaler, clone_clf
 
 
@@ -436,6 +487,7 @@ def train_single_model(
     model_save_name=None,
     model_save_path=None,
     dataset_name=None,
+    check_feat_importance=False,
 ):
     # generate the list of parameters to sample over
     params_dict_train_setup = list(
@@ -480,7 +532,7 @@ def train_single_model(
         # reassign any parameters that were changed by the above prepare_cnc_data function
         params_dict_train_setup["dataprep_method"] = dataprep_method
         params_dict_train_setup["cnc_indices_keep"] = cnc_indices_keep
-        params_dict_train_setup["cnc_cases_drop"] = cnc_cases_drop  
+        params_dict_train_setup["cnc_cases_drop"] = cnc_cases_drop
 
     elif dataset_name == "milling":
         df, dataprep_method = prepare_milling_data(df, dataprep_method)
@@ -553,12 +605,13 @@ def train_single_model(
         max_feats=max_feats,
         feat_col_list=feat_col_list,
         early_stopping_rounds=early_stopping_rounds,
+        check_feat_importance=check_feat_importance,
     )
 
     # added additional parameters to the training setup dictionary
     params_dict_train_setup["sampler_seed"] = sample_seed
 
-        # save the model if requested
+    # save the model if requested
     if save_model:
 
         scaler_save_name = "scaler_" + model_save_name
@@ -995,7 +1048,6 @@ if __name__ == "__main__":
         type=int,
         help="Fix the random seed for ONLY the classifier sampler",
     )
-
 
     parser.add_argument(
         "--path_data_dir",
