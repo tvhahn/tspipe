@@ -153,8 +153,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--processed_dir_name milling_features \
 		--rand_search_iter 10 \
 		--dataset milling \
-		--feat_file_name milling_features.csv \
-		--sample_seed 19930338
+		--feat_file_name milling_features.csv
 else # assume on HPC
 	sbatch src/models/train_milling_hpc.sh $(PROJECT_DIR)
 endif
