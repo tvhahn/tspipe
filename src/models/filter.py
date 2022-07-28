@@ -50,10 +50,10 @@ def set_directories(args):
 def filter_results_df(df, keep_top_n=None):
     dfr = df[
         (df["precision_score_min"] > 0)
-        & (df["precision_score_max"] < 1)
+        # & (df["precision_score_max"] < 1)
         & (df["precision_score_std"] > 0)
         & (df["recall_score_min"] > 0)
-        & (df["recall_score_max"] < 1)
+        # & (df["recall_score_max"] < 1)
         & (df["recall_score_std"] > 0)
         & (df["f1_score_min"] > 0)
         & (df["f1_score_max"] < 1)
@@ -407,6 +407,9 @@ def main(args):
 
     # any additional filtering
     df = df[df["n_feats"] <= 10]
+
+    # drop any duplicate rows in df
+    df = df.drop_duplicates()
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
     sort_by = ["prauc_min", "prauc_avg"]
