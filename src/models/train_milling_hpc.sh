@@ -20,8 +20,8 @@ python $PROJECT_DIR/src/models/train.py \
     --path_data_dir $SCRATCH_DATA_DIR \
     --dataset milling \
     --save_dir_name interim_results_milling \
-    --processed_dir_name milling_features \
-    --feat_file_name milling_features.csv \
+    --processed_dir_name milling_features_comp \
+    --feat_file_name milling_features_comp.csv \
     --rand_search_iter 5000
 
 

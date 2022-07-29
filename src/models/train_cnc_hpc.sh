@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=1:10:00 # 30 min
+#SBATCH --time=16:10:00 # 30 min
 #SBATCH --array=1-95
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
@@ -22,8 +22,7 @@ python $PROJECT_DIR/src/models/train.py \
     --save_dir_name interim_results_cnc \
     --processed_dir_name cnc_features_comp \
     --feat_file_name cnc_features_54_comp.csv \
-    --rand_search_iter 5000 \
-    --sample_seed_clf 5634130
+    --rand_search_iter 5000
 
 
 
