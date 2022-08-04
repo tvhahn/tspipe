@@ -92,11 +92,11 @@ general_params = {
         "rf",  # Random Forest
         "xgb", # XGBoost
         "knn", # K-Nearest Neighbors
-        # "svm", # Support Vector Machine
-        # "lr", # Logistic Regression
-        # "sgd", # Linear model with SGD
-        # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "svm", # Support Vector Machine
+        "lr", # Logistic Regression
+        "sgd", # Linear model with SGD
+        "ridge", # Ridge Classifier
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,
