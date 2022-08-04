@@ -56,18 +56,18 @@ def filter_results_df(df, keep_top_n=None):
         # & (df["recall_score_max"] < 1)
         & (df["recall_score_std"] > 0)
         & (df["f1_score_min"] > 0)
-        & (df["f1_score_max"] < 1)
+        # & (df["f1_score_max"] < 1)
         & (df["f1_score_std"] > 0)
         & (df["rocauc_min"] < 1)
-        & (df["rocauc_max"] < 1)
+        # & (df["rocauc_max"] < 1)
         & (df["rocauc_avg"] < 1)
         & (df["rocauc_std"] > 0)
         & (df["prauc_min"] < 1)
-        & (df["prauc_max"] < 1)
+        # & (df["prauc_max"] < 1)
         & (df["prauc_avg"] < 1)
         & (df["prauc_std"] > 0)
         & (df["accuracy_min"] < 1)
-        & (df["accuracy_max"] < 1)
+        # & (df["accuracy_max"] < 1)
         & (df["accuracy_avg"] < 1)
         & (df["accuracy_std"] > 0)
         & (df["n_thresholds_min"] > 3)
@@ -327,6 +327,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
         # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
         df_feat_anom = df_feat[df_feat[y_label_col] == 1]
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
+        print(f"{id} has {percent_anom:.3f} anomalies")
 
         i_argmin = np.argmin(model_metrics_dict['prauc_array'])
         # print("i_argmin: ", i_argmin)
@@ -405,14 +406,18 @@ def main(args):
     df = filter_results_df(df)
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
-    # any additional filtering
+    ####### any additional filtering
     df = df[df["n_feats"] <= 10]
+    
+    # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
+    # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]
 
-    # drop any duplicate rows in df
-    df = df.drop_duplicates()
+    # drop any duplicate rows in df, excluding the "sampler_seed" column
+    # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    sort_by = ["prauc_min", "prauc_avg"]
+    # sort_by = ["prauc_min", "prauc_avg"]
+    sort_by = ["mcc_min", "mcc_avg"]
     df = (
         df.groupby(["classifier"])
         .head(int(args.keep_top_n))
