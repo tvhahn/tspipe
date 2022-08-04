@@ -848,7 +848,7 @@ def prepare_cnc_data(
     if cnc_cases_drop == True:
         print("#!#!#!#!#!#1#!!#!#!#!#!#! DROP CASES")
         cnc_cases_drop = sorted(
-            random.sample(list(range(1, 36)), k=random.randint(1, 6))
+            random.sample(list(range(1, 36)), k=random.randint(1, 2))
         )  # random drop up to 5 cases between cases 1-35
         df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
 

@@ -29,50 +29,52 @@ import random
 
 general_params = {
     "scaler_method": [
-        "standard", 
+        # "standard", 
         "minmax", 
-        None
+        # None
         ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
         "adasyn",
-        None,
+        # None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [
-        0.1, 
-        0.2, 
-        0.3, 
-        0.4, 
-        0.5, 
-        0.6, 
+        # 0.1, 
+        # 0.2, 
+        # 0.3, 
+        # 0.4, 
+        # 0.5, 
+        # 0.6, 
         0.7, 
-        0.8, 
-        0.85, 
-        0.9, 
-        0.95, 
-        1.0
+        # 0.8, 
+        # 0.85, 
+        # 0.9, 
+        # 0.95, 
+        # 1.0
     ],
-    "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    "undersamp_ratio": [
+        0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0
+        ],
     "early_stopping_rounds": [
-        None, 
+        # None, 
         10, 
-        50, 
-        100
+        # 50, 
+        # 100
     ],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
+        # "tsfresh_random",
         "random",
         # None,
     ],
@@ -90,23 +92,23 @@ general_params = {
     ],
     "classifier": [
         "rf",  # Random Forest
-        "xgb", # XGBoost
-        "knn", # K-Nearest Neighbors
-        "svm", # Support Vector Machine
-        "lr", # Logistic Regression
-        "sgd", # Linear model with SGD
-        "ridge", # Ridge Classifier
-        "nb",  # Naive Bayes
+        # "xgb", # XGBoost
+        # "knn", # K-Nearest Neighbors
+        # "svm", # Support Vector Machine
+        # "lr", # Logistic Regression
+        # "sgd", # Linear model with SGD
+        # "ridge", # Ridge Classifier
+        # "nb",  # Naive Bayes
     ],
     "feat_col_list": [
-        None,
-        # ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
+        # None,
+        ['current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)', 'current__fft_coefficient__attr_"imag"__coeff_5', 'current__fft_coefficient__attr_"imag"__coeff_48', 'current__fft_coefficient__attr_"real"__coeff_68', 'current__cwt_coefficients__coeff_10__w_20__widths_(2, 5, 10, 20)', 'current__symmetry_looking__r_0.45', 'current__linear_trend__attr_"stderr"', 'current__spkt_welch_density__coeff_5', 'current__fft_coefficient__attr_"angle"__coeff_15', 'current__large_standard_deviation__r_0.8']
     ],
     "dataprep_method": [
         "cnc_standard",
-        "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_standard_index_select",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),
@@ -118,8 +120,8 @@ general_params = {
         list(range(2, 10)),
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        None,  # no drop
-        # True,  # randomly select cases to drop
+        # False,  # no drop
+        True,  # randomly select cases to drop. Modify number to drop in train.py
         # [1,2], # input a list of cases to drop
         # [9, 17, 21, 23, 25, 31, 35, 15],
         # [9],
