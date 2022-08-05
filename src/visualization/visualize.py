@@ -180,6 +180,294 @@ def plot_pr_roc_curves_kfolds(
         plt.show()
 
 
+def plot_lollipop_results(
+    df,
+    metric="prauc",
+    plt_title=None,
+    path_save_dir=None,
+    save_name="results_lollipop",
+    save_plot=False,
+    dpi=300,
+):
+    """Plot the top performing models and by a metric.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the results of the models.
+    metric : str
+        The metric to plot the results by.
+    plt_title : str
+        The title of the plot.
+    path_save_name : Path
+        The name (as a path object) of the file to save the plot to.
+    save_plot : bool
+        Whether to save the plot or not. Otherwise, it will be shown.
+    dpi : int
+        The resolution of the plot if saved as png or if shown.
+    """
+
+    df = df.sort_values(by=[f"{metric}_avg"], ascending=True).reset_index(drop=True)
+
+    plt.style.use("seaborn-whitegrid")  # set style because it looks nice
+    fig, ax = plt.subplots(
+        1,
+        1,
+        figsize=(10, 12),
+    )
+
+    # color palette to choose from
+    darkblue = "#1f253f"
+    lightblue = "#58849f"
+    redish = "#d73027"
+
+    DOT_SIZE = 150
+
+    # create the various dots
+    # avg dot
+    ax.scatter(
+        x=df[f"{metric}_avg"],
+        y=df["classifier"],
+        s=DOT_SIZE,
+        alpha=1,
+        label="Average",
+        color=lightblue,
+        edgecolors="white",
+    )
+
+    # min dot
+    ax.scatter(
+        x=df[f"{metric}_min"],
+        y=df["classifier"],
+        s=DOT_SIZE,
+        alpha=1,
+        color=darkblue,
+        label="Min/Max",
+        edgecolors="white",
+        zorder=10,
+    )
+
+    # max dot
+    ax.scatter(
+        x=df[f"{metric}_max"],
+        y=df["classifier"],
+        s=DOT_SIZE,
+        alpha=1,
+        color=darkblue,
+        edgecolors="white",
+    )
+
+    # create the horizontal line
+    # between min and max vals
+    ax.hlines(
+        y=df["classifier"],
+        xmin=df[f"{metric}_min"],
+        xmax=df[f"{metric}_max"],
+        color="grey",
+        alpha=0.4,
+        lw=4,  # line-width
+        zorder=0,  # make sure line at back
+    )
+
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+
+    # plot the line that shows how a naive classifier performs
+    # plot two lines, one white, so that there is a gap between grid lines
+    # from https://stackoverflow.com/a/12731750/9214620
+    ax.plot([0.024, 0.024], [y_min, y_max], linestyle="-", color="white", linewidth=14)
+    ax.plot([0.024, 0.024], [y_min, y_max], linestyle="--", color=redish, alpha=0.4)
+
+    # dictionary used to map the column labels from df to a readable name
+    label_dict = {
+        "sgd": "SGD Linear",
+        "xgb": "XGBoost",
+        "rf": "Random Forest",
+        "knn": "KNN",
+        "nb": "Naive Bayes",
+        "ridge": "Ridge Regression",
+        "svm": "SVM",
+        "lr": "Logistic Regression",
+    }
+
+    # iterate through each result and apply the text
+    # df should already be sorted
+    for i in range(0, df.shape[0]):
+        # avg auc score
+        ax.text(
+            x=df[f"{metric}_avg"][i],
+            y=i + 0.15,
+            s="{:.2f}".format(df[f"{metric}_avg"][i]),
+            horizontalalignment="center",
+            verticalalignment="bottom",
+            size="x-large",
+            color="dimgrey",
+            weight="medium",
+        )
+
+        # min auc score
+        ax.text(
+            x=df[f"{metric}_min"][i],
+            y=i - 0.15,
+            s="{:.2f}".format(df[f"{metric}_min"][i]),
+            horizontalalignment="right",
+            verticalalignment="top",
+            size="x-large",
+            color="dimgrey",
+            weight="medium",
+            backgroundcolor="white",
+            zorder=9,
+        )
+
+        # max auc score
+        ax.text(
+            x=df[f"{metric}_max"][i],
+            y=i - 0.15,
+            s="{:.2f}".format(df[f"{metric}_max"][i]),
+            horizontalalignment="left",
+            verticalalignment="top",
+            size="x-large",
+            color="dimgrey",
+            weight="medium",
+        )
+
+        # add thin leading lines towards classifier names
+        # to the right of max dot
+        ax.plot(
+            [df[f"{metric}_max"][i] + 0.02, 1.0],
+            [i, i],
+            linewidth=1,
+            color="grey",
+            alpha=0.4,
+            zorder=0,
+        )
+
+        # to the left of min dot
+        ax.plot(
+            [-0.05, df[f"{metric}_min"][i] - 0.02],
+            [i, i],
+            linewidth=1,
+            color="grey",
+            alpha=0.4,
+            zorder=0,
+        )
+
+        # add classifier name text
+        clf_name = label_dict[df["classifier"][i]]
+        ax.text(
+            x=-0.059,
+            y=i,
+            s=clf_name,
+            horizontalalignment="right",
+            verticalalignment="center",
+            size="x-large",
+            color="dimgrey",
+            weight="normal",
+        )
+
+    # add text for the naive classifier
+    ax.text(
+        x=0.024,
+        y=(y_max - 2),
+        s="Naive Classifier",
+        horizontalalignment="center",
+        verticalalignment="bottom",
+        size="large",
+        color=redish,
+        rotation="vertical",
+        backgroundcolor="white",
+        alpha=0.4,
+        zorder=8,
+    )
+
+    # remove the y ticks
+    ax.set_yticks([])
+
+    # drop the gridlines (inherited from 'seaborn-whitegrid' style)
+    # and drop all the spines
+    ax.grid(False)
+    ax.spines["top"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+
+    # custom set the xticks since this looks better
+    ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
+
+    # set properties of xtick labels
+    # https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.tick_params.html#matplotlib.axes.Axes.tick_params
+    ax.tick_params(axis="x", pad=20, labelsize="x-large", labelcolor="dimgrey")
+
+    # Add plot title and then description underneath it
+    if plt_title is None:
+        plt_title = "Top Performing Models by PR-AUC Score"
+
+    plt_desc = (
+        "The top performing models in the feature engineering approach, "
+        "as sorted by the precision-recall area-under-curve (PR-AUC) score. "
+        "The average PR-AUC score for the k-folds-cross-validiation is shown, "
+        "along with the minimum and maximum scores in the cross-validation. The baseline"
+        " of a naive/random classifier is demonstated by a dotted line."
+    )
+
+    # set the plot description
+    # use the textwrap.fill (from textwrap std. lib.) to
+    # get the text to wrap after a certain number of characters
+    PLT_DESC_LOC = 8.8
+    # ax.text(
+    #     x=-0.05,
+    #     y=PLT_DESC_LOC,
+    #     s=textwrap.fill(plt_desc, 90),
+    #     horizontalalignment="left",
+    #     verticalalignment="top",
+    #     size="large",
+    #     color="dimgrey",
+    #     weight="normal",
+    #     wrap=True,
+    # )
+
+    ax.text(
+        x=-0.05,
+        y=PLT_DESC_LOC + 0.1,
+        s=plt_title,
+        horizontalalignment="left",
+        verticalalignment="bottom",
+        size=16,
+        color="dimgrey",
+        weight="semibold",
+        wrap=True,
+    )
+
+    # create legend
+    # matplotlib > 3.3.0 can use labelcolor in legend
+    # to change color of text
+    l = ax.legend(
+        frameon=False,
+        bbox_to_anchor=(0.5, 1.08),
+        ncol=2,
+        fontsize="x-large",
+        # loc="lower center",
+        # labelcolor="dimgrey",
+    )
+
+    # google colab doesn't use matplotlib > 3.3.0, so we'll change text color
+    # the old way, from https://stackoverflow.com/a/18910491/9214620
+    for text in l.get_texts():
+        text.set_color("dimgrey")
+
+    if save_plot:
+        if path_save_dir is None:
+            path_save_dir = "./"
+
+        # save as both png and pdf
+        plt.savefig(path_save_dir / f"{plt_title}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{plt_title}.pdf", bbox_inches="tight")
+        plt.cla()
+        plt.close()
+    else:
+        plt.show()
+
+
 ###############################################################################
 # CNC plotting functions
 ###############################################################################
@@ -417,8 +705,12 @@ def set_directories(args):
         path_save_dir,
     )
 
+
+###############################################################################
 #### CNC DATASET
+###############################################################################
 def plot_cnc_data(
+    proj_dir,
     path_data_dir,
     path_save_dir,
     processed_dir_name,
@@ -470,6 +762,25 @@ def plot_cnc_data(
         save_plot=save_plot,
     )
 
+    ###################
+    # Lollipop plot
+
+    df_results = pd.read_csv(
+        proj_dir
+        / "models/final_results_cnc_2022_08_04_final"
+        / "compiled_results_filtered_best.csv"
+    )
+
+    plot_lollipop_results(
+        df_results,
+        metric="prauc",
+        plt_title=None,
+        path_save_dir=path_save_dir,
+        save_name="results_lollipop",
+        save_plot=True,
+        dpi=300,
+    )
+
 
 def main(args):
 
@@ -480,6 +791,7 @@ def main(args):
     ) = set_directories(args)
 
     plot_cnc_data(
+        proj_dir,
         path_data_dir,
         path_save_dir,
         processed_dir_name="cnc_features_custom_1",
