@@ -11,7 +11,11 @@ import numpy as np
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from src.models.train import train_single_model, load_cnc_features
-from src.models.utils import milling_add_y_label_anomaly, cnc_add_y_label_binary, get_model_metrics_df
+from src.models.utils import (
+    milling_add_y_label_anomaly,
+    cnc_add_y_label_binary,
+    get_model_metrics_df,
+)
 from ast import literal_eval
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
 
@@ -42,32 +46,41 @@ def set_directories(args):
 
     path_interim_dir = path_model_dir / args.interim_dir_name
     path_final_dir = path_model_dir / args.final_dir_name
-    path_processed_dir = path_data_dir / "processed" / args.dataset / args.processed_dir_name
+    path_processed_dir = (
+        path_data_dir / "processed" / args.dataset / args.processed_dir_name
+    )
 
-    return proj_dir, path_data_dir, path_processed_dir, path_model_dir, path_interim_dir, path_final_dir
+    return (
+        proj_dir,
+        path_data_dir,
+        path_processed_dir,
+        path_model_dir,
+        path_interim_dir,
+        path_final_dir,
+    )
 
 
 def filter_results_df(df, keep_top_n=None):
     dfr = df[
         (df["precision_score_min"] > 0)
-        # & (df["precision_score_max"] < 1)
+        & (df["precision_score_max"] < 1)
         & (df["precision_score_std"] > 0)
         & (df["recall_score_min"] > 0)
-        # & (df["recall_score_max"] < 1)
+        & (df["recall_score_max"] < 1)
         & (df["recall_score_std"] > 0)
         & (df["f1_score_min"] > 0)
-        # & (df["f1_score_max"] < 1)
+        & (df["f1_score_max"] < 1)
         & (df["f1_score_std"] > 0)
         & (df["rocauc_min"] < 1)
-        # & (df["rocauc_max"] < 1)
+        & (df["rocauc_max"] < 1)
         & (df["rocauc_avg"] < 1)
         & (df["rocauc_std"] > 0)
         & (df["prauc_min"] < 1)
-        # & (df["prauc_max"] < 1)
+        & (df["prauc_max"] < 1)
         & (df["prauc_avg"] < 1)
         & (df["prauc_std"] > 0)
         & (df["accuracy_min"] < 1)
-        # & (df["accuracy_max"] < 1)
+        & (df["accuracy_max"] < 1)
         & (df["accuracy_avg"] < 1)
         & (df["accuracy_std"] > 0)
         & (df["n_thresholds_min"] > 3)
@@ -234,7 +247,6 @@ def order_columns_on_results_df(df, dataset_name=None):
             "n_thresholds_min",
             "n_thresholds_max",
             "test_strat_group_worst_prauc",
-
         ]
 
     # remove any columns names from primary_cols that are not in df
@@ -265,11 +277,19 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
 
     # remove any keys from general_param_keys that are not in df
     general_param_keys = [col for col in general_param_keys if col in df.columns]
-    
+
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
-def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, check_feat_importance, save_models):
+def plot_generic(
+    df,
+    df_feat,
+    save_n_figures,
+    path_model_curves,
+    dataset_name,
+    check_feat_importance,
+    save_models,
+):
 
     n_rows = df.shape[0]
 
@@ -293,11 +313,15 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
         # rebuild parameters that are specific to certain datasets
         if dataset_name == "cnc":
             try:
-                general_params["cnc_indices_keep"] = [literal_eval(df.iloc[row_idx]["cnc_indices_keep"])]
+                general_params["cnc_indices_keep"] = [
+                    literal_eval(df.iloc[row_idx]["cnc_indices_keep"])
+                ]
             except:
                 general_params["cnc_indices_keep"] = [None]
             try:
-                general_params["cnc_cases_drop"] = [literal_eval(df.iloc[row_idx]["cnc_cases_drop"])]
+                general_params["cnc_cases_drop"] = [
+                    literal_eval(df.iloc[row_idx]["cnc_cases_drop"])
+                ]
             except:
                 general_params["cnc_cases_drop"] = [None]
 
@@ -306,7 +330,7 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
             params_dict_clf_named,
             params_dict_train_setup,
             feat_col_list,
-            meta_label_cols
+            meta_label_cols,
         ) = train_single_model(
             df_feat,
             sample_seed,
@@ -335,13 +359,12 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
         print(f"{id} has {percent_anom:.3f} anomalies")
 
-        i_argmin = np.argmin(model_metrics_dict['prauc_array'])
+        i_argmin = np.argmin(model_metrics_dict["prauc_array"])
         # print("i_argmin: ", i_argmin)
         # print("prauc_array: ", model_metrics_dict['prauc_array'])
         # print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
         # for j in model_metrics_dict['unique_grouping']:
         #     print(j["unique_test_group"])
-
 
         plot_pr_roc_curves_kfolds(
             model_metrics_dict["precisions_array"],
@@ -362,7 +385,13 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
 
 
 def milling_plot_results(
-    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False
+    df,
+    save_n_figures,
+    path_dataset_processed_dir,
+    feat_file_name,
+    path_model_curves,
+    check_feat_importance=False,
+    save_models=False,
 ):
 
     # load feature dataframe
@@ -372,26 +401,55 @@ def milling_plot_results(
 
     df_feat = milling_add_y_label_anomaly(df_feat)
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="milling", check_feat_importance=check_feat_importance)
+    plot_generic(
+        df,
+        df_feat,
+        save_n_figures,
+        path_model_curves,
+        dataset_name="milling",
+        check_feat_importance=check_feat_importance,
+        save_models=save_models,
+    )
 
 
 def cnc_plot_results(
-    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False, save_models=False
+    df,
+    save_n_figures,
+    path_dataset_processed_dir,
+    feat_file_name,
+    path_model_curves,
+    check_feat_importance=False,
+    save_models=False,
 ):
     # To-Do: in filter.py, add load_cnc_features to cnc_plot_results
     # df_feat = load_cnc_features(path_data_dir, path_processed_dir, feat_file_name, label_file_name)
 
-    df_feat = pd.read_csv(path_dataset_processed_dir / feat_file_name,)
+    df_feat = pd.read_csv(
+        path_dataset_processed_dir / feat_file_name,
+    )
     df_feat["unix_date"] = df_feat["id"].apply(lambda x: int(x.split("_")[0]))
     df_feat["tool_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-2]))
     df_feat["index_no"] = df_feat["id"].apply(lambda x: int(x.split("_")[-1]))
 
-    df_labels = pd.read_csv(path_dataset_processed_dir.parent / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv")
-    df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=['case_tool_54'])
-    df_feat = df_feat.dropna(axis=1, how="all") # drop any columns that are completely empty
-    df_feat = df_feat.dropna(axis=0) # drop any rows that have NaN values in them
+    df_labels = pd.read_csv(
+        path_dataset_processed_dir.parent
+        / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+    )
+    df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=["case_tool_54"])
+    df_feat = df_feat.dropna(
+        axis=1, how="all"
+    )  # drop any columns that are completely empty
+    df_feat = df_feat.dropna(axis=0)  # drop any rows that have NaN values in them
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc", check_feat_importance=check_feat_importance, save_models=save_models)
+    plot_generic(
+        df,
+        df_feat,
+        save_n_figures,
+        path_model_curves,
+        dataset_name="cnc",
+        check_feat_importance=check_feat_importance,
+        save_models=save_models,
+    )
 
 
 def main(args):
@@ -415,7 +473,7 @@ def main(args):
     ####### any additional filtering
     # df = df[df["n_feats"] <= 10]
     # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
-    
+
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
     # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]
 
@@ -464,7 +522,7 @@ def main(args):
             check_feat_importance=check_feat_importance,
         )
 
-    elif args.dataset =="cnc" and args.save_n_figures > 0:
+    elif args.dataset == "cnc" and args.save_n_figures > 0:
 
         cnc_plot_results(
             df,
@@ -477,6 +535,7 @@ def main(args):
         )
     else:
         pass
+
 
 if __name__ == "__main__":
 
@@ -590,7 +649,6 @@ if __name__ == "__main__":
         default="False",
         help="Check the feature importance of the models.",
     )
-
 
     args = parser.parse_args()
 

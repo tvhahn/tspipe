@@ -206,12 +206,12 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--path_data_dir $(PROJECT_DIR)/data \
 		--path_model_dir $(PROJECT_DIR)/models \
 		--dataset milling \
-		--processed_dir_name milling_features \
-		--feat_file_name milling_features.csv \
+		--processed_dir_name milling_features_comp \
+		--feat_file_name milling_features_comp.csv \
 		--final_dir_name final_results_milling \
 		--keep_top_n 1 \
 		--save_n_figures 8 \
-		--check_feat_importance True
+		--check_feat_importance False
 else # assume on HPC
 	sbatch src/models/filter_hpc.sh $(PROJECT_DIR)
 endif
