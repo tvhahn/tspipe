@@ -101,3 +101,4 @@ target/
 notebooks/scratch/cnc_data_with_labels.csv
 
 notebooks/scratch/introducing-ssa-for-time-series-decomposition.ipynb
+notebooks/scratch/*.pkl
