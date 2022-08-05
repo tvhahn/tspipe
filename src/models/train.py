@@ -108,6 +108,8 @@ def kfold_cv(
 ):
     print("feat_select_method: ", feat_selection)
     scores_list = []
+    clf_trained_list = []
+    scaler_list = []
 
     np.random.seed(sampler_seed)  # fix random seeds
     random.seed(sampler_seed)
@@ -294,6 +296,8 @@ def kfold_cv(
                 "unique_test_group": unique_test_group,
             }
             scores_list.append(ind_score_dict)
+            clf_trained_list.append(clone_clf)
+            scaler_list.append(scaler)
 
             if check_feat_importance:
                 if i == 0:
@@ -454,6 +458,8 @@ def kfold_cv(
                 "unique_test_group": unique_test_group,
             }
             scores_list.append(ind_score_dict)
+            clf_trained_list.append(clone_clf)
+            scaler_list.append(scaler)
 
             if check_feat_importance:
                 if i == 0:
@@ -469,7 +475,7 @@ def kfold_cv(
     if check_feat_importance:
         trained_result_dict["df_feat_imp"] = pd.concat(df_feat_imp_list)
 
-    return trained_result_dict, feat_col_list, scaler, clone_clf
+    return trained_result_dict, feat_col_list, scaler_list, clf_trained_list
 
 
 # TO-DO: need to add the general_params dictionary to the functions.
@@ -588,7 +594,7 @@ def train_single_model(
     )
     print("\n", params_dict_clf_named)
 
-    model_metrics_dict, feat_col_list, scaler_fitted, clf_trained = kfold_cv(
+    model_metrics_dict, feat_col_list, scaler_list, clf_trained_list = kfold_cv(
         df,
         clf,
         sample_seed,
@@ -614,15 +620,17 @@ def train_single_model(
     # save the model if requested
     if save_model:
 
-        scaler_save_name = "scaler_" + model_save_name
-        model_save_name = "model_" + model_save_name
+        scaler_save_name = f"scaler_{model_save_name}.pkl"
+        model_save_name = f"model_{model_save_name}.pkl"
+
+        i_argmin = np.argmin(model_metrics_dict["prauc_array"])
 
         # save the model and scaler with pickle
         with open(model_save_path / model_save_name, "wb") as f:
-            pickle.dump(clf_trained, f)
+            pickle.dump(clf_trained_list[i_argmin], f)
 
         with open(model_save_path / scaler_save_name, "wb") as f:
-            pickle.dump(scaler_fitted, f)
+            pickle.dump(scaler_list[i_argmin], f)
 
     return (
         model_metrics_dict,

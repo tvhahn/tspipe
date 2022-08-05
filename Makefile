@@ -229,6 +229,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--final_dir_name final_results_cnc \
 		--keep_top_n 1 \
 		--save_n_figures 8 \
+		--save_models True \
 		--check_feat_importance False
 else # assume on HPC
 	sbatch src/models/filter_cnc_hpc.sh $(PROJECT_DIR)

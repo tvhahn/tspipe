@@ -72,7 +72,7 @@ general_params = {
     ],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
+        # "tsfresh_random",
         "random",
         # None,
     ],
@@ -89,14 +89,14 @@ general_params = {
         # 500,
     ],
     "classifier": [
-        "rf",  # Random Forest
-        "xgb", # XGBoost
-        "knn", # K-Nearest Neighbors
+        # "rf",  # Random Forest
+        # "xgb", # XGBoost
+        # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,
@@ -104,9 +104,9 @@ general_params = {
     ],
     "dataprep_method": [
         "cnc_standard",
-        "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_standard_index_select",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),

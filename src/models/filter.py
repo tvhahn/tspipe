@@ -269,7 +269,7 @@ def rebuild_general_params(df, row_idx, general_param_keys=None):
     return {k: [df.iloc[row_idx][k]] for k in general_param_keys}
 
 
-def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, check_feat_importance):
+def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, check_feat_importance, save_models):
 
     n_rows = df.shape[0]
 
@@ -315,6 +315,9 @@ def plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name, c
             stratification_grouping_col,
             y_label_col,
             feat_col_list,
+            save_model=save_models,
+            model_save_name=id,
+            model_save_path=path_model_curves,
             general_params=general_params,
             params_clf=params_clf,
             dataset_name=dataset_name,
@@ -373,7 +376,7 @@ def milling_plot_results(
 
 
 def cnc_plot_results(
-    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False
+    df, save_n_figures, path_dataset_processed_dir, feat_file_name, path_model_curves, check_feat_importance=False, save_models=False
 ):
     # To-Do: in filter.py, add load_cnc_features to cnc_plot_results
     # df_feat = load_cnc_features(path_data_dir, path_processed_dir, feat_file_name, label_file_name)
@@ -388,7 +391,7 @@ def cnc_plot_results(
     df_feat = df_feat.dropna(axis=1, how="all") # drop any columns that are completely empty
     df_feat = df_feat.dropna(axis=0) # drop any rows that have NaN values in them
 
-    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc", check_feat_importance=check_feat_importance)
+    plot_generic(df, df_feat, save_n_figures, path_model_curves, dataset_name="cnc", check_feat_importance=check_feat_importance, save_models=save_models)
 
 
 def main(args):
@@ -439,6 +442,11 @@ def main(args):
     else:
         check_feat_importance = False
 
+    if args.save_models == "True":
+        save_models = True
+    else:
+        save_models = False
+
     ########################################################################
     #### MILLING DATASET ####
     ########################################################################
@@ -465,6 +473,7 @@ def main(args):
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
             check_feat_importance=check_feat_importance,
+            save_models=save_models,
         )
     else:
         pass
