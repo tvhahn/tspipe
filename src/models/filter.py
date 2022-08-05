@@ -143,10 +143,15 @@ def order_columns_on_results_df(df, dataset_name=None):
         "undersamp_method",
         "undersamp_ratio",
         "early_stopping_rounds",
+        "mcc_avg",
+        "mcc_min",
+        "mcc_max",
+        "mcc_std",
         "prauc_avg",
         "prauc_min",
         "prauc_max",
         "prauc_std",
+        "tn_fp_fn_tp_worst_prauc",
         "rocauc_avg",
         "rocauc_min",
         "rocauc_max",
@@ -167,10 +172,6 @@ def order_columns_on_results_df(df, dataset_name=None):
         "f1_score_min",
         "f1_score_max",
         "f1_score_std",
-        "mcc_avg",
-        "mcc_min",
-        "mcc_max",
-        "mcc_std",
         "n_thresholds_min",
         "n_thresholds_max",
         "test_strat_group_worst_prauc",
@@ -201,10 +202,15 @@ def order_columns_on_results_df(df, dataset_name=None):
             "undersamp_method",
             "undersamp_ratio",
             "early_stopping_rounds",
+            "mcc_avg",
+            "mcc_min",
+            "mcc_max",
+            "mcc_std",
             "prauc_avg",
             "prauc_min",
             "prauc_max",
             "prauc_std",
+            "tn_fp_fn_tp_worst_prauc",
             "rocauc_avg",
             "rocauc_min",
             "rocauc_max",
@@ -225,13 +231,10 @@ def order_columns_on_results_df(df, dataset_name=None):
             "f1_score_min",
             "f1_score_max",
             "f1_score_std",
-            "mcc_avg",
-            "mcc_min",
-            "mcc_max",
-            "mcc_std",
             "n_thresholds_min",
             "n_thresholds_max",
             "test_strat_group_worst_prauc",
+
         ]
 
     # remove any columns names from primary_cols that are not in df
@@ -408,6 +411,7 @@ def main(args):
 
     ####### any additional filtering
     df = df[df["n_feats"] <= 10]
+    df = df[df["dataprep_method"] == "cnc_index_select_transposed"]
     
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
     # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]

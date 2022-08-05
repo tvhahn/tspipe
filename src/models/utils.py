@@ -43,6 +43,7 @@ from sklearn.metrics import (
     roc_curve,
     accuracy_score,
     matthews_corrcoef,
+    confusion_matrix
 )
 
 
@@ -150,6 +151,35 @@ def get_classifier_and_params(classifier_string):
         raise ValueError("Classifier string not recognized")
 
 
+def feat_selection_binary_classification(
+    x_train, y_train, x_train_cols, x_test, y_test, x_test_cols, feat_col_list=None
+):
+    if feat_col_list is None:
+        from tsfresh import (
+            select_features,
+        )  # import in loop because it is a heavy package
+
+        x_train = select_features(
+            pd.DataFrame(x_train, columns=x_train_cols),
+            y_train,
+            n_jobs=5,
+            chunksize=10,
+            ml_task="classification",
+            multiclass=False,
+        )
+
+        feat_col_list = list(x_train.columns)
+
+        x_train = x_train.values
+        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+
+    else:
+        x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
+        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
+
+    return x_train, x_test, feat_col_list
+
+
 def calculate_scores(
     clf,
     x_test,
@@ -189,6 +219,9 @@ def calculate_scores(
     f1_result = f1_score(y_test, y_pred)
     mcc_result = matthews_corrcoef(y_test, y_pred)
 
+    # calculate confusion matrix
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+
     # create a dictionary of all the scores
     scores = {
         "n_correct": n_correct,
@@ -207,38 +240,10 @@ def calculate_scores(
         "roc_thresholds": roc_thresholds,
         "y_scores": y_scores,
         "accuracy_result": accuracy_result,
+        "confusion_matrix": (tn, fp, fn, tp),
     }
 
     return scores
-
-
-def feat_selection_binary_classification(
-    x_train, y_train, x_train_cols, x_test, y_test, x_test_cols, feat_col_list=None
-):
-    if feat_col_list is None:
-        from tsfresh import (
-            select_features,
-        )  # import in loop because it is a heavy package
-
-        x_train = select_features(
-            pd.DataFrame(x_train, columns=x_train_cols),
-            y_train,
-            n_jobs=5,
-            chunksize=10,
-            ml_task="classification",
-            multiclass=False,
-        )
-
-        feat_col_list = list(x_train.columns)
-
-        x_train = x_train.values
-        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-
-    else:
-        x_train = pd.DataFrame(x_train, columns=x_train_cols)[feat_col_list].values
-        x_test = pd.DataFrame(x_test, columns=x_test_cols)[feat_col_list].values
-
-    return x_train, x_test, feat_col_list
 
 
 def collate_scores_binary_classification(scores_list):
@@ -259,6 +264,7 @@ def collate_scores_binary_classification(scores_list):
     mcc_list = []
     accuracy_list = []
     unique_grouping_list = []
+    confusion_matrix_list = []
 
     for ind_score_dict in scores_list:
         n_thresholds_list.append(ind_score_dict["n_thresholds"])
@@ -274,6 +280,8 @@ def collate_scores_binary_classification(scores_list):
         mcc_list.append(ind_score_dict["mcc_result"])
         accuracy_list.append(ind_score_dict["accuracy_result"])
         unique_grouping_list.append(ind_score_dict["unique_grouping"])
+        confusion_matrix_list.append(ind_score_dict["confusion_matrix"])
+
 
     result_dict = {
         "precisions_array": np.array(precisions_list, dtype=object),
@@ -289,6 +297,7 @@ def collate_scores_binary_classification(scores_list):
         "n_thresholds_array": np.array(n_thresholds_list, dtype=int),
         "accuracy_array": np.array(accuracy_list, dtype=object),
         "unique_grouping": unique_grouping_list,
+        "confusion_matrix": confusion_matrix_list,
     }
 
     return result_dict
@@ -351,17 +360,23 @@ def get_model_metrics_df(model_metrics_dict):
 
     # get argmin of prauc_array
     i_argmin = np.argmin(model_metrics_dict["prauc_array"])
-    print("i_argmin: ", i_argmin)
-    print("prauc_array: ", model_metrics_dict["prauc_array"])
-    print("prauc_array[i_argmin]: ", model_metrics_dict["prauc_array"][i_argmin])
-    for j in model_metrics_dict["unique_grouping"]:
-        print(j["unique_test_group"])
+    # print("i_argmin: ", i_argmin)
+    # print("prauc_array: ", model_metrics_dict["prauc_array"])
+    # print("prauc_array[i_argmin]: ", model_metrics_dict["prauc_array"][i_argmin])
+    # for j in model_metrics_dict["unique_grouping"]:
+    #     print(j["unique_test_group"])
     # print("unique_grouping: ", model_metrics_dict['unique_grouping'])
 
-    # selected_metrics_dict["train_group_worst"] = model_metrics_dict['unique_grouping'][i_argmin]["unique_train_group"]
+    # print("model_metrics_dict['confusion_matrix']: ", model_metrics_dict["confusion_matrix"])
+
     selected_metrics_dict["test_strat_group_worst_prauc"] = model_metrics_dict[
         "unique_grouping"
     ][i_argmin]["unique_test_group"]
+
+    # confusion matrix: tn, fp, fn, tp
+    selected_metrics_dict["tn_fp_fn_tp_worst_prauc"] = model_metrics_dict[
+        "confusion_matrix"
+    ][i_argmin]
 
     df_m = pd.DataFrame.from_dict(selected_metrics_dict, orient="index").T
 
