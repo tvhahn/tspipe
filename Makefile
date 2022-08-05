@@ -164,8 +164,9 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_cnc \
 		--processed_dir_name cnc_features_comp \
-		--rand_search_iter 20 \
+		--rand_search_iter 10 \
 		--dataset cnc \
+		--sample_seed_clf 401172 \
 		--feat_file_name cnc_features_54_comp.csv
 else # assume on HPC
 	sbatch src/models/train_cnc_hpc.sh $(PROJECT_DIR)
@@ -226,10 +227,10 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--dataset cnc \
 		--processed_dir_name cnc_features_comp \
 		--feat_file_name cnc_features_54_comp.csv \
-		--final_dir_name final_results_cnc \
+		--final_dir_name final_results_cnc_2022_08_04_final \
 		--keep_top_n 1 \
 		--save_n_figures 8 \
-		--save_models True \
+		--save_models False \
 		--check_feat_importance False
 else # assume on HPC
 	sbatch src/models/filter_cnc_hpc.sh $(PROJECT_DIR)

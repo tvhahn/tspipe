@@ -30,38 +30,38 @@ import random
 general_params = {
     "scaler_method": [
         "standard", 
-        "minmax", 
-        None
+        # "minmax", 
+        # None
         ],
     "oversamp_method": [
         "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
-        None,
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
+        # None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [
-        0.1, 
-        0.2, 
-        0.3, 
+        # 0.1, 
+        # 0.2, 
+        # 0.3, 
         0.4, 
-        0.5, 
-        0.6, 
-        0.7, 
-        0.8, 
-        0.85, 
-        0.9, 
-        0.95, 
-        1.0
+        # 0.5, 
+        # 0.6, 
+        # 0.7, 
+        # 0.8, 
+        # 0.85, 
+        # 0.9, 
+        # 0.95, 
+        # 1.0
     ],
     "undersamp_ratio": [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
     "early_stopping_rounds": [
@@ -89,46 +89,46 @@ general_params = {
         # 500,
     ],
     "classifier": [
-        # "rf",  # Random Forest
+        "rf",  # Random Forest
         # "xgb", # XGBoost
         # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        "nb",  # Naive Bayes
+        # "nb",  # Naive Bayes
     ],
     "feat_col_list": [
-        None,
-        # ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
+        # None,
+        ['current__cwt_coefficients__coeff_5__w_2__widths_(2, 5, 10, 20)', 'current__fft_coefficient__attr_"imag"__coeff_50', 'current__fft_coefficient__attr_"imag"__coeff_59', 'current__fft_coefficient__attr_"angle"__coeff_33', 'current__agg_linear_trend__attr_"slope"__chunk_len_5__f_agg_"min"', 'current__augmented_dickey_fuller__attr_"usedlag"__autolag_"AIC"', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__c3__lag_3', 'current__agg_linear_trend__attr_"intercept"__chunk_len_5__f_agg_"mean"', 'current__index_mass_quantile__q_0.3']
     ],
     "dataprep_method": [
-        "cnc_standard",
-        # "cnc_standard_index_select",
+        # "cnc_standard",
+        "cnc_standard_index_select",
         # "cnc_index_transposed",
         # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
-        list(range(0, 10)),
-        list(range(1, 10)),
-        list(range(1, 9)),
-        list(range(1, 8)),
+        # list(range(0, 10)),
+        # list(range(1, 10)),
+        # list(range(1, 9)),
+        # list(range(1, 8)),
         list(range(2, 8)),
-        list(range(2, 9)),
-        list(range(2, 10)),
+        # list(range(2, 9)),
+        # list(range(2, 10)),
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        None,  # no drop
+        # None,  # no drop
         # True,  # randomly select cases to drop
         # [1,2], # input a list of cases to drop
         # [9, 17, 21, 23, 25, 31, 35, 15],
         # [9],
         # [17],
         # [21],
-        # [23],
+        [23],
         # [25],
-        # [31],
-        # [35],
+        [31],
+        [35],
         # [15],
         # [9, 17],
         # [9, 21],

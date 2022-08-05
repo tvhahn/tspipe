@@ -50,24 +50,24 @@ def set_directories(args):
 def filter_results_df(df, keep_top_n=None):
     dfr = df[
         (df["precision_score_min"] > 0)
-        # & (df["precision_score_max"] < 1)
+        & (df["precision_score_max"] < 1)
         & (df["precision_score_std"] > 0)
         & (df["recall_score_min"] > 0)
-        # & (df["recall_score_max"] < 1)
+        & (df["recall_score_max"] < 1)
         & (df["recall_score_std"] > 0)
         & (df["f1_score_min"] > 0)
-        # & (df["f1_score_max"] < 1)
+        & (df["f1_score_max"] < 1)
         & (df["f1_score_std"] > 0)
         & (df["rocauc_min"] < 1)
-        # & (df["rocauc_max"] < 1)
+        & (df["rocauc_max"] < 1)
         & (df["rocauc_avg"] < 1)
         & (df["rocauc_std"] > 0)
         & (df["prauc_min"] < 1)
-        # & (df["prauc_max"] < 1)
+        & (df["prauc_max"] < 1)
         & (df["prauc_avg"] < 1)
         & (df["prauc_std"] > 0)
         & (df["accuracy_min"] < 1)
-        # & (df["accuracy_max"] < 1)
+        & (df["accuracy_max"] < 1)
         & (df["accuracy_avg"] < 1)
         & (df["accuracy_std"] > 0)
         & (df["n_thresholds_min"] > 3)
@@ -413,7 +413,7 @@ def main(args):
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
     ####### any additional filtering
-    # df = df[df["n_feats"] <= 10]
+    df = df[df["n_feats"] <= 10]
     # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
     
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
