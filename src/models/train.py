@@ -511,15 +511,13 @@ def train_single_model(
     dataprep_method = params_dict_train_setup["dataprep_method"]
     feat_col_list = params_dict_train_setup["feat_col_list"]
 
+    ##################
     # prepare datasets
     if dataset_name == "cnc":
 
         # cnc specific parameters
         cnc_indices_keep = params_dict_train_setup["cnc_indices_keep"]
         cnc_cases_drop = params_dict_train_setup["cnc_cases_drop"]
-
-        # print("############################################################")
-        # print("cnc_cases_drop: ", cnc_cases_drop)
 
         (
             df,
@@ -548,6 +546,8 @@ def train_single_model(
             del params_dict_train_setup["cnc_indices_keep"]
         if "cnc_cases_drop" in params_dict_train_setup:
             del params_dict_train_setup["cnc_cases_drop"]
+
+        params_dict_train_setup["dataprep_method"] = dataprep_method
 
     else:
         pass
