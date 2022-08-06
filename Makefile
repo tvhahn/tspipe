@@ -47,9 +47,9 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/dataprep/make_dataset_milling.py \
 	-p $(PROJECT_DIR) \
 	--path_data_dir $(PROJECT_DIR)/data/ \
-	--window_len 64 \
+	--window_len 1024 \
 	--stride 64 \
-	--raw_dir_name stride64_len64
+	--raw_dir_name stride64_len2048
 else # assume on HPC
 	sbatch src/dataprep/make_dataset_milling_hpc.sh $(PROJECT_DIR)
 endif
@@ -150,10 +150,10 @@ train_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
 	$(PYTHON_INTERPRETER) src/models/train.py \
 		--save_dir_name interim_results_milling \
-		--processed_dir_name milling_features \
+		--processed_dir_name milling_features_comp_stride64_len1024 \
 		--rand_search_iter 10 \
 		--dataset milling \
-		--feat_file_name milling_features.csv
+		--feat_file_name milling_features_comp_stride64_len1024.csv
 else # assume on HPC
 	sbatch src/models/train_milling_hpc.sh $(PROJECT_DIR)
 endif
