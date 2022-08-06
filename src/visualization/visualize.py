@@ -42,7 +42,8 @@ def plot_pr_roc_curves_kfolds(
     rocauc_array,
     prauc_array,
     percent_anomalies_truth=0.073,
-    path_save_name="model_curves.pdf",
+    path_save_dir=None,
+    save_name="model_curves",
     save_plot=False,
     dpi=300,
 ):
@@ -173,7 +174,12 @@ def plot_pr_roc_curves_kfolds(
         ax.grid(False)
 
     if save_plot:
-        plt.savefig(path_save_name, dpi=dpi, bbox_inches="tight")
+        if path_save_dir is None:
+            path_save_dir = "./"
+
+        # save as both png and pdf
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=dpi, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
         plt.cla()
         plt.close()
     else:

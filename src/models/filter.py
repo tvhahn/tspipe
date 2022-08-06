@@ -374,7 +374,8 @@ def plot_generic(
             model_metrics_dict["rocauc_array"],
             model_metrics_dict["prauc_array"],
             percent_anomalies_truth=percent_anom,
-            path_save_name=path_model_curves / f"curve_{id}.png",
+            path_save_dir=path_model_curves,
+            save_name=f"curve_{id}",
             save_plot=True,
             dpi=300,
         )
@@ -400,6 +401,7 @@ def milling_plot_results(
     )
 
     df_feat = milling_add_y_label_anomaly(df_feat)
+    df_feat = df_feat.dropna(axis=1)  # drop any columns that have NaNs in them
 
     plot_generic(
         df,
@@ -471,7 +473,7 @@ def main(args):
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
     ####### any additional filtering
-    # df = df[df["n_feats"] <= 10]
+    df = df[df["n_feats"] <= 10]
     # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
 
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
