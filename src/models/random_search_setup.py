@@ -105,7 +105,7 @@ general_params = {
     "dataprep_method": [
         "cnc_standard",
         # "cnc_standard_index_select",
-        # "cnc_index_transposed",
+        "cnc_index_transposed",
         # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
