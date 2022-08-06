@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --time=00:15:00 # 10 minutes
+#SBATCH --time=00:30:00 # 10 minutes
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=64G
 #SBATCH --account=rrg-mechefsk
 #SBATCH --mail-type=ALL               # Type of email notification- BEGIN,END,F$
 #SBATCH --mail-user=18tcvh@queensu.ca   # Email to which notifications will be $
@@ -18,6 +18,6 @@ source ~/featstore/bin/activate
 python $PROJECT_DIR/src/dataprep/make_dataset_milling.py \
     -p $PROJECT_DIR \
     --path_data_dir $SCRATCH_DATA_DIR \
-	--window_len 64 \
+	--window_len 1024 \
 	--stride 64 \
-	--raw_dir_name stride64_len64
+	--raw_dir_name stride64_len1024
