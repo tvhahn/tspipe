@@ -16,6 +16,7 @@ from sklearn.inspection import permutation_importance
 from src.models.utils import (
     milling_add_y_label_anomaly,
     cnc_add_y_label_binary,
+    load_cnc_features,
     under_over_sampler,
     scale_data,
     calculate_scores,
@@ -928,33 +929,6 @@ def train_milling_models(args):
         debug=True,
     )
 
-
-def load_cnc_features(
-    path_data_dir, path_processed_dir, feat_file_name, label_file_name
-):
-    """
-    This function returns a dataframe with the appropriate meta-label columns and the label column (y).
-
-    Meta-label columns are:
-    - case_tool_54: the case number for tool 54
-    - unix_date: the unix date at the time of the cut
-    - tool_no: the tool number
-    - index_no: the index number of the cut
-
-    """
-    df = pd.read_csv(
-        path_processed_dir / feat_file_name,
-    )
-    df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
-    df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
-    df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
-
-    df_labels = pd.read_csv(path_data_dir / "processed/cnc" / label_file_name)
-
-    df = cnc_add_y_label_binary(df, df_labels, col_list_case=["case_tool_54"])
-    df = df.dropna(axis=1, how="all")  # drop any columns that are completely empty
-    df = df.dropna(axis=0)  # drop any rows that have NaN values in them
-    return df
 
 
 def train_cnc_models(args):

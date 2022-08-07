@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 import seaborn as sns
 import pandas as pd
 import argparse
-from src.models.utils import cnc_add_y_label_binary
+from src.models.utils import cnc_add_y_label_binary, load_cnc_features
 from datetime import datetime
 from pathlib import Path
 
@@ -726,21 +726,29 @@ def plot_cnc_data(
 
     path_processed_dir = path_data_dir / "processed" / "cnc" / processed_dir_name
 
-    # load feature df and df_labels and merge
-    df = pd.read_csv(path_processed_dir / feat_file_name)
-    df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
-    df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
-    df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
 
-    df_labels = pd.read_csv(
-        path_data_dir
-        / "processed"
-        / "cnc"
-        / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
-    )
+    df = load_cnc_features(
+        path_data_dir, 
+        path_processed_dir, 
+        feat_file_name, 
+        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+        )
 
-    df = cnc_add_y_label_binary(df, df_labels, col_list_case=["case_tool_54"])
-    df = df.dropna(axis=0)
+    # # load feature df and df_labels and merge
+    # df = pd.read_csv(path_processed_dir / feat_file_name)
+    # df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
+    # df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
+    # df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
+
+    # df_labels = pd.read_csv(
+    #     path_data_dir
+    #     / "processed"
+    #     / "cnc"
+    #     / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+    # )
+
+    # df = cnc_add_y_label_binary(df, df_labels, col_list_case=["case_tool_54"])
+    # df = df.dropna(axis=0)
 
     ###################
     # Trend features
@@ -774,13 +782,13 @@ def plot_cnc_data(
     df_results = pd.read_csv(
         proj_dir
         / "models/final_results_cnc_2022_08_04_final"
-        / "compiled_results_filtered_best.csv"
+        / "compiled_results_filtered.csv"
     )
 
     plot_lollipop_results(
         df_results,
-        metric="prauc",
-        plt_title=None,
+        metric="mcc",
+        plt_title="Top Performing Models by MCC Score",
         path_save_dir=path_save_dir,
         save_name="results_lollipop",
         save_plot=True,
