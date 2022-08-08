@@ -466,8 +466,127 @@ def plot_lollipop_results(
             path_save_dir = "./"
 
         # save as both png and pdf
-        plt.savefig(path_save_dir / f"{plt_title}.png", dpi=300, bbox_inches="tight")
-        plt.savefig(path_save_dir / f"{plt_title}.pdf", bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
+        plt.cla()
+        plt.close()
+    else:
+        plt.show()
+
+
+def plot_feat_importance(
+    df,
+    feature_name_map=None,
+    metric="f1",
+    plt_title=None,
+    path_save_dir=None,
+    save_name="feature_importance",
+    save_plot=False,
+    dpi=300,
+):
+    """Plot the top performing models and by a metric.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing the feature importance results.
+    feature_name_map : dict
+        Dictionary for mapping the feature names to readable english
+    metric : str
+        The metric to plot the results by.
+    plt_title : str
+        The title of the plot.
+    path_save_name : Path
+        The name (as a path object) of the file to save the plot to.
+    save_plot : bool
+        Whether to save the plot or not. Otherwise, it will be shown.
+    dpi : int
+        The resolution of the plot if saved as png or if shown.
+    """
+
+    if feature_name_map is not None:
+        df = df.rename(columns=feature_name_map)
+
+    # group the feature importance df by the selected metric and average across the folds
+    df = (
+        df[df["metric"] == metric]
+        .groupby(["metric", "measure"])
+        .mean()
+        .reset_index()
+        .drop(columns=["k_fold_i", "metric", "measure"])
+        .T.reset_index()
+        .rename(columns={"index": "feature", 0: "mean", 1: "std"})
+        .sort_values(["mean"], ascending=False)
+        .reset_index(drop=True)
+    )
+
+    sns.set(font_scale=1.0, style="whitegrid", font="DejaVu Sans")  # proper formatting
+
+    fig, ax = plt.subplots(
+        nrows=1,
+        ncols=1,
+        figsize=(9, 12),
+        # dpi=150,
+    )
+
+    ax = sns.barplot(x="mean", y="feature", data=df, palette="Blues_d", ax=ax)
+
+    for i, p in enumerate(ax.patches):
+        # help from https://stackoverflow.com/a/56780852/9214620
+        if i == 0:
+            space = (p.get_x() + p.get_width()) * 0.04
+        _x = p.get_x() + p.get_width() + float(space)
+        _y = p.get_y() + p.get_height() / 2
+        value = p.get_width()
+        ax.text(
+            _x,
+            _y,
+            f"{value:.2}",
+            ha="left",
+            va="center",
+            weight="semibold",
+            size=12,
+        )
+
+    ax.spines["bottom"].set_visible(True)
+    _, ylabels = plt.yticks()
+    ax.set_yticklabels(ylabels, size=12)
+    ax.set_ylabel("")
+    ax.set_xlabel("")
+
+    ax.annotate(
+        "Increasing Importance",
+        xy=(df["mean"].max() * 0.9, 5),
+        xycoords="data",
+        xytext=(df["mean"].max() * 0.9, 8),
+        textcoords="data",
+        font="DejaVu Sans",
+        arrowprops=dict(color="gray", arrowstyle="->", lw=2.0),
+        horizontalalignment="center",
+        verticalalignment="center",
+        rotation=90,
+        fontsize=14,
+        color="gray",
+    )
+
+    ax.grid(alpha=0.7, linewidth=1, axis="x")
+    ax.set_xticks([0])
+    ax.set_xticklabels([], alpha=0)
+
+    if plt_title is None:
+        plt_title = f"Feature importance by mean {metric} score decrease"
+
+    ax.set_title(plt_title, fontsize=14, loc="center")
+    # plt.subplots_adjust(wspace=0.8)
+    sns.despine(left=True, bottom=True)
+
+    if save_plot:
+        if path_save_dir is None:
+            path_save_dir = "./"
+
+        # save as both png and pdf
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
         plt.cla()
         plt.close()
     else:
@@ -724,49 +843,67 @@ def plot_cnc_data(
     save_plot=False,
 ):
 
+    # Get feature dataframe
     path_processed_dir = path_data_dir / "processed" / "cnc" / processed_dir_name
 
-
     df = load_cnc_features(
-        path_data_dir, 
-        path_processed_dir, 
-        feat_file_name, 
-        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
-        )
+        path_data_dir,
+        path_processed_dir,
+        feat_file_name,
+        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv",
+    )
 
-    # # load feature df and df_labels and merge
-    # df = pd.read_csv(path_processed_dir / feat_file_name)
-    # df["unix_date"] = df["id"].apply(lambda x: int(x.split("_")[0]))
-    # df["tool_no"] = df["id"].apply(lambda x: int(x.split("_")[-2]))
-    # df["index_no"] = df["id"].apply(lambda x: int(x.split("_")[-1]))
+    ###################
+    # Feature importance
 
-    # df_labels = pd.read_csv(
-    #     path_data_dir
-    #     / "processed"
-    #     / "cnc"
-    #     / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
-    # )
+    df_imp = pd.read_csv(
+        proj_dir
+        / "models/final_results_cnc_2022_08_04_final"
+        / "21676100_rf_2022-08-05-1500-29_cnc_feat_imp.csv"
+    )
 
-    # df = cnc_add_y_label_binary(df, df_labels, col_list_case=["case_tool_54"])
-    # df = df.dropna(axis=0)
+    # create a dict that maps the old feature names to the new feature names
+    feature_name_map = {
+        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
+        'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
+        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
+        'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
+        'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
+        'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
+        'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
+        'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
+        'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
+        'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
+    }
+
+    plot_feat_importance(
+        df_imp,
+        feature_name_map=feature_name_map,
+        metric="f1",
+        plt_title=None,
+        path_save_dir=path_save_dir,
+        save_name="feature_importance",
+        save_plot=True,
+        dpi=300,
+    )
 
     ###################
     # Trend features
 
     feat_to_trend = {
-        'current__fft_coefficient__attr_"abs"__coeff_58': "fft coeff. 58",
-        'current__fft_coefficient__attr_"abs"__coeff_97': "fft coeff. 97",
-        'current__fft_coefficient__attr_"imag"__coeff_45': "fft coeff. 45",
-        'current__fft_coefficient__attr_"real"__coeff_12': "fft coeff. 12",
-        'current__fft_coefficient__attr_"imag"__coeff_77': "fft coeff. 77",
-        'current__fft_coefficient__attr_"abs"__coeff_49': "fft coeff. 49",
+        'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
+        'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
+        'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
+        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
+        'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
+        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
     }
 
     plot_features_by_average_index_mpl(
         df,
         feat_to_trend=feat_to_trend,
         tool_no=54,
-        index_list=[2, 3, 4, 5, 6, 7],
+        index_list=[2, 3, 4, 5, 6, 7, 8, 9],
         chart_height=9000,
         start_index=1000,
         stop_index=4900,
@@ -788,7 +925,7 @@ def plot_cnc_data(
     plot_lollipop_results(
         df_results,
         metric="mcc",
-        plt_title="Top Performing Models by MCC Score",
+        plt_title="Top Performing Models by F1 Score",
         path_save_dir=path_save_dir,
         save_name="results_lollipop",
         save_plot=True,
@@ -808,8 +945,8 @@ def main(args):
         proj_dir,
         path_data_dir,
         path_save_dir,
-        processed_dir_name="cnc_features_custom_1",
-        feat_file_name="cnc_features_54_custom_1.csv",
+        processed_dir_name="cnc_features_comp",
+        feat_file_name="cnc_features_54_comp.csv",
         save_plot=True,
     )
 
