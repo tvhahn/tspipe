@@ -474,7 +474,11 @@ def main(args):
 
     ####### any additional filtering
     df = df[df["n_feats"] <= 10]
-    # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
+
+    if args.dataset == "cnc":
+        # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
+        df = df[df["dataprep_method"].isin(["cnc_standard_index_select", "cnc_standard"])]
+
 
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
     # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]

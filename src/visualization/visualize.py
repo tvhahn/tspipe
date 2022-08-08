@@ -924,8 +924,8 @@ def plot_cnc_data(
 
     plot_lollipop_results(
         df_results,
-        metric="mcc",
-        plt_title="Top Performing Models by F1 Score",
+        metric="prauc",
+        plt_title="Top Performing Models by PR-AUC Score",
         path_save_dir=path_save_dir,
         save_name="results_lollipop",
         save_plot=True,
