@@ -227,11 +227,11 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--dataset cnc \
 		--processed_dir_name cnc_features_comp \
 		--feat_file_name cnc_features_54_comp.csv \
-		--final_dir_name final_results_cnc_2022_08_04_final \
+		--final_dir_name final_results_cnc \
 		--keep_top_n 1 \
 		--save_n_figures 8 \
-		--save_models True \
-		--check_feat_importance True
+		--save_models False \
+		--check_feat_importance False
 else # assume on HPC
 	sbatch src/models/filter_cnc_hpc.sh $(PROJECT_DIR)
 endif
