@@ -105,8 +105,8 @@ general_params = {
     "dataprep_method": [
         "cnc_standard",
         "cnc_standard_index_select",
-        "cnc_index_transposed",
-        "cnc_index_select_transposed",
+        # "cnc_index_transposed",
+        # "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
         list(range(0, 10)),
@@ -118,9 +118,10 @@ general_params = {
         list(range(2, 10)),
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        None,  # no drop
+        # None,  # no drop
         # True,  # randomly select cases to drop
         # [1,2], # input a list of cases to drop
+        [29, 30, 31, 33], # these are cases that have been down sampled from 2khz
         # [9, 17, 21, 23, 25, 31, 35, 15],
         # [9],
         # [17],
