@@ -227,7 +227,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--dataset cnc \
 		--processed_dir_name cnc_features_comp \
 		--feat_file_name cnc_features_54_comp.csv \
-		--final_dir_name final_results_cnc \
+		--final_dir_name final_results_cnc_2022_08_04_final \
 		--keep_top_n 1 \
 		--save_n_figures 8 \
 		--save_models False \

@@ -483,11 +483,17 @@ def main(args):
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
     # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]
 
+    # drop any rows where the "classifier" column is "knn" and its "f1_score" is less than 0.5
+    # help from Guy on stackoverflow: https://stackoverflow.com/a/68085032/9214620
+    ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
+    df = df[~df["id"].isin(ids)]
+
     # drop any duplicate rows in df, excluding the "sampler_seed" column
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    sort_by = ["prauc_min", "prauc_avg"]
+    sort_by = ["prauc_avg"]
+    # sort_by = ["prauc_min", "prauc_avg"]
     # sort_by = ["mcc_min", "mcc_avg"]
     df = (
         df.groupby(["classifier"])
