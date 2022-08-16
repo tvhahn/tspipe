@@ -7,6 +7,7 @@ import argparse
 from src.models.utils import cnc_add_y_label_binary, load_cnc_features
 from datetime import datetime
 from pathlib import Path
+from pyphm.datasets.milling import MillingPrepMethodA
 
 ###############################################################################
 # Generic plotting functions
@@ -463,10 +464,10 @@ def plot_lollipop_results(
 
     if save_plot:
         if path_save_dir is None:
-            path_save_dir = "./"
+            path_save_dir = Path.cwd()
 
         # save as both png and pdf
-        plt.savefig(path_save_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=dpi, bbox_inches="tight")
         plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
         plt.cla()
         plt.close()
@@ -582,10 +583,10 @@ def plot_feat_importance(
 
     if save_plot:
         if path_save_dir is None:
-            path_save_dir = "./"
+            path_save_dir = Path.cwd()
 
         # save as both png and pdf
-        plt.savefig(path_save_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=dpi, bbox_inches="tight")
         plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
         plt.cla()
         plt.close()
@@ -799,6 +800,184 @@ def plot_features_by_average_index_mpl(
         plt.show()
 
 
+def plot_raw_cnc_signal(
+    df,
+    save_name="cnc_signal",
+    path_save_dir=None,
+    save_plot=False,
+    dpi=150,
+):
+    """
+    Plot raw cnc signal
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Dataframe with cnc signal
+    save_name : str
+        Name of the file to save the plot
+    path_save_dir : pathlib.Path
+        Path to the directory to save the plot
+    save_plot : bool
+        If True, save the plot. Otherwise will only display the plot.
+    dpi : int
+        DPI of the plot
+    """
+
+    s = df["current_sub"].values
+    s_cut_signal = df["cut_signal"].values
+
+    # define colour palette and seaborn style
+    pal = sns.cubehelix_palette(6, rot=-0.25, light=0.7)
+    sns.set(style="white", font="DejaVu Sans")
+
+    fig, ax = plt.subplots(
+        1,
+        1,
+        dpi=dpi,
+        figsize=(6, 3),
+        constrained_layout=True,
+    )
+
+    seconds = np.arange(0, len(s)) / 1000.0
+
+    ax.plot(seconds, s, color=pal[-2], linewidth=0.5, alpha=1)
+
+    ax.set_ylabel(
+        "Current",
+        fontsize=7,
+    )
+
+    ax.fill_between(
+        seconds,
+        min(s),
+        max(s),
+        where=(s_cut_signal > 0),
+        color="gray",
+        alpha=0.2,
+        zorder=0,
+        linewidth=0,
+    )
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.set_yticks([])
+    ax.tick_params(axis="x", labelsize=7)
+    ax.set_xlabel("Seconds", size=5)
+
+    if save_plot:
+        if path_save_dir is None:
+            path_save_dir = Path.cwd()
+
+        # save as both png and pdf
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=300, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
+        plt.cla()
+        plt.close()
+    else:
+        plt.show()
+
+
+###############################################################################
+# Milling plotting functions
+###############################################################################
+
+
+def plot_raw_milling_signals(
+    data,
+    cut_no=145,
+    save_name="milling_signal",
+    path_save_dir=None,
+    save_plot=False,
+    dpi=300,
+):
+
+    # there are 6 types of signals, smcAC to AE_spindle
+    # reverse the signal order so that it is matching other charts
+    signals_trend = list(data.dtype.names[7:])[::-1]
+
+    # we'll plot signal 146 (index 145)
+    cut_signal = data[0, cut_no]
+
+    # define colour palette and seaborn style
+    pal = sns.cubehelix_palette(6, rot=-0.25, light=0.7)
+    sns.set(style="white", context="notebook")
+
+    fig, axes = plt.subplots(
+        6,
+        1,
+        dpi=150,
+        figsize=(5, 6),
+        sharex=True,
+        constrained_layout=True,
+    )
+
+    # the "revised" signal names so it looks good on the chart
+    signal_names_revised = [
+        "AE Spindle",
+        "AE Table",
+        "Vibe Spindle",
+        "Vibe Table",
+        "DC Current",
+        "AC Current",
+    ]
+
+    # go through each of the signals
+    for i in range(6):
+        # plot the signal
+        # note, we take the length of the signal (9000 data point)
+        # and divide it by the frequency (250 Hz) to get the x-axis
+        # into seconds
+        axes[i].plot(
+            np.arange(0, 9000) / 250.0,
+            cut_signal[signals_trend[i]],
+            color=pal[i],
+            linewidth=0.5,
+            alpha=1,
+        )
+
+        axis_label = signal_names_revised[i]
+
+        axes[i].set_ylabel(
+            axis_label,
+            fontsize=7,
+        )
+
+        # if it's not the last signal on the plot
+        # we don't want to show the subplot outlines
+        if i != 5:
+            axes[i].spines["top"].set_visible(False)
+            axes[i].spines["right"].set_visible(False)
+            axes[i].spines["left"].set_visible(False)
+            axes[i].spines["bottom"].set_visible(False)
+            axes[i].set_yticks([])  # also remove the y-ticks, cause ugly
+
+        # for the last signal we will show the x-axis labels
+        # which are the length (in seconds) of the signal
+        else:
+            axes[i].spines["top"].set_visible(False)
+            axes[i].spines["right"].set_visible(False)
+            axes[i].spines["left"].set_visible(False)
+            axes[i].spines["bottom"].set_visible(False)
+            axes[i].set_yticks([])
+            axes[i].tick_params(axis="x", labelsize=7)
+            axes[i].set_xlabel("Seconds", size=5)
+
+    if save_plot:
+        if path_save_dir is None:
+            path_save_dir = Path.cwd()
+
+        # save as both png and pdf
+        plt.savefig(path_save_dir / f"{save_name}.png", dpi=dpi, bbox_inches="tight")
+        plt.savefig(path_save_dir / f"{save_name}.pdf", bbox_inches="tight")
+        plt.cla()
+        plt.close()
+    else:
+        plt.show()
+
+
 ###############################################################################
 # Main functions to plot datasets
 ###############################################################################
@@ -831,9 +1010,6 @@ def set_directories(args):
     )
 
 
-###############################################################################
-#### CNC DATASET
-###############################################################################
 def plot_cnc_data(
     proj_dir,
     path_data_dir,
@@ -843,14 +1019,17 @@ def plot_cnc_data(
     save_plot=False,
 ):
 
-    # Get feature dataframe
-    path_processed_dir = path_data_dir / "processed" / "cnc" / processed_dir_name
+    ###################
+    # Raw cnc signal
 
-    df = load_cnc_features(
-        path_data_dir,
-        path_processed_dir,
-        feat_file_name,
-        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv",
+    df_raw = pd.read_csv(path_data_dir / "raw" / "cnc" / "tool54_example.csv")
+
+    plot_raw_cnc_signal(
+        df_raw,
+        save_name="cnc_signal_example",
+        path_save_dir=path_save_dir,
+        save_plot=True,
+        dpi=300,
     )
 
     ###################
@@ -882,13 +1061,23 @@ def plot_cnc_data(
         metric="f1",
         plt_title=None,
         path_save_dir=path_save_dir,
-        save_name="feature_importance",
+        save_name="cnc_feature_importance",
         save_plot=True,
         dpi=300,
     )
 
     ###################
     # Trend features
+
+    # Get feature dataframe
+    path_processed_dir = path_data_dir / "processed" / "cnc" / processed_dir_name
+
+    df_feat = load_cnc_features(
+        path_data_dir,
+        path_processed_dir,
+        feat_file_name,
+        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv",
+    )
 
     feat_to_trend = {
         'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
@@ -900,7 +1089,7 @@ def plot_cnc_data(
     }
 
     plot_features_by_average_index_mpl(
-        df,
+        df_feat,
         feat_to_trend=feat_to_trend,
         tool_no=54,
         index_list=[2, 3, 4, 5, 6, 7, 8, 9],
@@ -908,7 +1097,7 @@ def plot_cnc_data(
         start_index=1000,
         stop_index=4900,
         path_save_dir=path_save_dir,
-        save_name="feat_trends",
+        save_name="cnc_feat_trends",
         dpi=300,
         save_plot=save_plot,
     )
@@ -927,10 +1116,55 @@ def plot_cnc_data(
         metric="prauc",
         plt_title="Top Performing Models by PR-AUC Score",
         path_save_dir=path_save_dir,
-        save_name="results_lollipop",
+        save_name="cnc_results_lollipop",
         save_plot=True,
         dpi=300,
     )
+
+
+def plot_milling_data(
+    proj_dir,
+    path_data_dir,
+    path_save_dir,
+    save_plot=False,
+):
+
+    ###################
+    # Raw milling signal
+
+    # instantiate the MillingPrepMethodA class and download data if it does not exist
+    mill = MillingPrepMethodA(root=path_data_dir / "raw", download=False)
+    data = mill.load_mat()
+
+    plot_raw_milling_signals(
+        data,
+        cut_no=145,
+        save_name="milling_signal",
+        path_save_dir=path_save_dir,
+        save_plot=save_plot,
+        dpi=300,
+    )
+
+
+    ###################
+    # Lollipop plot
+
+    df_results = pd.read_csv(
+        proj_dir
+        / "models/final_results_milling_2022_08_07_final"
+        / "compiled_results_filtered.csv"
+    )
+
+    plot_lollipop_results(
+        df_results,
+        metric="prauc",
+        plt_title="Top Performing Models by PR-AUC Score",
+        path_save_dir=path_save_dir,
+        save_name="milling_results_lollipop",
+        save_plot=True,
+        dpi=300,
+    )
+
 
 
 def main(args):
@@ -947,6 +1181,13 @@ def main(args):
         path_save_dir,
         processed_dir_name="cnc_features_comp",
         feat_file_name="cnc_features_54_comp.csv",
+        save_plot=True,
+    )
+
+    plot_milling_data(
+        proj_dir,
+        path_data_dir,
+        path_save_dir,
         save_plot=True,
     )
 
