@@ -4,7 +4,7 @@ from numpy.lib.stride_tricks import sliding_window_view
 import seaborn as sns
 import pandas as pd
 import argparse
-from src.models.utils import cnc_add_y_label_binary, load_cnc_features
+from src.models.utils import cnc_add_y_label_binary, load_cnc_features, load_milling_features
 from datetime import datetime
 from pathlib import Path
 from pyphm.datasets.milling import MillingPrepMethodA
@@ -190,6 +190,7 @@ def plot_pr_roc_curves_kfolds(
 def plot_lollipop_results(
     df,
     metric="prauc",
+    percent_anom=0.024,
     plt_title=None,
     path_save_dir=None,
     save_name="results_lollipop",
@@ -240,6 +241,7 @@ def plot_lollipop_results(
         label="Average",
         color=lightblue,
         edgecolors="white",
+        zorder=11,
     )
 
     # min dot
@@ -262,6 +264,7 @@ def plot_lollipop_results(
         alpha=1,
         color=darkblue,
         edgecolors="white",
+        zorder=10,
     )
 
     # create the horizontal line
@@ -282,8 +285,8 @@ def plot_lollipop_results(
     # plot the line that shows how a naive classifier performs
     # plot two lines, one white, so that there is a gap between grid lines
     # from https://stackoverflow.com/a/12731750/9214620
-    ax.plot([0.024, 0.024], [y_min, y_max], linestyle="-", color="white", linewidth=14)
-    ax.plot([0.024, 0.024], [y_min, y_max], linestyle="--", color=redish, alpha=0.4)
+    ax.plot([percent_anom, percent_anom], [y_min, y_max], linestyle="-", color="white", linewidth=14)
+    ax.plot([percent_anom, percent_anom], [y_min, y_max], linestyle="--", color=redish, alpha=0.4)
 
     # dictionary used to map the column labels from df to a readable name
     label_dict = {
@@ -374,7 +377,7 @@ def plot_lollipop_results(
 
     # add text for the naive classifier
     ax.text(
-        x=0.024,
+        x=percent_anom,
         y=(y_max - 2),
         s="Naive Classifier",
         horizontalalignment="center",
@@ -1079,6 +1082,11 @@ def plot_cnc_data(
         label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv",
     )
 
+    # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
+    df_feat_anom = df_feat[df_feat["y"] == 1]
+    percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
+    print(f"Percentage of anomalies in the feature dataframe: {percent_anom}")
+
     feat_to_trend = {
         'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
         'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
@@ -1114,6 +1122,7 @@ def plot_cnc_data(
     plot_lollipop_results(
         df_results,
         metric="prauc",
+        percent_anom=percent_anom,
         plt_title="Top Performing Models by PR-AUC Score",
         path_save_dir=path_save_dir,
         save_name="cnc_results_lollipop",
@@ -1126,6 +1135,8 @@ def plot_milling_data(
     proj_dir,
     path_data_dir,
     path_save_dir,
+    processed_dir_name,
+    feat_file_name,
     save_plot=False,
 ):
 
@@ -1149,6 +1160,15 @@ def plot_milling_data(
     ###################
     # Lollipop plot
 
+    path_processed_dir = path_data_dir / "processed" / "milling" / processed_dir_name
+
+    df_feat = load_milling_features(path_data_dir, path_processed_dir, feat_file_name)
+
+    # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
+    df_feat_anom = df_feat[df_feat["y"] == 1]
+    percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
+    print(f"Percentage of anomalies in the feature dataframe: {percent_anom}")
+
     df_results = pd.read_csv(
         proj_dir
         / "models/final_results_milling_2022_08_07_final"
@@ -1158,12 +1178,15 @@ def plot_milling_data(
     plot_lollipop_results(
         df_results,
         metric="prauc",
+        percent_anom=percent_anom,
         plt_title="Top Performing Models by PR-AUC Score",
         path_save_dir=path_save_dir,
         save_name="milling_results_lollipop",
         save_plot=True,
         dpi=300,
     )
+
+
 
 
 
@@ -1188,6 +1211,8 @@ def main(args):
         proj_dir,
         path_data_dir,
         path_save_dir,
+        processed_dir_name="milling_features_comp_stride64_len1024",
+        feat_file_name="milling_features_comp_stride64_len1024.csv",
         save_plot=True,
     )
 

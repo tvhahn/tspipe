@@ -17,6 +17,7 @@ from src.models.utils import (
     milling_add_y_label_anomaly,
     cnc_add_y_label_binary,
     load_cnc_features,
+    load_milling_features,
     under_over_sampler,
     scale_data,
     calculate_scores,
@@ -893,11 +894,8 @@ def train_milling_models(args):
     else:
         feat_file_name = "milling_features.csv"
 
-    df = pd.read_csv(path_processed_dir / feat_file_name)
-    df = df.dropna(axis=1)  # drop any columns that have NaNs in them
 
-    # add y label
-    df = milling_add_y_label_anomaly(df)
+    df = load_milling_features(path_data_dir, path_processed_dir, feat_file_name)
 
     Y_LABEL_COL = "y"
 
