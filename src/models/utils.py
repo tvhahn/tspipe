@@ -43,7 +43,7 @@ from sklearn.metrics import (
     roc_curve,
     accuracy_score,
     matthews_corrcoef,
-    confusion_matrix
+    confusion_matrix,
 )
 
 
@@ -281,7 +281,6 @@ def collate_scores_binary_classification(scores_list):
         accuracy_list.append(ind_score_dict["accuracy_result"])
         unique_grouping_list.append(ind_score_dict["unique_grouping"])
         confusion_matrix_list.append(ind_score_dict["confusion_matrix"])
-
 
     result_dict = {
         "precisions_array": np.array(precisions_list, dtype=object),
