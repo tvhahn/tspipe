@@ -79,8 +79,8 @@ general_params = {
     "max_feats": [
         # None,
         10,
-        20,
-        50,
+        # 20,
+        # 50,
         # 75,
         # 100,
         # 200,
@@ -92,11 +92,11 @@ general_params = {
         "rf",  # Random Forest
         "xgb", # XGBoost
         "knn", # K-Nearest Neighbors
-        "svm", # Support Vector Machine
-        "lr", # Logistic Regression
-        "sgd", # Linear model with SGD
-        "ridge", # Ridge Classifier
-        "nb",  # Naive Bayes
+        # "svm", # Support Vector Machine
+        # "lr", # Logistic Regression
+        # "sgd", # Linear model with SGD
+        # "ridge", # Ridge Classifier
+        # "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,
@@ -118,10 +118,10 @@ general_params = {
         list(range(2, 10)),
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
-        # None,  # no drop
+        None,  # no drop
         # True,  # randomly select cases to drop
         # [1,2], # input a list of cases to drop
-        [29, 30, 31, 33], # these are cases that have been down sampled from 2khz
+        # [29, 30, 31, 33], # these are cases that have been down sampled from 2khz
         # [9, 17, 21, 23, 25, 31, 35, 15],
         # [9],
         # [17],

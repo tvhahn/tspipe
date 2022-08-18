@@ -946,7 +946,7 @@ def train_cnc_models(args):
         label_file_name = args.label_file_name
     else:
         label_file_name = (
-            "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+            "high_level_labels_MASTER_update2022-08-18_with_case.csv"
         )
 
     df = load_cnc_features(
