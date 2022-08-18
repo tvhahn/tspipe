@@ -617,6 +617,27 @@ def plot_feat_importance(
 # CNC plotting functions
 ###############################################################################
 
+def create_cnc_label_percentage_df(
+    df, path_save_dir
+):
+    # get the percentage of each y label
+    df_p = df.groupby('y').size() / df.shape[0] * 100
+    df_p = df_p.reset_index()
+    df_p.columns = ['y', 'percentage']
+
+    # get the count of each tool_class
+    df_c = df.groupby('y').size().to_frame().reset_index()
+    df_c.columns = ['y', 'count']
+
+    # merge the two dataframes
+    df_pc = df_p.merge(df_c, on='y')[['y', 'count', 'percentage']]
+
+    # save the dataframe
+    df_pc.to_csv(path_save_dir / "cnc_label_percentage.csv", index=False)
+    df_pc['percentage'] = df_pc['percentage'].round(2)
+
+    print("\nCNC label percentage:\n", df_pc)
+
 
 def plot_features_by_average_index_mpl(
     df,
@@ -903,6 +924,33 @@ def plot_raw_cnc_signal(
 # Milling plotting functions
 ###############################################################################
 
+def create_milling_label_percentage_df(
+    path_data_dir, path_processed_dir, path_save_dir, feat_file_name
+):
+    """
+    Create a dataframe with the percentage of each label in the dataframe
+    """
+
+    df = pd.read_csv(path_processed_dir / feat_file_name)
+    # get the percentage of each tool_class
+    df_p = df.groupby('tool_class').size() / df.shape[0] * 100
+    df_p = df_p.reset_index()
+    df_p.columns = ['tool_class', 'percentage']
+
+    # get the count of each tool_class
+    df_c = df.groupby('tool_class').size().to_frame().reset_index()
+    df_c.columns = ['tool_class', 'count']
+
+    # merge the two dataframes
+    df_pc = df_p.merge(df_c, on='tool_class')[['tool_class', 'count', 'percentage']]
+
+    # save the dataframe
+    df_pc.to_csv(path_save_dir / "milling_label_percentage.csv", index=False)
+    df_pc['percentage'] = df_pc['percentage'].round(2)
+
+    print("\nMilling label percentage:\n", df_pc)
+
+
 
 def plot_raw_milling_signals(
     data,
@@ -1095,13 +1143,16 @@ def plot_cnc_data(
         path_data_dir,
         path_processed_dir,
         feat_file_name,
-        label_file_name="high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv",
+        label_file_name="high_level_labels_MASTER_update2022-08-18_with_case.csv",
     )
+
+    create_cnc_label_percentage_df(
+        df_feat, path_save_dir
+    )   
 
     # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
     df_feat_anom = df_feat[df_feat["y"] == 1]
     percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
-    print(f"Percentage of anomalies in the feature dataframe: {percent_anom}")
 
     feat_to_trend = {
         'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
@@ -1177,12 +1228,15 @@ def plot_milling_data(
 
     path_processed_dir = path_data_dir / "processed" / "milling" / processed_dir_name
 
+    create_milling_label_percentage_df(
+        path_data_dir, path_processed_dir, path_save_dir, feat_file_name
+    )
+
     df_feat = load_milling_features(path_data_dir, path_processed_dir, feat_file_name)
 
     # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
     df_feat_anom = df_feat[df_feat["y"] == 1]
     percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
-    print(f"Percentage of anomalies in the feature dataframe: {percent_anom}")
 
     df_results = pd.read_csv(
         proj_dir
