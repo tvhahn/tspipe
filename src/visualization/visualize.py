@@ -4,7 +4,11 @@ from numpy.lib.stride_tricks import sliding_window_view
 import seaborn as sns
 import pandas as pd
 import argparse
-from src.models.utils import cnc_add_y_label_binary, load_cnc_features, load_milling_features
+from src.models.utils import (
+    cnc_add_y_label_binary,
+    load_cnc_features,
+    load_milling_features,
+)
 from datetime import datetime
 from pathlib import Path
 from pyphm.datasets.milling import MillingPrepMethodA
@@ -285,8 +289,20 @@ def plot_lollipop_results(
     # plot the line that shows how a naive classifier performs
     # plot two lines, one white, so that there is a gap between grid lines
     # from https://stackoverflow.com/a/12731750/9214620
-    ax.plot([percent_anom, percent_anom], [y_min, y_max], linestyle="-", color="white", linewidth=14)
-    ax.plot([percent_anom, percent_anom], [y_min, y_max], linestyle="--", color=redish, alpha=0.4)
+    ax.plot(
+        [percent_anom, percent_anom],
+        [y_min, y_max],
+        linestyle="-",
+        color="white",
+        linewidth=14,
+    )
+    ax.plot(
+        [percent_anom, percent_anom],
+        [y_min, y_max],
+        linestyle="--",
+        color=redish,
+        alpha=0.4,
+    )
 
     # dictionary used to map the column labels from df to a readable name
     label_dict = {
@@ -442,9 +458,9 @@ def plot_lollipop_results(
         s=plt_title,
         horizontalalignment="left",
         verticalalignment="bottom",
-        size=16,
+        size="x-large",
         color="dimgrey",
-        weight="semibold",
+        weight="normal",
         wrap=True,
     )
 
@@ -1062,7 +1078,7 @@ def plot_cnc_data(
         df_imp,
         feature_name_map=feature_name_map,
         metric="f1",
-        plt_title=None,
+        plt_title="Feature importance by mean F1 score decrease, CNC data",
         path_save_dir=path_save_dir,
         save_name="cnc_feature_importance",
         save_plot=True,
@@ -1123,7 +1139,7 @@ def plot_cnc_data(
         df_results,
         metric="prauc",
         percent_anom=percent_anom,
-        plt_title="Top Performing Models by PR-AUC Score",
+        plt_title="Top Performing Models by PR-AUC Score, CNC data",
         path_save_dir=path_save_dir,
         save_name="cnc_results_lollipop",
         save_plot=True,
@@ -1156,7 +1172,6 @@ def plot_milling_data(
         dpi=300,
     )
 
-
     ###################
     # Lollipop plot
 
@@ -1179,15 +1194,12 @@ def plot_milling_data(
         df_results,
         metric="prauc",
         percent_anom=percent_anom,
-        plt_title="Top Performing Models by PR-AUC Score",
+        plt_title="Top Performing Models by PR-AUC Score, Milling data",
         path_save_dir=path_save_dir,
         save_name="milling_results_lollipop",
         save_plot=True,
         dpi=300,
     )
-
-
-
 
 
 def main(args):
