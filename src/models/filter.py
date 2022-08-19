@@ -435,7 +435,7 @@ def cnc_plot_results(
 
     df_labels = pd.read_csv(
         path_dataset_processed_dir.parent
-        / "high_level_labels_MASTER_update2020-08-06_new-jan-may-data_with_case.csv"
+        / "high_level_labels_MASTER_update2022-08-18_with_case.csv"
     )
     df_feat = cnc_add_y_label_binary(df_feat, df_labels, col_list_case=["case_tool_54"])
     df_feat = df_feat.dropna(
