@@ -18,7 +18,7 @@ source ~/featstore/bin/activate
 python $PROJECT_DIR/src/features/combine_feat_dataframes.py \
     --dataset cnc \
     --path_data_dir $SCRATCH_DATA_DIR \
-    --interim_dir_name cnc_features_comp \
-    --processed_dir_name cnc_features_comp \
-    --feat_file_name cnc_features_54_comp.csv \
+    --interim_dir_name cnc_features_comp_extra \
+    --processed_dir_name cnc_features_comp_extra \
+    --feat_file_name cnc_features_54_comp_extra.csv \
     --n_cores 10

@@ -18,7 +18,7 @@ source ~/featstore/bin/activate
 python $PROJECT_DIR/src/features/combine_feat_dataframes.py \
     --dataset milling \
     --path_data_dir $SCRATCH_DATA_DIR \
-    --interim_dir_name milling_features_comp_stride64_len1024 \
-    --processed_dir_name milling_features_comp_stride64_len1024 \
-    --feat_file_name milling_features_comp_stride64_len1024.csv \
+    --interim_dir_name milling_features_comp_stride64_len1024_extra \
+    --processed_dir_name milling_features_comp_stride64_len1024_extra \
+    --feat_file_name milling_features_comp_stride64_len1024_extra.csv \
     --n_cores 10

@@ -23,9 +23,9 @@ python $PROJECT_DIR/src/features/build_features.py \
     --dataset milling \
     --raw_dir_name stride64_len1024 \
     --raw_file_name milling.csv.gz \
-    --interim_dir_name milling_features_comp_stride64_len1024 \
-    --processed_dir_name milling_features_comp_stride64_len1024 \
-    --feat_file_name milling_features_comp_stride64_len1024.csv \
+    --interim_dir_name milling_features_comp_stride64_len1024_extra \
+    --processed_dir_name milling_features_comp_stride64_len1024_extra \
+    --feat_file_name milling_features_comp_stride64_len1024_extra.csv \
     --feat_dict_name comp \
     --n_chunks 80 \
     --n_cores 8 \

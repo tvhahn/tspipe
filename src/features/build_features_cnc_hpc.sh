@@ -23,9 +23,9 @@ python $PROJECT_DIR/src/features/build_features.py \
     --dataset cnc \
     --raw_dir_name data_raw_processed \
     --raw_file_name cnc_raw_54.csv \
-    --interim_dir_name cnc_features_comp \
-    --processed_dir_name cnc_features_comp \
-    --feat_file_name cnc_features_54_comp.csv \
+    --interim_dir_name cnc_features_comp_extra \
+    --processed_dir_name cnc_features_comp_extra \
+    --feat_file_name cnc_features_54_comp_extra.csv \
     --feat_dict_name comp \
     --n_chunks 80 \
     --n_cores 8 \
