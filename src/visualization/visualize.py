@@ -1156,6 +1156,15 @@ def plot_cnc_data(
         label_file_name="high_level_labels_MASTER_update2022-08-18_with_case.csv",
     )
 
+    n_feats = df_feat.shape[1] - 6
+    print(f"Number of features: {n_feats}")
+
+    # save all the column names into a txt file
+    feat_cols = df_feat.columns.tolist()
+    with open(path_save_dir / "cnc_feat_cols.txt", "w") as f:
+        for col in feat_cols:
+            f.write(f"{col}\n")
+
     create_cnc_label_percentage_df(
         df_feat, path_save_dir
     )   
@@ -1243,6 +1252,15 @@ def plot_milling_data(
     )
 
     df_feat = load_milling_features(path_data_dir, path_processed_dir, feat_file_name)
+
+    n_feats = df_feat.shape[1] - 5
+    print(f"Number of features: {n_feats}")
+
+    # save all the column names into a txt file
+    feat_cols = df_feat.columns.tolist()
+    with open(path_save_dir / "milling_feat_cols.txt", "w") as f:
+        for col in feat_cols:
+            f.write(f"{col}\n")
 
     # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
     df_feat_anom = df_feat[df_feat["y"] == 1]
