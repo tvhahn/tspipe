@@ -899,6 +899,16 @@ def plot_raw_cnc_signal(
         linewidth=0,
     )
 
+    fill_area = ax.fill_between(seconds, min(s), max(s), where=(s_cut_signal>0), color="gray", alpha=0.2, zorder=0,linewidth=0)
+    for i, p in enumerate(fill_area.get_paths()):
+        (x0, y0), (x1, y1) = p.get_extents().get_points() # help from JohanC https://stackoverflow.com/a/67489164/9214620
+        if i == 0:
+            sub_cut_index_text = f"sub-cut\n{str(i)}"
+        else:
+            sub_cut_index_text = str(i)
+
+        ax.text((x0 + x1) / 2, (y0 + y1)*1.01, sub_cut_index_text, ha='center', va='bottom', fontsize=6, color='dimgrey')
+
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
@@ -1093,7 +1103,7 @@ def plot_cnc_data(
 
     plot_raw_cnc_signal(
         df_raw,
-        save_name="cnc_signal_example",
+        save_name="cnc_signal",
         path_save_dir=path_save_dir,
         save_plot=True,
         dpi=300,
