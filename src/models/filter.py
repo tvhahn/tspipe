@@ -488,6 +488,10 @@ def main(args):
     ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
     df = df[~df["id"].isin(ids)]
 
+    # drop any rows where the "classifier" column is "rf" and its "f1_score" is less than 0.5
+    ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
+    df = df[~df["id"].isin(ids)]
+
     # drop any duplicate rows in df, excluding the "sampler_seed" column
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
