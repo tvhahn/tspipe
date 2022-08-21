@@ -146,8 +146,8 @@ def kfold_cv(
 
             # train
             df_train = df[df[stratification_grouping_col].isin(train_strat_vals)]
-            # df_train = shuffle(df_train, random_state=42+i)
-            # df_train = df_train.reset_index(drop=True)
+            df_train = shuffle(df_train, random_state=42+i) # shuffle rows
+            df_train = df_train.reset_index(drop=True)
             unique_train_group = list(df_train[stratification_grouping_col].unique())
             y_train = df_train[y_label_col].values.astype(int)
             df_train = df_train.drop(meta_label_cols + [y_label_col], axis=1)
@@ -162,8 +162,8 @@ def kfold_cv(
 
             # test
             df_test = df[df[stratification_grouping_col].isin(test_strat_vals)]
-            # df_test = shuffle(df_test, random_state=42+i)
-            # df_test = df_test.reset_index(drop=True)
+            df_test = shuffle(df_test, random_state=42+i) # shuffle rows
+            df_test = df_test.reset_index(drop=True)
             unique_test_group = list(df_test[stratification_grouping_col].unique())
             y_test = df_test[y_label_col].values.astype(int)
             df_test = df_test.drop(meta_label_cols + [y_label_col], axis=1)
