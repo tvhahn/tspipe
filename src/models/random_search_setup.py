@@ -72,7 +72,7 @@ general_params = {
     ],
     "feat_select_method": [
         # "tsfresh",
-        "tsfresh_random",
+        # "tsfresh_random",
         "random",
         # None,
     ],
@@ -90,8 +90,8 @@ general_params = {
     ],
     "classifier": [
         "rf",  # Random Forest
-        "xgb", # XGBoost
-        "knn", # K-Nearest Neighbors
+        # "xgb", # XGBoost
+        # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
@@ -173,7 +173,10 @@ rf_params = {
     "criterion": ["gini", "entropy"],  # default=gini
     "max_depth": sp_randint(1, 500),  # default=None
     "min_samples_leaf": sp_randint(1, 10),
-    "bootstrap": [True, False],
+    "bootstrap": [
+        True, 
+        # False
+        ],
     "min_samples_split": sp_randint(2, 10),  # default=2
     "class_weight": ["balanced", "balanced_subsample", None],
 }

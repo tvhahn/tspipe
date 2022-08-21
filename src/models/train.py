@@ -110,6 +110,7 @@ def kfold_cv(
     check_feat_importance=False,
 ):
     print("feat_select_method: ", feat_selection)
+    print("k_folds in kfold_cv: ", n_splits)
     scores_list = []
     clf_trained_list = []
     scaler_list = []
@@ -496,6 +497,7 @@ def train_single_model(
     sample_seed,
     sample_seed_clf,
     meta_label_cols,
+    k_folds,
     stratification_grouping_col=None,
     y_label_col="y",
     feat_col_list=None,
@@ -618,7 +620,7 @@ def train_single_model(
         meta_label_cols,
         stratification_grouping_col,
         y_label_col,
-        n_splits=5,
+        n_splits=k_folds,
         feat_selection=feat_selection,
         max_feats=max_feats,
         feat_col_list=feat_col_list,
@@ -665,11 +667,12 @@ def random_search_runner(
     label_file_name=None,
     dataset_name=None,
     y_label_col="y",
+    k_folds=5,
     save_freq=1,
     debug=True,
     feat_col_list=None,
 ):
-
+    print("k_folds:", k_folds)
     results_list = []
     for i in range(rand_search_iter):
         # set random sample seed
@@ -708,6 +711,7 @@ def random_search_runner(
                 sample_seed,
                 sample_seed_clf,
                 meta_label_cols,
+                k_folds,
                 stratification_grouping_col,
                 y_label_col,
                 feat_col_list,
@@ -724,6 +728,7 @@ def random_search_runner(
             df_t["y_label_col"] = y_label_col
             df_t["feat_file_name"] = str(feat_file_name)
             df_t["n_feats"] = len(feat_col_list)
+            df_t["k_folds"] = k_folds
 
             if label_file_name is not None:
                 df_t["label_file_name"] = str(label_file_name)
@@ -908,6 +913,7 @@ def train_milling_models(args):
     df = load_milling_features(path_data_dir, path_processed_dir, feat_file_name)
 
     Y_LABEL_COL = "y"
+    K_FOLDS = 7
 
     # identify if there is another column you want to
     # stratify on, besides the y label
@@ -933,6 +939,7 @@ def train_milling_models(args):
         feat_file_name,
         dataset_name="milling",
         y_label_col=Y_LABEL_COL,
+        k_folds=K_FOLDS,
         save_freq=1,
         debug=True,
     )
@@ -964,6 +971,7 @@ def train_cnc_models(args):
     )
 
     Y_LABEL_COL = "y"
+    K_FOLDS = 10
 
     # identify if there is another column you want to
     # stratify on, besides the y label
@@ -990,6 +998,7 @@ def train_cnc_models(args):
         label_file_name,
         dataset_name="cnc",
         y_label_col=Y_LABEL_COL,
+        k_folds=K_FOLDS,
         save_freq=1,
         debug=True,
     )
