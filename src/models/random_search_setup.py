@@ -169,15 +169,15 @@ general_params = {
 
 # random forest parameters
 rf_params = {
-    "n_estimators": sp_randint(5, 500),  # default=100
+    "n_estimators": sp_randint(2, 500),  # default=100
     "criterion": ["gini", "entropy"],  # default=gini
     "max_depth": sp_randint(1, 500),  # default=None
-    "min_samples_leaf": sp_randint(1, 10),
+    "min_samples_leaf": sp_randint(1, 100),
     "bootstrap": [
         True, 
         # False
         ],
-    "min_samples_split": sp_randint(2, 10),  # default=2
+    "min_samples_split": sp_randint(2, 100),  # default=2
     "class_weight": ["balanced", "balanced_subsample", None],
 }
 
