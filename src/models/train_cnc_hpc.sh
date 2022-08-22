@@ -21,7 +21,7 @@ python $PROJECT_DIR/src/models/train.py \
     --dataset cnc \
     --save_dir_name interim_results_cnc \
     --processed_dir_name cnc_features_comp_extra \
-    --feat_file_name cnc_features_comp_extra.csv \
+    --feat_file_name cnc_features_54_comp_extra.csv \
     --rand_search_iter 5000
 
 

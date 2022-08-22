@@ -310,6 +310,8 @@ def plot_generic(
         feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         general_params["feat_col_list"] = [feat_col_list]
 
+        k_folds = 10
+
         # rebuild parameters that are specific to certain datasets
         if dataset_name == "cnc":
             try:
@@ -336,6 +338,7 @@ def plot_generic(
             sample_seed,
             sample_seed_clf,
             meta_label_cols,
+            k_folds,
             stratification_grouping_col,
             y_label_col,
             feat_col_list,
@@ -485,8 +488,8 @@ def main(args):
 
     # drop any rows where the "classifier" column is "knn" and its "f1_score" is less than 0.5
     # help from Guy on stackoverflow: https://stackoverflow.com/a/68085032/9214620
-    ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
-    df = df[~df["id"].isin(ids)]
+    # ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
+    # df = df[~df["id"].isin(ids)]
 
     # drop any rows where the "classifier" column is "rf" and its "f1_score" is less than 0.5
     ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
@@ -496,7 +499,8 @@ def main(args):
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    sort_by = ["prauc_avg"]
+    # sort_by = ["prauc_avg"]
+    sort_by = ["prauc_min"]
     # sort_by = ["prauc_min", "prauc_avg"]
     # sort_by = ["mcc_min", "mcc_avg"]
     df = (
