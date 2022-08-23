@@ -476,11 +476,11 @@ def main(args):
     df = order_columns_on_results_df(df, dataset_name=args.dataset)
 
     ####### any additional filtering
-    df = df[df["n_feats"] <= 10]
+    # df = df[df["n_feats"] <= 10]
 
-    if args.dataset == "cnc":
-        # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
-        df = df[df["dataprep_method"].isin(["cnc_standard_index_select", "cnc_standard"])]
+    # if args.dataset == "cnc":
+    #     # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
+    #     df = df[df["dataprep_method"].isin(["cnc_standard_index_select", "cnc_standard"])]
 
 
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
@@ -499,8 +499,8 @@ def main(args):
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    # sort_by = ["prauc_avg"]
-    sort_by = ["prauc_min"]
+    sort_by = ["prauc_avg"]
+    # sort_by = ["prauc_min"]
     # sort_by = ["prauc_min", "prauc_avg"]
     # sort_by = ["mcc_min", "mcc_avg"]
     df = (

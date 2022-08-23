@@ -1296,8 +1296,8 @@ def main(args):
         proj_dir,
         path_data_dir,
         path_save_dir,
-        processed_dir_name="cnc_features_comp",
-        feat_file_name="cnc_features_54_comp.csv",
+        processed_dir_name="cnc_features_comp_extra",
+        feat_file_name="cnc_features_54_comp_extra.csv",
         save_plot=True,
     )
 
