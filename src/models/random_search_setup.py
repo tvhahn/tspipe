@@ -72,14 +72,14 @@ general_params = {
     ],
     "feat_select_method": [
         # "tsfresh",
-        # "tsfresh_random",
+        "tsfresh_random",
         "random",
         # None,
     ],
     "max_feats": [
         # None,
         10,
-        # 20,
+        20,
         # 50,
         # 75,
         # 100,
@@ -90,13 +90,13 @@ general_params = {
     ],
     "classifier": [
         "rf",  # Random Forest
-        # "xgb", # XGBoost
-        # "knn", # K-Nearest Neighbors
-        # "svm", # Support Vector Machine
-        # "lr", # Logistic Regression
-        # "sgd", # Linear model with SGD
-        # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "xgb", # XGBoost
+        "knn", # K-Nearest Neighbors
+        "svm", # Support Vector Machine
+        "lr", # Logistic Regression
+        "sgd", # Linear model with SGD
+        "ridge", # Ridge Classifier
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,

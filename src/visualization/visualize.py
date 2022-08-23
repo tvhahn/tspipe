@@ -1118,6 +1118,13 @@ def plot_cnc_data(
         / "21676100_rf_2022-08-05-1500-29_cnc_feat_imp.csv"
     )
 
+    # df_imp = pd.read_csv(
+    #     proj_dir
+    #     / "models/final_results_cnc"
+    #     / "7206511_rf_2022-08-23-0152-17_cnc_feat_imp.csv"
+    # )
+
+
     # create a dict that maps the old feature names to the new feature names
     feature_name_map = {
         'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
@@ -1132,13 +1139,26 @@ def plot_cnc_data(
         'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
     }
 
+    # feature_name_map = {
+    #     'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
+    #     'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
+    #     'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
+    #     'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
+    # }
+
     plot_feat_importance(
         df_imp,
         feature_name_map=feature_name_map,
         metric="f1",
         plt_title="Feature importance by mean F1 score decrease, CNC data",
         path_save_dir=path_save_dir,
-        save_name="cnc_feature_importance",
+        save_name="cnc_feature_importance_1",
         save_plot=True,
         dpi=300,
     )
@@ -1199,9 +1219,15 @@ def plot_cnc_data(
     ###################
     # Lollipop plot
 
+    # df_results = pd.read_csv(
+    #     proj_dir
+    #     / "models/final_results_cnc_2022_08_04_final"
+    #     / "compiled_results_filtered.csv"
+    # )
+
     df_results = pd.read_csv(
         proj_dir
-        / "models/final_results_cnc_2022_08_04_final"
+        / "models/final_results_cnc"
         / "compiled_results_filtered.csv"
     )
 

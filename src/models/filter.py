@@ -83,8 +83,8 @@ def filter_results_df(df, keep_top_n=None):
         & (df["accuracy_max"] < 1)
         & (df["accuracy_avg"] < 1)
         & (df["accuracy_std"] > 0)
-        & (df["n_thresholds_min"] > 3)
-        & (df["n_thresholds_max"] > 3)
+        & (df["n_thresholds_min"] > 10)
+        & (df["n_thresholds_max"] > 10)
     ].sort_values(by=["prauc_avg", "rocauc_avg", "accuracy_avg"], ascending=False)
 
     if keep_top_n is not None:
@@ -478,8 +478,8 @@ def main(args):
     ####### any additional filtering
     # df = df[df["n_feats"] <= 10]
 
-    # if args.dataset == "cnc":
-    #     # df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
+    if args.dataset == "cnc":
+        df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
     #     df = df[df["dataprep_method"].isin(["cnc_standard_index_select", "cnc_standard"])]
 
 
@@ -491,7 +491,6 @@ def main(args):
     # ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
     # df = df[~df["id"].isin(ids)]
 
-    # drop any rows where the "classifier" column is "rf" and its "f1_score" is less than 0.5
     ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
     df = df[~df["id"].isin(ids)]
 
@@ -499,9 +498,9 @@ def main(args):
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    sort_by = ["prauc_avg"]
+    # sort_by = ["prauc_avg"]
     # sort_by = ["prauc_min"]
-    # sort_by = ["prauc_min", "prauc_avg"]
+    sort_by = ["prauc_min", "prauc_avg"]
     # sort_by = ["mcc_min", "mcc_avg"]
     df = (
         df.groupby(["classifier"])
