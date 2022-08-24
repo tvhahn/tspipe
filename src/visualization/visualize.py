@@ -618,7 +618,7 @@ def plot_feat_importance(
 ###############################################################################
 
 def create_cnc_label_percentage_df(
-    df, path_save_dir
+    df, path_save_dir, save_name="cnc_label_percentage_sub_cuts.csv"
 ):
     # get the percentage of each y label
     df_p = df.groupby('y').size() / df.shape[0] * 100
@@ -633,10 +633,11 @@ def create_cnc_label_percentage_df(
     df_pc = df_p.merge(df_c, on='y')[['y', 'count', 'percentage']]
 
     # save the dataframe
-    df_pc.to_csv(path_save_dir / "cnc_label_percentage.csv", index=False)
+    df_pc.to_csv(path_save_dir / save_name, index=False)
     df_pc['percentage'] = df_pc['percentage'].round(2)
 
     print("\nCNC label percentage:\n", df_pc)
+    return df_pc
 
 
 def plot_features_by_average_index_mpl(
@@ -1185,13 +1186,21 @@ def plot_cnc_data(
         for col in feat_cols:
             f.write(f"{col}\n")
 
-    create_cnc_label_percentage_df(
-        df_feat, path_save_dir
-    )   
+    _ = create_cnc_label_percentage_df(
+        df_feat, path_save_dir, save_name="cnc_label_percentage_sub_cuts.csv"
+    )
 
-    # calculate the percentage of "anomlalies" (value==1) in the df_feat. Targets are found in the "y_label_col" column.
-    df_feat_anom = df_feat[df_feat["y"] == 1]
-    percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
+    df_label_percent = create_cnc_label_percentage_df(
+        df_feat.drop_duplicates(subset=["unix_date"]), path_save_dir, save_name="cnc_label_percentage_whole_cuts.csv"
+    )
+
+    # get the percentage of each y label
+    df_label_count_case = df_feat.drop_duplicates(subset=["unix_date"]).groupby(['case_tool_54','y']).count().reset_index()[['case_tool_54','y','id']].rename(columns={'id':'n_cuts'})
+    df_label_count_case.to_csv(path_save_dir / "cnc_cut_count_by_case.csv", index=False)      
+
+    # calculate the percentage of "anomlalies" (value==1) in the df_feat
+    percent_anom = df_label_percent[df_label_percent["y"]==1]["percentage"].to_numpy()[0] / 100.0
+    print(f"Percentage of anomalies: {percent_anom}")
 
     feat_to_trend = {
         'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
