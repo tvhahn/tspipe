@@ -80,7 +80,7 @@ general_params = {
         # None,
         10,
         20,
-        # 50,
+        50,
         # 75,
         # 100,
         # 200,
@@ -103,19 +103,21 @@ general_params = {
         # ['current__fft_coefficient__attr_"angle"__coeff_39', 'current__fft_coefficient__attr_"imag"__coeff_26', 'current__fft_coefficient__attr_"angle"__coeff_26', 'current__fft_coefficient__attr_"real"__coeff_42', 'current__fft_coefficient__attr_"imag"__coeff_36', 'current__fft_coefficient__attr_"abs"__coeff_33', 'current__fft_coefficient__attr_"abs"__coeff_2', 'current__fft_coefficient__attr_"abs"__coeff_19', 'current__fft_coefficient__attr_"angle"__coeff_13', 'current__cwt_coefficients__coeff_0__w_2__widths_(2, 5, 10, 20)']
     ],
     "dataprep_method": [
-        "cnc_standard",
-        "cnc_standard_index_select",
+        # "cnc_standard",
+        # "cnc_standard_index_select",
         # "cnc_index_transposed",
-        # "cnc_index_select_transposed",
+        "cnc_index_select_transposed",
     ],
     "cnc_indices_keep": [
-        list(range(0, 10)),
-        list(range(1, 10)),
-        list(range(1, 9)),
-        list(range(1, 8)),
-        list(range(2, 8)),
-        list(range(2, 9)),
-        list(range(2, 10)),
+        # list(range(0, 10)),
+        # list(range(1, 10)),
+        # list(range(1, 9)),
+        # list(range(1, 8)),
+        # list(range(2, 8)),
+        # list(range(2, 9)),
+        # list(range(2, 10)),
+        list(range(2, 6)), # Ati suggests only 3-6 are good (although I don't know if she starts counting at 0 or 1)
+        list(range(3, 7)), 
     ],  # no cut indices past 9 that are valid
     "cnc_cases_drop": [
         None,  # no drop
