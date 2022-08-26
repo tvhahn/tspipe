@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.lib.stride_tricks import sliding_window_view
+from scipy import interpolate
 import seaborn as sns
 import pandas as pd
 import argparse
@@ -18,25 +18,17 @@ from pyphm.datasets.milling import MillingPrepMethodA
 ###############################################################################
 
 
-def segment_line_by_sliding_window(x, y, x_axis_n=1000):
+def interpolate_curves(x, y, x_axis_n=1000, mode=None):
+    if mode=='pr':
+        x = x[::-1]
+        y = y[::-1]
+    
+    f = interpolate.interp1d(x, y, kind='next')
 
-    y_adj = []  # y values, adjusted
-    x_adj = []  # x values, adjusted
+    xnew = np.linspace(0, 1, x_axis_n)
+    ynew = f(xnew)
 
-    # break the x-axis up by moving a sliding window along it
-    for j, i in enumerate(sliding_window_view(np.linspace(0, 1, x_axis_n), 2)):
-        window_segment = np.where((x >= i[0]) & (x <= i[1]))[0]
-
-        # if there are no values in the window, then
-        # use the last precision value in the window
-        if len(window_segment) == 0:
-            x_adj.append(np.mean(i))
-            y_adj.append(y_adj[-1])
-        else:
-            x_adj.append(np.mean(i))
-            y_adj.append(np.mean(y[window_segment]))
-
-    return np.array(x_adj), np.array(y_adj)
+    return xnew, ynew
 
 
 def plot_pr_roc_curves_kfolds(
@@ -77,7 +69,7 @@ def plot_pr_roc_curves_kfolds(
     # plot the precision recall curves
     precisions_all_segmented = []
     for p, r in zip(precision_array, recall_array):
-        r_adj, p_adj = segment_line_by_sliding_window(r, p, x_axis_n=10000)
+        r_adj, p_adj = interpolate_curves(r, p, x_axis_n=10000, mode='pr')
         precisions_all_segmented.append(p_adj)
 
     precisions_all_segmented = np.array(precisions_all_segmented)
@@ -85,10 +77,10 @@ def plot_pr_roc_curves_kfolds(
     for i, (p, r) in enumerate(zip(precision_array, recall_array)):
         if i == np.shape(precision_array)[0] - 1:
             axes[0].plot(
-                r[:], p[:], label="k-fold model", color="gray", alpha=0.5, linewidth=1
+                r[:], p[:], label="k-fold model", color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post'
             )
         else:
-            axes[0].plot(r[:], p[:], color="grey", alpha=0.5, linewidth=1)
+            axes[0].plot(r[:], p[:], color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post')
 
     axes[0].plot(
         r_adj,
@@ -96,6 +88,7 @@ def plot_pr_roc_curves_kfolds(
         label="Average model",
         color=pal[5],
         linewidth=2,
+        drawstyle='steps-post',
     )
 
     axes[0].plot(
@@ -128,7 +121,7 @@ def plot_pr_roc_curves_kfolds(
     # plot the ROC curves
     roc_all_segmented = []
     for t, f in zip(tpr_array, fpr_array):
-        f_adj, t_adj = segment_line_by_sliding_window(f, t, x_axis_n=10000)
+        f_adj, t_adj = interpolate_curves(f, t, x_axis_n=10000)
         roc_all_segmented.append(t_adj)
 
     roc_all_segmented = np.array(roc_all_segmented)
@@ -136,10 +129,10 @@ def plot_pr_roc_curves_kfolds(
     for i, (t, f) in enumerate(zip(tpr_array, fpr_array)):
         if i == np.shape(tpr_array)[0] - 1:
             axes[1].plot(
-                f[:], t[:], label="k-fold models", color="gray", alpha=0.5, linewidth=1
+                f[:], t[:], label="k-fold models", color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post'
             )
         else:
-            axes[1].plot(f[:], t[:], color="grey", alpha=0.5, linewidth=1)
+            axes[1].plot(f[:], t[:], color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post')
 
     axes[1].plot(
         f_adj,
@@ -147,6 +140,7 @@ def plot_pr_roc_curves_kfolds(
         label="Average of k-folds",
         color=pal[5],
         linewidth=2,
+        drawstyle='steps-post',
     )
 
     axes[1].plot(
