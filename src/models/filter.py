@@ -5,6 +5,7 @@ import logging
 import os
 import matplotlib
 import numpy as np
+import pickle
 
 # run matplotlib without display
 # https://stackoverflow.com/a/4706614/9214620
@@ -356,6 +357,12 @@ def plot_generic(
             dataset_name=dataset_name,
             check_feat_importance=check_feat_importance,
         )
+
+        # save model_metrics_dict as a pickle file
+        # model_metrics_dict_pickle_name = f"{id}_model_metrics_dict.pkl"
+        # with open(path_model_curves.parent / model_metrics_dict_pickle_name, "wb") as f:
+        #     pickle.dump(model_metrics_dict, f)
+
 
         # save the feature importance df to a csv if requested
         if check_feat_importance:
