@@ -511,9 +511,9 @@ def main(args):
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")
 
     # use this is you want to only select the top models by model type (e.g. top SVM, RF, etc.)
-    # sort_by = ["prauc_avg"]
+    sort_by = ["prauc_avg"]
     # sort_by = ["prauc_min"]
-    sort_by = ["prauc_min", "prauc_avg"]
+    # sort_by = ["prauc_min", "prauc_avg"]
     # sort_by = ["mcc_min", "mcc_avg"]
     df = (
         df.groupby(["classifier"])

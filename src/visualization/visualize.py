@@ -19,11 +19,11 @@ from pyphm.datasets.milling import MillingPrepMethodA
 
 
 def interpolate_curves(x, y, x_axis_n=1000, mode=None):
-    if mode=='pr':
+    if mode == "pr":
         x = x[::-1]
         y = y[::-1]
-    
-    f = interpolate.interp1d(x, y, kind='next')
+
+    f = interpolate.interp1d(x, y, kind="next")
 
     xnew = np.linspace(0, 1, x_axis_n)
     ynew = f(xnew)
@@ -69,7 +69,7 @@ def plot_pr_roc_curves_kfolds(
     # plot the precision recall curves
     precisions_all_segmented = []
     for p, r in zip(precision_array, recall_array):
-        r_adj, p_adj = interpolate_curves(r, p, x_axis_n=10000, mode='pr')
+        r_adj, p_adj = interpolate_curves(r, p, x_axis_n=10000, mode="pr")
         precisions_all_segmented.append(p_adj)
 
     precisions_all_segmented = np.array(precisions_all_segmented)
@@ -77,10 +77,18 @@ def plot_pr_roc_curves_kfolds(
     for i, (p, r) in enumerate(zip(precision_array, recall_array)):
         if i == np.shape(precision_array)[0] - 1:
             axes[0].plot(
-                r[:], p[:], label="k-fold model", color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post'
+                r[:],
+                p[:],
+                label="k-fold model",
+                color="grey",
+                alpha=0.5,
+                linewidth=1,
+                drawstyle="steps-post",
             )
         else:
-            axes[0].plot(r[:], p[:], color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post')
+            axes[0].plot(
+                r[:], p[:], color="grey", alpha=0.5, linewidth=1, drawstyle="steps-post"
+            )
 
     axes[0].plot(
         r_adj,
@@ -88,7 +96,7 @@ def plot_pr_roc_curves_kfolds(
         label="Average model",
         color=pal[5],
         linewidth=2,
-        drawstyle='steps-post',
+        drawstyle="steps-post",
     )
 
     axes[0].plot(
@@ -129,10 +137,18 @@ def plot_pr_roc_curves_kfolds(
     for i, (t, f) in enumerate(zip(tpr_array, fpr_array)):
         if i == np.shape(tpr_array)[0] - 1:
             axes[1].plot(
-                f[:], t[:], label="k-fold models", color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post'
+                f[:],
+                t[:],
+                label="k-fold models",
+                color="grey",
+                alpha=0.5,
+                linewidth=1,
+                drawstyle="steps-post",
             )
         else:
-            axes[1].plot(f[:], t[:], color="grey", alpha=0.5, linewidth=1, drawstyle='steps-post')
+            axes[1].plot(
+                f[:], t[:], color="grey", alpha=0.5, linewidth=1, drawstyle="steps-post"
+            )
 
     axes[1].plot(
         f_adj,
@@ -140,7 +156,7 @@ def plot_pr_roc_curves_kfolds(
         label="Average of k-folds",
         color=pal[5],
         linewidth=2,
-        drawstyle='steps-post',
+        drawstyle="steps-post",
     )
 
     axes[1].plot(
@@ -611,24 +627,25 @@ def plot_feat_importance(
 # CNC plotting functions
 ###############################################################################
 
+
 def create_cnc_label_percentage_df(
     df, path_save_dir, save_name="cnc_label_percentage_sub_cuts.csv"
 ):
     # get the percentage of each y label
-    df_p = df.groupby('y').size() / df.shape[0] * 100
+    df_p = df.groupby("y").size() / df.shape[0] * 100
     df_p = df_p.reset_index()
-    df_p.columns = ['y', 'percentage']
+    df_p.columns = ["y", "percentage"]
 
     # get the count of each tool_class
-    df_c = df.groupby('y').size().to_frame().reset_index()
-    df_c.columns = ['y', 'count']
+    df_c = df.groupby("y").size().to_frame().reset_index()
+    df_c.columns = ["y", "count"]
 
     # merge the two dataframes
-    df_pc = df_p.merge(df_c, on='y')[['y', 'count', 'percentage']]
+    df_pc = df_p.merge(df_c, on="y")[["y", "count", "percentage"]]
 
     # save the dataframe
     df_pc.to_csv(path_save_dir / save_name, index=False)
-    df_pc['percentage'] = df_pc['percentage'].round(2)
+    df_pc["percentage"] = df_pc["percentage"].round(2)
 
     print("\nCNC label percentage:\n", df_pc)
     return df_pc
@@ -894,15 +911,37 @@ def plot_raw_cnc_signal(
         linewidth=0,
     )
 
-    fill_area = ax.fill_between(seconds, min(s), max(s), where=(s_cut_signal>0), color="gray", alpha=0.2, zorder=0,linewidth=0)
+    fill_area = ax.fill_between(
+        seconds,
+        min(s),
+        max(s),
+        where=(s_cut_signal > 0),
+        color="gray",
+        alpha=0.2,
+        zorder=0,
+        linewidth=0,
+    )
     for i, p in enumerate(fill_area.get_paths()):
-        (x0, y0), (x1, y1) = p.get_extents().get_points() # help from JohanC https://stackoverflow.com/a/67489164/9214620
+        (x0, y0), (
+            x1,
+            y1,
+        ) = (
+            p.get_extents().get_points()
+        )  # help from JohanC https://stackoverflow.com/a/67489164/9214620
         if i == 0:
             sub_cut_index_text = f"sub-cut\n{str(i)}"
         else:
             sub_cut_index_text = str(i)
 
-        ax.text((x0 + x1) / 2, (y0 + y1)*1.01, sub_cut_index_text, ha='center', va='bottom', fontsize=6, color='dimgrey')
+        ax.text(
+            (x0 + x1) / 2,
+            (y0 + y1) * 1.01,
+            sub_cut_index_text,
+            ha="center",
+            va="bottom",
+            fontsize=6,
+            color="dimgrey",
+        )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -929,6 +968,7 @@ def plot_raw_cnc_signal(
 # Milling plotting functions
 ###############################################################################
 
+
 def create_milling_label_percentage_df(
     path_data_dir, path_processed_dir, path_save_dir, feat_file_name
 ):
@@ -938,23 +978,22 @@ def create_milling_label_percentage_df(
 
     df = pd.read_csv(path_processed_dir / feat_file_name)
     # get the percentage of each tool_class
-    df_p = df.groupby('tool_class').size() / df.shape[0] * 100
+    df_p = df.groupby("tool_class").size() / df.shape[0] * 100
     df_p = df_p.reset_index()
-    df_p.columns = ['tool_class', 'percentage']
+    df_p.columns = ["tool_class", "percentage"]
 
     # get the count of each tool_class
-    df_c = df.groupby('tool_class').size().to_frame().reset_index()
-    df_c.columns = ['tool_class', 'count']
+    df_c = df.groupby("tool_class").size().to_frame().reset_index()
+    df_c.columns = ["tool_class", "count"]
 
     # merge the two dataframes
-    df_pc = df_p.merge(df_c, on='tool_class')[['tool_class', 'count', 'percentage']]
+    df_pc = df_p.merge(df_c, on="tool_class")[["tool_class", "count", "percentage"]]
 
     # save the dataframe
     df_pc.to_csv(path_save_dir / "milling_label_percentage.csv", index=False)
-    df_pc['percentage'] = df_pc['percentage'].round(2)
+    df_pc["percentage"] = df_pc["percentage"].round(2)
 
     print("\nMilling label percentage:\n", df_pc)
-
 
 
 def plot_raw_milling_signals(
@@ -1107,32 +1146,62 @@ def plot_cnc_data(
     ###################
     # Feature importance
 
-    df_imp = pd.read_csv(
-        proj_dir
-        / "models/final_results_cnc_2022_08_04_final"
-        / "21676100_rf_2022-08-05-1500-29_cnc_feat_imp.csv"
-    )
+    # plot knn feature importance
 
     # df_imp = pd.read_csv(
     #     proj_dir
-    #     / "models/final_results_cnc"
-    #     / "7206511_rf_2022-08-23-0152-17_cnc_feat_imp.csv"
+    #     / "models/final_results_cnc_2022_08_04_final"
+    #     / "21676100_rf_2022-08-05-1500-29_cnc_feat_imp.csv"
     # )
 
+    df_imp = pd.read_csv(
+        proj_dir
+        / "models/final_results_cnc_2022_08_25_final"
+        / "12545393_knn_2022-08-23-1431-29_cnc_feat_imp.csv"
+    )
+
+    feat_orig_names = [
+        'current__fft_coefficient__attr_"real"__coeff_39__1',
+        'current__fft_coefficient__attr_"angle"__coeff_96__2',
+        'current__fft_coefficient__attr_"abs"__coeff_55__5',
+        'current__change_quantiles__f_agg_"var"__isabs_True__qh_0.8__ql_0.6__4',
+        'current__fft_coefficient__attr_"abs"__coeff_13__5',
+        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"min"__6',
+        "current__friedrich_coefficients__coeff_2__m_3__r_30__1",
+        'current__change_quantiles__f_agg_"var"__isabs_True__qh_0.8__ql_0.2__5',
+        'current__fft_coefficient__attr_"abs"__coeff_79__1',
+        'current__fft_coefficient__attr_"angle"__coeff_91__5',
+    ]
+
+    feat_renamed = [
+        "FFT coef. 39 (real),\nsub-cut 1",
+        "FFT coef. 96 (angle),\nsub-cut 2",
+        "FFT coef. 55 (abs),\nsub-cut 5",
+        "Change quantiles\n(agg. by var), sub-cut 4",
+        "FFT coef. 13 (abs),\nsub-cut 5",
+        "Agg. linear trend\n(agg. by min), sub-cut 6",
+        "Friedrich coeff. 2,\nsub-cut 1",
+        "Change quantiles\n(agg. by var), sub-cut 5",
+        "FFT coef. 79 (abs),\nsub-cut 1",
+        "FFT coef. 91 (angle),\nsub-cut 5",
+    ]
+        
+    # zip the original names with the renamed names into a dictionary
+    feature_name_map = dict(zip(feat_orig_names, feat_renamed))
 
     # create a dict that maps the old feature names to the new feature names
-    feature_name_map = {
-        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
-        'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
-        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
-        'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
-        'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
-        'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
-        'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
-        'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
-        'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
-        'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
-    }
+    # feature_name_map = {
+    #     'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
+    #     'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
+    #     'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
+    #     'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
+    #     'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
+    #     'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
+    # }
 
     # feature_name_map = {
     #     'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
@@ -1153,7 +1222,25 @@ def plot_cnc_data(
         metric="f1",
         plt_title="Feature importance by mean F1 score decrease, CNC data",
         path_save_dir=path_save_dir,
-        save_name="cnc_feature_importance_1",
+        save_name="cnc_feature_importance_knn",
+        save_plot=True,
+        dpi=300,
+    )
+
+    # plot random forest feature importance
+    df_imp = pd.read_csv(
+        proj_dir
+        / "models/final_results_cnc_2022_08_25_final"
+        / "18600077_rf_2022-08-22-0739-49_cnc_feat_imp.csv"
+    )
+
+    plot_feat_importance(
+        df_imp,
+        # feature_name_map=feature_name_map,
+        metric="f1",
+        plt_title="Feature importance by mean F1 score decrease, CNC data",
+        path_save_dir=path_save_dir,
+        save_name="cnc_feature_importance_rf",
         save_plot=True,
         dpi=300,
     )
@@ -1185,15 +1272,25 @@ def plot_cnc_data(
     )
 
     df_label_percent = create_cnc_label_percentage_df(
-        df_feat.drop_duplicates(subset=["unix_date"]), path_save_dir, save_name="cnc_label_percentage_whole_cuts.csv"
+        df_feat.drop_duplicates(subset=["unix_date"]),
+        path_save_dir,
+        save_name="cnc_label_percentage_whole_cuts.csv",
     )
 
     # get the percentage of each y label
-    df_label_count_case = df_feat.drop_duplicates(subset=["unix_date"]).groupby(['case_tool_54','y']).count().reset_index()[['case_tool_54','y','id']].rename(columns={'id':'n_cuts'})
-    df_label_count_case.to_csv(path_save_dir / "cnc_cut_count_by_case.csv", index=False)      
+    df_label_count_case = (
+        df_feat.drop_duplicates(subset=["unix_date"])
+        .groupby(["case_tool_54", "y"])
+        .count()
+        .reset_index()[["case_tool_54", "y", "id"]]
+        .rename(columns={"id": "n_cuts"})
+    )
+    df_label_count_case.to_csv(path_save_dir / "cnc_cut_count_by_case.csv", index=False)
 
     # calculate the percentage of "anomlalies" (value==1) in the df_feat
-    percent_anom = df_label_percent[df_label_percent["y"]==1]["percentage"].to_numpy()[0] / 100.0
+    percent_anom = (
+        df_label_percent[df_label_percent["y"] == 1]["percentage"].to_numpy()[0] / 100.0
+    )
     print(f"Percentage of anomalies: {percent_anom}")
 
     feat_to_trend = {
@@ -1230,7 +1327,7 @@ def plot_cnc_data(
 
     df_results = pd.read_csv(
         proj_dir
-        / "models/final_results_cnc"
+        / "models/final_results_cnc_2022_08_25_final"
         / "compiled_results_filtered.csv"
     )
 
