@@ -363,6 +363,35 @@ def plot_generic(
         # with open(path_model_curves.parent / model_metrics_dict_pickle_name, "wb") as f:
         #     pickle.dump(model_metrics_dict, f)
 
+        i_argmin = np.argmin(model_metrics_dict["prauc_array"])
+        i_argmax = np.argmax(model_metrics_dict["prauc_array"])
+        print("f1 score tuned, worst k-fold:", model_metrics_dict["f1_threshold_tuned"][i_argmin])
+        print("confusion matrix tuned, worst k-fold:", model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin])
+
+        if row_idx == 0:
+            # create dataframe with the f1 score tuned for each k-fold
+            df_tuned = pd.DataFrame(
+                {
+                    "id": [id],
+                    "f1_threshold_tuned": [model_metrics_dict["f1_threshold_tuned"][i_argmin]],
+                    "threshold": [model_metrics_dict["threshold_tuned"][i_argmin]],
+                    "confusion_matrix": [model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]],
+                }
+            )
+            # save df_tuned as csv
+            df_tuned.to_csv(path_model_curves.parent / "tuned_threshold_results.csv", index=False)
+        else:
+            df_tuned_2 = pd.DataFrame(
+                {
+                    "id": [id],
+                    "f1_threshold_tuned": [model_metrics_dict["f1_threshold_tuned"][i_argmin]],
+                    "threshold": [model_metrics_dict["threshold_tuned"][i_argmin]],
+                    "confusion_matrix": [model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]],
+                }
+            )
+            df_tuned = pd.concat([df_tuned, df_tuned_2], ignore_index=True)
+            df_tuned.to_csv(path_model_curves.parent / "tuned_threshold_results.csv", index=False)
+
 
         # save the feature importance df to a csv if requested
         if check_feat_importance:
@@ -375,7 +404,7 @@ def plot_generic(
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
         print(f"{id} has {percent_anom:.3f} anomalies")
 
-        i_argmin = np.argmin(model_metrics_dict["prauc_array"])
+
         # print("i_argmin: ", i_argmin)
         # print("prauc_array: ", model_metrics_dict['prauc_array'])
         # print("prauc_array[i_argmin]: ", model_metrics_dict['prauc_array'][i_argmin])
@@ -506,6 +535,8 @@ def main(args):
 
     ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
     df = df[~df["id"].isin(ids)]
+
+    # df = df[(df["classifier"] == 'nb')]
 
     # drop any duplicate rows in df, excluding the "sampler_seed" column
     # df = df.drop_duplicates(subset=["cnc_cases_drop"], keep="first")

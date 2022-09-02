@@ -222,6 +222,21 @@ def calculate_scores(
     # calculate confusion matrix
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
 
+    # find optimum threshold from pr curve
+    # this should only be used for evaluating final models to avoid
+    # any accidental overfitting to the testing data
+    try:
+        f1_scores = (2 * precisions * recalls) / (precisions + recalls)
+        i = np.argmax(f1_scores)
+        f1_threshold_tuned = f1_scores[i]
+        threshold_tuned = pr_thresholds[i]
+        y_pred_tuned = (clf.predict_proba(x_test)[:,1] >= threshold_tuned).astype(bool)
+        tn_t, fp_t, fn_t, tp_t = confusion_matrix(y_test, y_pred_tuned).ravel()
+    except:
+        f1_threshold_tuned = 0
+        threshold_tuned = 0
+        tn_t, fp_t, fn_t, tp_t = 0, 0, 0, 0
+
     # create a dictionary of all the scores
     scores = {
         "n_correct": n_correct,
@@ -241,6 +256,9 @@ def calculate_scores(
         "y_scores": y_scores,
         "accuracy_result": accuracy_result,
         "confusion_matrix": (tn, fp, fn, tp),
+        "f1_threshold_tuned": f1_threshold_tuned,
+        "threshold_tuned": threshold_tuned,
+        "confusion_matrix_threshold_tuned": (tn_t, fp_t, fn_t, tp_t),
     }
 
     return scores
@@ -265,6 +283,9 @@ def collate_scores_binary_classification(scores_list):
     accuracy_list = []
     unique_grouping_list = []
     confusion_matrix_list = []
+    f1_threshold_tuned_list = []
+    threshold_tuned_list = []
+    confusion_matrix_threshold_tuned_list = []
 
     for ind_score_dict in scores_list:
         n_thresholds_list.append(ind_score_dict["n_thresholds"])
@@ -281,6 +302,9 @@ def collate_scores_binary_classification(scores_list):
         accuracy_list.append(ind_score_dict["accuracy_result"])
         unique_grouping_list.append(ind_score_dict["unique_grouping"])
         confusion_matrix_list.append(ind_score_dict["confusion_matrix"])
+        f1_threshold_tuned_list.append(ind_score_dict["f1_threshold_tuned"])
+        threshold_tuned_list.append(ind_score_dict["threshold_tuned"])
+        confusion_matrix_threshold_tuned_list.append(ind_score_dict["confusion_matrix_threshold_tuned"])
 
     result_dict = {
         "precisions_array": np.array(precisions_list, dtype=object),
@@ -297,6 +321,9 @@ def collate_scores_binary_classification(scores_list):
         "accuracy_array": np.array(accuracy_list, dtype=object),
         "unique_grouping": unique_grouping_list,
         "confusion_matrix": confusion_matrix_list,
+        "f1_threshold_tuned": f1_threshold_tuned_list,
+        "threshold_tuned": threshold_tuned_list,
+        "confusion_matrix_threshold_tuned": confusion_matrix_threshold_tuned_list,
     }
 
     return result_dict
