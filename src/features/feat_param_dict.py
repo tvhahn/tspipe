@@ -8,6 +8,27 @@ dummy_features = {
 comprehensive_features = {}
 
 comprehensive_features.update({
+    # add these simple statistical features
+    "mean_abs_change": None,
+    "abs_energy": None,
+    "mean_change": None,
+    "mean_second_derivative_central": None,
+    "median": None,
+    "mean": None,
+    "standard_deviation": None,
+    "variation_coefficient": None,
+    "variance": None,
+    "skewness": None,
+    "kurtosis": None,
+    "root_mean_square": None,
+    "absolute_sum_of_changes": None,
+    "longest_strike_below_mean": None,
+    "longest_strike_above_mean": None,
+    "count_above_mean": None,
+    "count_below_mean": None,
+    
+    # these are the remaining "comprehensive" features as originally defined
+    # by TSFRESH
     "time_reversal_asymmetry_statistic": [{"lag": lag} for lag in range(1, 4)],
     "c3": [{"lag": lag} for lag in range(1, 4)],
     "cid_ce": [{"normalize": True}, {"normalize": False}],
