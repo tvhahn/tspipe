@@ -312,12 +312,11 @@ def plot_generic(
         sample_seed = int(df.iloc[row_idx]["sampler_seed"])
         sample_seed_clf = sample_seed
         id = df.iloc[row_idx]["id"]
+        k_folds = int(df.iloc[row_idx]["k_folds"])
 
         # update general_params the saved feat_col_list as in the df
         feat_col_list = literal_eval(df.iloc[row_idx]["feat_col_list"])
         general_params["feat_col_list"] = [feat_col_list]
-
-        k_folds = 10
 
         # rebuild parameters that are specific to certain datasets
         if dataset_name == "cnc":
@@ -585,6 +584,7 @@ def main(args):
             feat_file_name=args.feat_file_name,
             path_model_curves=path_model_curves,
             check_feat_importance=check_feat_importance,
+            save_models=save_models,
         )
 
     elif args.dataset == "cnc" and args.save_n_figures > 0:

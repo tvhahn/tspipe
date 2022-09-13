@@ -209,7 +209,7 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 		--processed_dir_name milling_features_comp_stride64_len1024 \
 		--feat_file_name milling_features_comp_stride64_len1024.csv \
 		--final_dir_name final_results_milling \
-		--keep_top_n 3 \
+		--keep_top_n 1 \
 		--save_n_figures 8 \
 		--save_models True \
 		--check_feat_importance True
