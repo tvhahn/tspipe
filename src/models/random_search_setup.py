@@ -29,24 +29,24 @@ import random
 
 general_params = {
     "scaler_method": [
-        "standard", 
-        "minmax", 
+        # "standard", 
+        # "minmax", 
         None
         ],
     "oversamp_method": [
-        "random_over",
-        "smote_enn",
-        "smote_tomek",
-        "borderline_smote",
-        "kmeans_smote",
-        "svm_smote",
-        "smote",
-        "adasyn",
+        # "random_over",
+        # "smote_enn",
+        # "smote_tomek",
+        # "borderline_smote",
+        # "kmeans_smote",
+        # "svm_smote",
+        # "smote",
+        # "adasyn",
         None,
     ],
     "undersamp_method": [
-        "random_under",
-        "random_under_bootstrap",
+        # "random_under",
+        # "random_under_bootstrap",
         None,
     ],
     "oversamp_ratio": [
@@ -79,8 +79,8 @@ general_params = {
     "max_feats": [
         # None,
         10,
-        20,
-        50,
+        # 20,
+        # 50,
         # 75,
         # 100,
         # 200,
@@ -90,13 +90,13 @@ general_params = {
     ],
     "classifier": [
         # "rf",  # Random Forest
-        "xgb", # XGBoost
+        # "xgb", # XGBoost
         # "knn", # K-Nearest Neighbors
         # "svm", # Support Vector Machine
         # "lr", # Logistic Regression
         # "sgd", # Linear model with SGD
         # "ridge", # Ridge Classifier
-        # "nb",  # Naive Bayes
+        "nb",  # Naive Bayes
     ],
     "feat_col_list": [
         None,

@@ -532,9 +532,11 @@ def main(args):
     # help from Guy on stackoverflow: https://stackoverflow.com/a/68085032/9214620
     # ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
     # df = df[~df["id"].isin(ids)]
-
-    ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
-    df = df[~df["id"].isin(ids)]
+    try:
+        ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
+        df = df[~df["id"].isin(ids)]
+    except:
+        pass
 
     # df = df[(df["classifier"] == 'nb')]
 
