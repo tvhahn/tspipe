@@ -16,6 +16,7 @@ from src.models.utils import (
     milling_add_y_label_anomaly,
     cnc_add_y_label_binary,
     get_model_metrics_df,
+    get_rates,
 )
 from ast import literal_eval
 from src.visualization.visualize import plot_pr_roc_curves_kfolds
@@ -73,11 +74,9 @@ def filter_results_df(df, keep_top_n=None):
         & (df["rocauc_std"] > 0)
         & (df["n_thresholds_min"] > 10)
         & (df["n_thresholds_max"] > 10)
-
         # none of the below metrics have been tuned
         # on their threshold, and therefore cannot be used
         # as a good metric for selecting the best model
-
         # & df["precision_score_min"] > 0)
         # & (df["precision_score_max"] < 1)
         # & (df["precision_score_std"] > 0)
@@ -91,7 +90,6 @@ def filter_results_df(df, keep_top_n=None):
         # & (df["accuracy_max"] < 1)
         # & (df["accuracy_avg"] < 1)
         # & (df["accuracy_std"] > 0)
-
     ].sort_values(by=["prauc_avg", "rocauc_avg", "accuracy_avg"], ascending=False)
 
     if keep_top_n is not None:
@@ -364,33 +362,69 @@ def plot_generic(
 
         i_argmin = np.argmin(model_metrics_dict["prauc_array"])
         i_argmax = np.argmax(model_metrics_dict["prauc_array"])
-        print("f1 score tuned, worst k-fold:", model_metrics_dict["f1_threshold_tuned"][i_argmin])
-        print("confusion matrix tuned, worst k-fold:", model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin])
+        print(
+            "f1 score tuned, worst k-fold:",
+            model_metrics_dict["f1_threshold_tuned"][i_argmin],
+        )
+        print(
+            "confusion matrix tuned, worst k-fold:",
+            model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin],
+        )
 
         if row_idx == 0:
+
+            # get true negatives (tn), false positives (fp), false negatives (fn), and true positives (tp)
+            # for the worst k-fold
+            cm = model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]
+            tn, fp, fn, tp = cm
+            tpr, fpr, fnr, tnr = get_rates(tn, fp, fn, tp)
+
             # create dataframe with the f1 score tuned for each k-fold
             df_tuned = pd.DataFrame(
                 {
                     "id": [id],
-                    "f1_threshold_tuned": [model_metrics_dict["f1_threshold_tuned"][i_argmin]],
+                    "f1_threshold_tuned": [
+                        model_metrics_dict["f1_threshold_tuned"][i_argmin]
+                    ],
                     "threshold": [model_metrics_dict["threshold_tuned"][i_argmin]],
-                    "confusion_matrix": [model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]],
+                    "confusion_matrix": [
+                        model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]
+                    ],
+                    "tpr (sensitivity)": tpr,
+                    "tnr (specificity)": tnr,
+                    "fpr (fall-out)": fpr,
+                    "fnr (miss rate)": fnr,
                 }
             )
             # save df_tuned as csv
-            df_tuned.to_csv(path_model_curves.parent / "tuned_threshold_results.csv", index=False)
+            df_tuned.to_csv(
+                path_model_curves.parent / "tuned_threshold_results.csv", index=False
+            )
         else:
+            cm = model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]
+            tn, fp, fn, tp = cm
+            tpr, fpr, fnr, tnr = get_rates(tn, fp, fn, tp)
+
             df_tuned_2 = pd.DataFrame(
                 {
                     "id": [id],
-                    "f1_threshold_tuned": [model_metrics_dict["f1_threshold_tuned"][i_argmin]],
+                    "f1_threshold_tuned": [
+                        model_metrics_dict["f1_threshold_tuned"][i_argmin]
+                    ],
                     "threshold": [model_metrics_dict["threshold_tuned"][i_argmin]],
-                    "confusion_matrix": [model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]],
+                    "confusion_matrix": [
+                        model_metrics_dict["confusion_matrix_threshold_tuned"][i_argmin]
+                    ],
+                    "tpr (sensitivity)": tpr,
+                    "tnr (specificity)": tnr,
+                    "fpr (fall-out)": fpr,
+                    "fnr (miss rate)": fnr,
                 }
             )
             df_tuned = pd.concat([df_tuned, df_tuned_2], ignore_index=True)
-            df_tuned.to_csv(path_model_curves.parent / "tuned_threshold_results.csv", index=False)
-
+            df_tuned.to_csv(
+                path_model_curves.parent / "tuned_threshold_results.csv", index=False
+            )
 
         # save the feature importance df to a csv if requested
         if check_feat_importance:
@@ -402,7 +436,6 @@ def plot_generic(
         df_feat_anom = df_feat[df_feat[y_label_col] == 1]
         percent_anom = df_feat_anom.shape[0] / df_feat.shape[0]
         print(f"{id} has {percent_anom:.3f} anomalies")
-
 
         # print("i_argmin: ", i_argmin)
         # print("prauc_array: ", model_metrics_dict['prauc_array'])
@@ -520,9 +553,12 @@ def main(args):
     df = df[df["n_feats"] <= 10]
 
     if args.dataset == "cnc":
-        df = df[df["dataprep_method"].isin(["cnc_index_select_transposed", "cnc_index_transposed"])]
+        df = df[
+            df["dataprep_method"].isin(
+                ["cnc_index_select_transposed", "cnc_index_transposed"]
+            )
+        ]
     #     df = df[df["dataprep_method"].isin(["cnc_standard_index_select", "cnc_standard"])]
-
 
     # drop any rows where the length of the "cnc_cases_drop" column is greater than 1
     # df = df[df["cnc_cases_drop"].apply(lambda x: len(literal_eval(x)) <= 1)]
@@ -532,7 +568,10 @@ def main(args):
     # ids = df[(df["classifier"] == 'knn') & (df["mcc_min"] < 0.5)]["id"].values
     # df = df[~df["id"].isin(ids)]
     try:
-        ids = df[(df["classifier"] == 'rf') & (df["RandomForestClassifier_bootstrap"] == False)]["id"].values
+        ids = df[
+            (df["classifier"] == "rf")
+            & (df["RandomForestClassifier_bootstrap"] == False)
+        ]["id"].values
         df = df[~df["id"].isin(ids)]
     except:
         pass

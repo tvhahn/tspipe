@@ -230,7 +230,7 @@ def calculate_scores(
         i = np.argmax(f1_scores)
         f1_threshold_tuned = f1_scores[i]
         threshold_tuned = pr_thresholds[i]
-        y_pred_tuned = (clf.predict_proba(x_test)[:,1] >= threshold_tuned).astype(bool)
+        y_pred_tuned = (clf.predict_proba(x_test)[:, 1] >= threshold_tuned).astype(bool)
         tn_t, fp_t, fn_t, tp_t = confusion_matrix(y_test, y_pred_tuned).ravel()
     except:
         f1_threshold_tuned = 0
@@ -304,7 +304,9 @@ def collate_scores_binary_classification(scores_list):
         confusion_matrix_list.append(ind_score_dict["confusion_matrix"])
         f1_threshold_tuned_list.append(ind_score_dict["f1_threshold_tuned"])
         threshold_tuned_list.append(ind_score_dict["threshold_tuned"])
-        confusion_matrix_threshold_tuned_list.append(ind_score_dict["confusion_matrix_threshold_tuned"])
+        confusion_matrix_threshold_tuned_list.append(
+            ind_score_dict["confusion_matrix_threshold_tuned"]
+        )
 
     result_dict = {
         "precisions_array": np.array(precisions_list, dtype=object),
@@ -347,6 +349,31 @@ def scale_data(x_train, x_test, scaler_method=None):
         scaler = None
         pass
     return x_train, x_test, scaler
+
+
+def get_rates(tn, fp, fn, tp):
+    """
+    Calculate the rates from the confusion matrix
+    """
+
+    # if there is a division by zero, set the value to 0
+    if (tp + fn) == 0:
+        tpr = 0
+    else:
+        tpr = tp / (tp + fn)  # sensitivity, recall, hit rate, or true positive rate
+    if (fp + tn) == 0:
+        fpr = 0
+    else:
+        fpr = fp / (fp + tn)  # fall out or false positive rate
+    if (fn + tp) == 0:
+        fnr = 0
+    else:
+        fnr = fn / (fn + tp)  # miss rate or false negative rate
+    if (tn + fp) == 0:
+        tnr = 0
+    else:
+        tnr = tn / (tn + fp)  # specificity or true negative rate
+    return tpr, fpr, fnr, tnr
 
 
 def get_model_metrics_df(model_metrics_dict):
