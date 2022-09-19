@@ -551,6 +551,10 @@ def main(args):
 
     ####### any additional filtering
     df = df[df["n_feats"] <= 10]
+    df = df[df["scaler_method"].isin(["standard", "minmax"])]
+
+    # for debugging
+    # df = df[df["classifier"] == "knn"]
 
     if args.dataset == "cnc":
         df = df[

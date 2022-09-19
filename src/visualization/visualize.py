@@ -69,6 +69,8 @@ def plot_pr_roc_curves_kfolds(
     # plot the precision recall curves
     precisions_all_segmented = []
     for p, r in zip(precision_array, recall_array):
+        p = p.astype(np.float64)
+        r = r.astype(np.float64)
         r_adj, p_adj = interpolate_curves(r, p, x_axis_n=10000, mode="pr")
         precisions_all_segmented.append(p_adj)
 
@@ -129,6 +131,8 @@ def plot_pr_roc_curves_kfolds(
     # plot the ROC curves
     roc_all_segmented = []
     for t, f in zip(tpr_array, fpr_array):
+        t = t.astype(np.float64)
+        f = f.astype(np.float64)
         f_adj, t_adj = interpolate_curves(f, t, x_axis_n=10000)
         roc_all_segmented.append(t_adj)
 
