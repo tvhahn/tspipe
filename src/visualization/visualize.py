@@ -1150,7 +1150,7 @@ def plot_cnc_data(
     ###################
     # Feature importance
 
-    # plot knn feature importance
+    # plot rf feature importance
 
     # df_imp = pd.read_csv(
     #     proj_dir
@@ -1161,7 +1161,7 @@ def plot_cnc_data(
     df_imp = pd.read_csv(
         proj_dir
         / "models/final_results_cnc_2022_08_25_final"
-        / "12545393_knn_2022-08-23-1431-29_cnc_feat_imp.csv"
+        / "18600077_rf_2022-08-22-0739-49_cnc_feat_imp.csv"
     )
 
     feat_orig_names = [
@@ -1398,7 +1398,7 @@ def plot_milling_data(
 
     df_results = pd.read_csv(
         proj_dir
-        / "models/final_results_milling_2022_08_07_final"
+        / "models/final_results_milling_2022_08_25_final"
         / "compiled_results_filtered.csv"
     )
 
