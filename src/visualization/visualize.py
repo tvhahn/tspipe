@@ -89,6 +89,7 @@ def prepare_cnc_data(
 
     return df, dataprep_method, meta_label_cols, cnc_indices_keep, cnc_cases_drop
 
+
 def interpolate_curves(x, y, x_axis_n=1000, mode=None):
     if mode == "pr":
         x = x[::-1]
@@ -418,7 +419,7 @@ def plot_lollipop_results(
 
         # min auc score
         ax.text(
-            x=df[f"{metric}_min"][i]-0.01,
+            x=df[f"{metric}_min"][i] - 0.01,
             y=i - 0.15,
             s="{:.2f}".format(df[f"{metric}_min"][i]),
             horizontalalignment="right",
@@ -432,7 +433,7 @@ def plot_lollipop_results(
 
         # max auc score
         ax.text(
-            x=df[f"{metric}_max"][i]+0.01,
+            x=df[f"{metric}_max"][i] + 0.01,
             y=i - 0.15,
             s="{:.2f}".format(df[f"{metric}_max"][i]),
             horizontalalignment="left",
@@ -1316,19 +1317,11 @@ def plot_cnc_data(
     )
     print(f"Percentage of anomalies: {percent_anom}")
 
-
-    (
-        df_feat,
-        _,
-        _,
-        _,
-        _,
-    ) = prepare_cnc_data(
+    (df_feat, _, _, _, _,) = prepare_cnc_data(
         df_feat,
         dataprep_method="cnc_index_transposed",
         meta_label_cols=["unix_date", "tool_no", "case_tool_54"],
     )
-
 
     feat_orig_names = [
         "current__index_mass_quantile__q_0.1__4",
@@ -1364,7 +1357,6 @@ def plot_cnc_data(
         dpi=300,
         save_plot=save_plot,
     )
-
 
     ###################
     # Lollipop plot
@@ -1455,6 +1447,53 @@ def plot_milling_data(
         plt_title="Top Performing Models by PR-AUC Score, Milling data",
         path_save_dir=path_save_dir,
         save_name="milling_results_lollipop",
+        save_plot=True,
+        dpi=300,
+    )
+
+    # plot rf feature importance
+    df_imp = pd.read_csv(
+        proj_dir
+        / "models/final_results_milling_2022_08_25_final"
+        / "9569263_rf_2022-09-13-1909-12_milling_feat_imp.csv"
+    )
+
+    feat_orig_names = [
+        "smcdc__energy_ratio_by_chunks__num_segments_10__segment_focus_6",
+        'ae_spindle__fft_coefficient__attr_"abs"__coeff_36',
+        'vib_table__agg_linear_trend__attr_"intercept"__chunk_len_10__f_agg_"min"',
+        'smcac__fft_coefficient__attr_"abs"__coeff_63',
+        'vib_table__fft_coefficient__attr_"imag"__coeff_95',
+        'smcac__agg_linear_trend__attr_"stderr"__chunk_len_5__f_agg_"var"',
+        'vib_spindle__fft_coefficient__attr_"imag"__coeff_63',
+        "vib_spindle__symmetry_looking__r_0.7000000000000001",
+        'ae_spindle__fft_coefficient__attr_"abs"__coeff_49',
+        'vib_table__fft_coefficient__attr_"angle"__coeff_42',
+    ]
+
+    feat_renamed = [
+        "Energy ratio by chunks\nAC current",
+        "FFT coef. 36 (abs),\nAE spindle",
+        "Linear trend intercept,\nVibe table",
+        "FFT coef. 63 (abs),\nAC current",
+        "FFT coef. 95 (imag),\nVibe table",
+        "Linear trend std. error,\nAC current",
+        "FFT coef. 63 (imag),\nVibe spindle",
+        "Symmetry looking,\nVibe spindle",
+        "FFT coef. 49 (abs),\nAE spindle",
+        "FFT coef. 42 (angle),\nVibe table",
+    ]
+
+    # zip the original names with the renamed names into a dictionary
+    feature_name_map = dict(zip(feat_orig_names, feat_renamed))
+
+    plot_feat_importance(
+        df_imp,
+        feature_name_map=feature_name_map,
+        metric="f1",
+        plt_title="Feature importance by mean F1 score decrease, Milling data",
+        path_save_dir=path_save_dir,
+        save_name="milling_feature_importance_rf",
         save_plot=True,
         dpi=300,
     )
