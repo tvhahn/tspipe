@@ -813,6 +813,8 @@ def set_directories(args):
     return proj_dir, path_data_dir, path_save_dir, path_processed_dir
 
 
+# should move this to utils.py so that I can use it easily in other scripts
+# there is a circular import issue currently in visualize.py
 def prepare_cnc_data(
     df, dataprep_method, meta_label_cols, cnc_indices_keep=None, cnc_cases_drop=None
 ):

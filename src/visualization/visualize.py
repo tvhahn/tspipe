@@ -9,6 +9,7 @@ from src.models.utils import (
     load_cnc_features,
     load_milling_features,
 )
+import random
 from datetime import datetime
 from pathlib import Path
 from pyphm.datasets.milling import MillingPrepMethodA
@@ -17,6 +18,76 @@ from pyphm.datasets.milling import MillingPrepMethodA
 # Generic plotting functions
 ###############################################################################
 
+# need to import this from utils at some point since this function is
+# duplicated in models/train.py
+def prepare_cnc_data(
+    df, dataprep_method, meta_label_cols, cnc_indices_keep=None, cnc_cases_drop=None
+):
+    """
+    This function takes in a dataframe and a dataprep method and returns a dataframe
+    with the data prepared according to the method.
+    """
+
+    if dataprep_method == "cnc_standard":
+        cnc_indices_keep = None
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
+
+    elif dataprep_method == "cnc_standard_index_select":
+        df = df[df["index_no"].isin(cnc_indices_keep)]
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
+
+    elif dataprep_method == "cnc_index_transposed":
+        feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
+
+        # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
+        # TO-DO: remove hard-coded index and meta_label_cols
+        df = df.pivot(
+            index=["unix_date", "tool_no", "case_tool_54", "y"],
+            columns="index_no",
+            values=feat_list,
+        ).reset_index()
+
+        # https://stackoverflow.com/a/51735628
+        df.columns = [f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values]
+
+        df = df.dropna(axis=1)
+        meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
+        cnc_indices_keep = None
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    elif dataprep_method == "cnc_index_select_transposed":
+        df = df[df["index_no"].isin(cnc_indices_keep)]
+        feat_list = list(set(df.columns) - set(meta_label_cols + ["y"]))
+
+        # do transpose and group by https://stackoverflow.com/questions/39107512/how-to-do-a-transpose-a-dataframe-group-by-key-on-pandas
+        df = df.pivot(
+            index=["unix_date", "tool_no", "case_tool_54", "y"],
+            columns="index_no",
+            values=feat_list,
+        ).reset_index()
+
+        df.columns = [f"{i}__{j}" if j != "" else f"{i}" for i, j in df.columns.values]
+
+        df = df.dropna(axis=1)
+        meta_label_cols = ["unix_date", "tool_no", "case_tool_54"]
+        # return df, dataprep_method, meta_label_cols, cnc_indices_keep
+
+    else:
+        dataprep_method = "cnc_standard"
+        cnc_indices_keep = None
+        meta_label_cols = ["id", "unix_date", "tool_no", "index_no", "case_tool_54"]
+
+    if cnc_cases_drop == True:
+        cnc_cases_drop = sorted(
+            random.sample(list(range(1, 36)), k=random.randint(1, 6))
+        )  # random drop up to 5 cases between cases 1-35
+        df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
+
+    # if a list of cnc_case_drop is provided, then use that list
+    elif isinstance(cnc_cases_drop, list):
+        df = df[~df["case_tool_54"].isin(cnc_cases_drop)]
+
+    return df, dataprep_method, meta_label_cols, cnc_indices_keep, cnc_cases_drop
 
 def interpolate_curves(x, y, x_axis_n=1000, mode=None):
     if mode == "pr":
@@ -347,7 +418,7 @@ def plot_lollipop_results(
 
         # min auc score
         ax.text(
-            x=df[f"{metric}_min"][i],
+            x=df[f"{metric}_min"][i]-0.01,
             y=i - 0.15,
             s="{:.2f}".format(df[f"{metric}_min"][i]),
             horizontalalignment="right",
@@ -361,7 +432,7 @@ def plot_lollipop_results(
 
         # max auc score
         ax.text(
-            x=df[f"{metric}_max"][i],
+            x=df[f"{metric}_max"][i]+0.01,
             y=i - 0.15,
             s="{:.2f}".format(df[f"{metric}_max"][i]),
             horizontalalignment="left",
@@ -678,11 +749,11 @@ def plot_features_by_average_index_mpl(
         value = datetime.fromtimestamp(unix_date)
         return value
 
-    df = (
-        df[(df["tool_no"] == tool_no) & (df["index_no"].isin(index_list))]
-        .groupby(["unix_date"], as_index=False)
-        .mean()
-    )
+    # df = (
+    #     df[(df["tool_no"] == tool_no) & (df["index_no"].isin(index_list))]
+    #     .groupby(["unix_date"], as_index=False)
+    #     .mean()
+    # )
     df = df.reset_index(drop=True).sort_values("unix_date")
     df["date"] = df[["unix_date"]].apply(convert_to_datetime, axis=1)
     df["date_ymd"] = pd.to_datetime(df["date"], unit="s").dt.to_period("D")
@@ -1151,13 +1222,6 @@ def plot_cnc_data(
     # Feature importance
 
     # plot rf feature importance
-
-    # df_imp = pd.read_csv(
-    #     proj_dir
-    #     / "models/final_results_cnc_2022_08_04_final"
-    #     / "21676100_rf_2022-08-05-1500-29_cnc_feat_imp.csv"
-    # )
-
     df_imp = pd.read_csv(
         proj_dir
         / "models/final_results_cnc_2022_08_25_final"
@@ -1165,82 +1229,37 @@ def plot_cnc_data(
     )
 
     feat_orig_names = [
-        'current__fft_coefficient__attr_"real"__coeff_39__1',
-        'current__fft_coefficient__attr_"angle"__coeff_96__2',
-        'current__fft_coefficient__attr_"abs"__coeff_55__5',
-        'current__change_quantiles__f_agg_"var"__isabs_True__qh_0.8__ql_0.6__4',
-        'current__fft_coefficient__attr_"abs"__coeff_13__5',
-        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"min"__6',
-        "current__friedrich_coefficients__coeff_2__m_3__r_30__1",
-        'current__change_quantiles__f_agg_"var"__isabs_True__qh_0.8__ql_0.2__5',
-        'current__fft_coefficient__attr_"abs"__coeff_79__1',
-        'current__fft_coefficient__attr_"angle"__coeff_91__5',
+        "current__index_mass_quantile__q_0.1__4",
+        "current__partial_autocorrelation__lag_3__5",
+        'current__fft_coefficient__attr_"real"__coeff_57__5',
+        'current__fft_coefficient__attr_"abs"__coeff_87__6',
+        'current__fft_coefficient__attr_"abs"__coeff_35__1',
+        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.2__ql_0.0__5',
+        'current__fft_coefficient__attr_"real"__coeff_4__5',
+        "current__large_standard_deviation__r_0.15000000000000002__6",
+        'current__fft_coefficient__attr_"abs"__coeff_28__1',
+        'current__fft_coefficient__attr_"abs"__coeff_46__1',
     ]
 
     feat_renamed = [
-        "FFT coef. 39 (real),\nsub-cut 1",
-        "FFT coef. 96 (angle),\nsub-cut 2",
-        "FFT coef. 55 (abs),\nsub-cut 5",
-        "Change quantiles\n(agg. by var), sub-cut 4",
-        "FFT coef. 13 (abs),\nsub-cut 5",
-        "Agg. linear trend\n(agg. by min), sub-cut 6",
-        "Friedrich coeff. 2,\nsub-cut 1",
-        "Change quantiles\n(agg. by var), sub-cut 5",
-        "FFT coef. 79 (abs),\nsub-cut 1",
-        "FFT coef. 91 (angle),\nsub-cut 5",
+        "Index mass quantile,\nsub-cut 4",
+        "Partial autocorrelation,\nsub-cut 5",
+        "FFT coef. 57 (real),\nsub-cut 5",
+        "FFT coef. 87 (abs),\nsub-cut 6",
+        "FFT coef. 35 (abs),\nsub-cut 1",
+        "Change quantiles,\n(agg. by mean), sub-cut 5",
+        "FFT coef. 4 (real),\nsub-cut 5",
+        "Large standard deviation,\nsub-cut 6",
+        "FFT coef. 28 (abs),\nsub-cut 1",
+        "FFT coef. 46 (abs),\nsub-cut 1",
     ]
-        
+
     # zip the original names with the renamed names into a dictionary
     feature_name_map = dict(zip(feat_orig_names, feat_renamed))
-
-    # create a dict that maps the old feature names to the new feature names
-    # feature_name_map = {
-    #     'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
-    #     'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
-    #     'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
-    #     'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
-    # }
-
-    # feature_name_map = {
-    #     'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_47': "FFT coef. 47,\n(abs)",
-    #     'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_52': "FFT coef. 52,\n(imag)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_98': "FFT coef. 98,\n(imag)",
-    #     'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
-    #     'current__fft_coefficient__attr_"imag"__coeff_86': "FFT coef. 86,\n(imag)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
-    #     'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
-    #     'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
-    # }
 
     plot_feat_importance(
         df_imp,
         feature_name_map=feature_name_map,
-        metric="f1",
-        plt_title="Feature importance by mean F1 score decrease, CNC data",
-        path_save_dir=path_save_dir,
-        save_name="cnc_feature_importance_knn",
-        save_plot=True,
-        dpi=300,
-    )
-
-    # plot random forest feature importance
-    df_imp = pd.read_csv(
-        proj_dir
-        / "models/final_results_cnc_2022_08_25_final"
-        / "18600077_rf_2022-08-22-0739-49_cnc_feat_imp.csv"
-    )
-
-    plot_feat_importance(
-        df_imp,
-        # feature_name_map=feature_name_map,
         metric="f1",
         plt_title="Feature importance by mean F1 score decrease, CNC data",
         path_save_dir=path_save_dir,
@@ -1297,18 +1316,44 @@ def plot_cnc_data(
     )
     print(f"Percentage of anomalies: {percent_anom}")
 
-    feat_to_trend = {
-        'current__fft_coefficient__attr_"abs"__coeff_9': "FFT coef. 9,\n(abs)",
-        'current__fft_coefficient__attr_"abs"__coeff_8': "FFT coef. 81,\n(abs)",
-        'current__fft_coefficient__attr_"angle"__coeff_43': "FFT coef. 43,\n(angle)",
-        'current__agg_linear_trend__attr_"slope"__chunk_len_50__f_agg_"var"': "Agg linear trend,\n(agg. by var; attr. slope)",
-        'current__fft_coefficient__attr_"angle"__coeff_91': "FFT coef. 91,\n(angle)",
-        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.8__ql_0.6': "Change quantiles,\n(agg. by mean)",
-    }
+
+    (
+        df_feat,
+        _,
+        _,
+        _,
+        _,
+    ) = prepare_cnc_data(
+        df_feat,
+        dataprep_method="cnc_index_transposed",
+        meta_label_cols=["unix_date", "tool_no", "case_tool_54"],
+    )
+
+
+    feat_orig_names = [
+        "current__index_mass_quantile__q_0.1__4",
+        'current__fft_coefficient__attr_"real"__coeff_4__5',
+        'current__fft_coefficient__attr_"abs"__coeff_87__6',
+        "current__partial_autocorrelation__lag_3__5",
+        'current__change_quantiles__f_agg_"mean"__isabs_True__qh_0.2__ql_0.0__5',
+        'current__fft_coefficient__attr_"real"__coeff_57__5',
+    ]
+
+    feat_renamed = [
+        "Index mass quantile,\nsub-cut 4",
+        "FFT coef. 4 (real),\nsub-cut 5",
+        "FFT coef. 87 (abs),\nsub-cut 6",
+        "Partial autocorrelation,\nsub-cut 5",
+        "Change quantiles,\n(agg. by mean), sub-cut 5",
+        "FFT coef. 57 (real),\nsub-cut 5",
+    ]
+
+    # zip the original names with the renamed names into a dictionary
+    feature_name_map = dict(zip(feat_orig_names, feat_renamed))
 
     plot_features_by_average_index_mpl(
         df_feat,
-        feat_to_trend=feat_to_trend,
+        feat_to_trend=feature_name_map,
         tool_no=54,
         index_list=[2, 3, 4, 5, 6, 7, 8, 9],
         chart_height=9000,
@@ -1319,6 +1364,7 @@ def plot_cnc_data(
         dpi=300,
         save_plot=save_plot,
     )
+
 
     ###################
     # Lollipop plot
