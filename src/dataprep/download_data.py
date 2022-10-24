@@ -1,23 +1,21 @@
-# -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
 import argparse
-import zipfile
-# from src.datasets.milling import MillingDataPrep
+from src.dataprep.utils import set_directories
 from pyphm.datasets.milling import MillingPrepMethodA
 
 
-def main(path_data_folder):
+def main(args):
     """Download the datasets."""
 
     logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
+    logger.info("Download the datasets")
 
-    path_data_raw_folder = path_data_folder / "raw"
+    proj_dir, path_data_dir, path_raw_dir = set_directories(args)
 
     print("Downloading milling data...")
     milldata = MillingPrepMethodA(
-        root = path_data_raw_folder, download=True)
+        root = path_raw_dir, download=True)
     
 
 
@@ -29,15 +27,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Create dataframe from raw data")
 
     parser.add_argument(
-        "--path_data_folder",
+        "-p",
+        "--proj_dir",
+        dest="proj_dir",
         type=str,
-        default="data/",
+        help="Location of project folder",
+    )
+
+
+    parser.add_argument(
+        "--path_data_dir",
+        type=str,
         help="Path to data folder that contains raw/interim/processed data folders",
     )
 
     args = parser.parse_args()
 
-    path_data_folder = Path(args.path_data_folder)
-    print("path_data_folder:", path_data_folder)
-
-    main(path_data_folder)
+    main(args)
