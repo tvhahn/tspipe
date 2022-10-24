@@ -39,7 +39,8 @@ ifeq (True,$(HAS_CONDA)) # assume on local
 	-p $(PROJECT_DIR) \
 	--path_data_dir $(PROJECT_DIR)/data/
 else # assume on HPC
-	python src/dataprep/download_data.py --path_data_folder ~/scratch/feat-store/data/
+	python src/dataprep/download_data.py \
+	--path_data_dir ~/scratch/feat-store/data/
 endif
 
 ## Make Dataset
