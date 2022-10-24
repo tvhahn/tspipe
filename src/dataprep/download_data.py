@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse
 from src.dataprep.utils import set_directories
 from pyphm.datasets.milling import MillingPrepMethodA
+import zipfile
 
 
 def main(args):
@@ -13,9 +14,24 @@ def main(args):
 
     proj_dir, path_data_dir, path_raw_dir = set_directories(args)
 
-    print("Downloading milling data...")
-    milldata = MillingPrepMethodA(
-        root = path_raw_dir, download=True)
+    
+    path_mill_zip = path_raw_dir / "milling" / "mill.zip"
+    path_mill_mat = path_raw_dir / "milling" / "mill.mat"
+
+    # if mill.zip exists and mill.mat does not exist, then unzip mill.zip
+    if path_mill_zip.exists() and not path_mill_mat.exists():
+        with zipfile.ZipFile(path_mill_zip, "r") as zip_ref:
+            zip_ref.extractall(path_raw_dir / "milling")
+
+    # if mill.zip exists and mill.mat exists, then pass
+    elif path_mill_zip.exists() and path_mill_mat.exists():
+        pass
+    
+    # else, download mill.zip
+    else:
+        print("Downloading milling data...")
+        milldata = MillingPrepMethodA(
+            root = path_raw_dir, download=True)
     
 
 
