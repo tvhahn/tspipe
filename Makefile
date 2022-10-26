@@ -105,7 +105,7 @@ endif
 ## Make Features
 features_milling: requirements
 ifeq (True,$(HAS_CONDA)) # assume on local
-	$(PYTHON_INTERPRETER) src/features/build_features_cnc.py \
+	$(PYTHON_INTERPRETER) src/features/build_features.py \
 		-p $(PROJECT_DIR) \
 		--dataset milling \
 		--path_data_dir $(PROJECT_DIR)/data/ \

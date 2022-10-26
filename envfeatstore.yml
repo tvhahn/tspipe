@@ -4,9 +4,11 @@ channels:
 dependencies:
   - python=3.8
   - conda
+  - cudatoolkit=11.0
   - mamba
   - jupyterlab
   - ipywidgets
+  - numba
   - scipy
   - statsmodels
   - matplotlib
@@ -20,5 +22,6 @@ dependencies:
   - black
   - imbalanced-learn
   - pip:
+    - pyphm
     - tsfresh
 
