@@ -101,9 +101,12 @@ target/
 notebooks/scratch/cnc_data_with_labels.csv
 
 notebooks/scratch/introducing-ssa-for-time-series-decomposition.ipynb
+models/final_results_cnc_2022_08_25_final/compiled_results_cnc_08_25_final.zip
+models/final_results_milling_2022_08_25_final/compiled_results_milling_2022_08_25_final.zip
 notebooks/scratch/*.pkl
 *auto$004.csv
 *.pkl
 compiled_results.csv
 /models/interim_results_milling
 /models/interim_results_cnc
+/models/*.zip
