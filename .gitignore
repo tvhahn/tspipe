@@ -110,3 +110,4 @@ compiled_results.csv
 /models/interim_results_milling
 /models/interim_results_cnc
 /models/*.zip
+/models/final_results_milling/
