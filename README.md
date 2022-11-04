@@ -1,9 +1,12 @@
-Time Series ML Pipeline
+tspipe - Time Series Pipeline
 ==============================
+> A scalable ETL/ML pipeline for rapid testing of feature engineering and classical machine learning techniques. Featured in the paper *Machine Learning in Manufacturing: Best Practices*. Tested on the UC Berkeley milling dataset and a CNC manufacturing dataset. Leverages HPC infrastructure.
 
-Developing scalable ETL/ML pipeline for rapid testing of feature engineering and classical machine learning techniques. For use on time series data, and tested on common industrial datasets. Leverages HPC infrastructure.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/milling-reproduction.ipynb) ![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
 
-![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
+The best way to reproduce the results from the paper is to run the [Colab notebook for the milling dataset](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/milling-reproduction.ipynb).
+
+
 
 run tests: `python -m unittest discover -s tests`
 
