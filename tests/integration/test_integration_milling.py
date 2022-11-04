@@ -3,41 +3,45 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.datasets.milling import MillingDataPrep
+from pyphm.datasets.milling import MillingPrepMethodA
 
 
 class TestMilling(unittest.TestCase):
-    def setUp(self):
-        # path to mill_truncated.mat
-        self.mill_data_path = Path(__file__).parent / "fixtures/mill_truncated.mat"
-        print("mill_data_path:", self.mill_data_path)
+    @classmethod
+    def setUpClass(cls):
+        pass
 
-        # path to labels_with_tool_class_truncated.csv
-        self.labels_path = (
-            Path(__file__).parent / "fixtures/labels_with_tool_class_truncated.csv"
-        )
+    def setUp(self):
+
+        # path to mill_truncated.mat
+        self.root = Path(__file__).parent / "fixtures"
+
+        # path to mill_truncated.mat
+        self.mill_data_path = self.root / "mill_truncated.mat"
+
+        # path to milling_labels_with_tool_class_truncated.csv
+        self.labels_path = self.root / "milling" / "labels_with_tool_class_truncated.csv"
 
         # path to milling_truncated_results.csv.gz
-        self.results_path = (
-            Path(__file__).parent / "fixtures/milling_truncated_results.csv.gz"
-        )
+        self.results_path = self.root / "milling" / "milling_truncated_results.csv.gz"
 
-    def test_milling_data_prep(self):
-        """Test that the milling data prep works as expected."""
-        
+    def test_load_run_as_df(self):
+        """Test the loading of an individual run as a dataframe."""
+
         # load the data and instantiate the data prep class
-        milldata = MillingDataPrep(
-            self.mill_data_path,
-            path_df_labels=self.labels_path,
-            window_size=64,
+        mill = MillingPrepMethodA(
+            self.root,
+            dataset_folder_path=self.mill_data_path,
+            data_file_name="mill_truncated.mat",
+            window_len=64,
             stride=64,
-            cut_drop_list=None,
+            cut_drop_list=[],
+            path_csv_labels=self.labels_path,
+            download=False,
         )
 
         # create the results dataframe
-        df = milldata.create_xy_dataframe()
-        print("df.shape:", df.shape)
-        print("df.columns:", df.columns)
+        df = mill.create_xy_dataframe()
 
         # load the ground truth results dataframe
         col_names_ordered = [
@@ -75,9 +79,6 @@ class TestMilling(unittest.TestCase):
             self.results_path,
             compression="gzip",
         ).astype(col_dtype_dict)
-
-        print("df_gt.shape:", df_gt.shape)
-        print("df_gt.columns:", df_gt.columns)
 
         # compare the results
         assert_frame_equal(df, df_gt)
