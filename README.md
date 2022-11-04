@@ -1,17 +1,23 @@
 tspipe - Time Series Pipeline
 ==============================
-> A scalable ETL/ML pipeline for rapid testing of feature engineering and classical machine learning techniques. Featured in the paper *Machine Learning in Manufacturing: Best Practices*. Tested on the UC Berkeley milling dataset and a CNC manufacturing dataset. Leverages HPC infrastructure.
+> Tool wear prediction with classical machine learning. Leverages a time series pipeline to extract features and train models with a random search. Tested on the [UC Berkeley milling dataset](https://www.nasa.gov/content/prognostics-center-of-excellence-data-set-repository) and a real-world CNC machine dataset. Work featured in the paper *Machine Learning in Manufacturing: Best Practices*.
+
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/milling-reproduction.ipynb) ![example workflow](https://github.com/tvhahn/feat-store/actions/workflows/main.yml/badge.svg)
 
-The best way to reproduce the results from the paper is to run the [Colab notebook for the milling dataset](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/milling-reproduction.ipynb).
+The best way to reproduce the results from the paper is to run the Colab notebooks:
+
+* [Colab notebook for the milling dataset](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/milling-reproduction.ipynb).
+* [Colab notebook for the CNC machine dataset](https://colab.research.google.com/github/tvhahn/tspipe/blob/master/notebooks/cnc-reproduction.ipynb).
 
 
 
 run tests: `python -m unittest discover -s tests`
 
-Project Organization
-------------
+## Summary
+
+
+## Project Organization
 
     ├── LICENSE
     ├── Makefile           <- Makefile with commands like `make data` or `make train`
