@@ -312,6 +312,7 @@ def plot_lollipop_results(
         1,
         1,
         figsize=(10, 12),
+        dpi=dpi,
     )
 
     # color palette to choose from
