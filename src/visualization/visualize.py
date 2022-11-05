@@ -633,7 +633,7 @@ def plot_feat_importance(
         nrows=1,
         ncols=1,
         figsize=(9, 12),
-        # dpi=150,
+        dpi=dpi,
     )
 
     ax = sns.barplot(x="mean", y="feature", data=df, palette="Blues_d", ax=ax)
