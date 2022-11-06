@@ -307,7 +307,7 @@ def plot_lollipop_results(
 
     df = df.sort_values(by=[f"{metric}_avg"], ascending=True).reset_index(drop=True)
 
-    plt.style.use("seaborn-whitegrid")  # set style because it looks nice
+    plt.style.use("seaborn-v0_8-whitegrid")  # set style because it looks nice
     fig, ax = plt.subplots(
         1,
         1,
