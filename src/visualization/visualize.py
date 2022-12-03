@@ -504,6 +504,8 @@ def plot_lollipop_results(
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
 
+
+
     # custom set the xticks since this looks better
     ax.set_xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0])
 
@@ -550,6 +552,10 @@ def plot_lollipop_results(
         weight="normal",
         wrap=True,
     )
+
+    # set x-axis title
+    ax.set_xlabel("Precision-Recall Area-Under-Curve Score", size="large", color="dimgrey")
+    ax.xaxis.set_label_coords(0.5, -.1)
 
     # create legend
     # matplotlib > 3.3.0 can use labelcolor in legend
